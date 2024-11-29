@@ -10,10 +10,8 @@ import close from "../../assets/images/close.png";
 function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [selectedRole, setSelectedRole] = useState('Staff');
+    const [selectedRole, setSelectedRole] = useState('Client');
     const [showPassword, setShowPassword] = useState(false);
-    // const [branches, setBranches] = useState([]);
-    // const [selectedBranch, setSelectedBranch] = useState('Main');
     const [error, setError] = useState({value: "" , isShow : false});
     const navigate = useNavigate();
 
@@ -26,7 +24,7 @@ function Login() {
             });
 
             const { user, accessToken, refreshToken, roleName } = response.data;
-            // console.log("User ID:", user.id);
+
             if (selectedRole !== roleName) {
                 // setError(`You cannot log in as ${selectedRole}. Your account role is ${userRole}.`);
 
@@ -49,23 +47,7 @@ function Login() {
                 // })
                 return;
             }
-            // if (selectedBranch !== branch) {
-            //     // setError(`You cannot log in as ${selectedRole}. Your account role is ${userRole}.`);
-            //     Swal.fire({
-            //         title: 'Wrong Branch',
-            //         text: 'Please select your designated branch.',
-            //         imageUrl: close,
-            //         imageWidth: 100,
-            //         imageHeight: 100,
-            //         confirmButtonText: "OK",
-            //         confirmButtonColor: "#EC221F",
-            //         customClass: {
-            //             confirmButton: "custom-error-confirm-button",
-            //             title: "custom-swal-title",
-            //         },
-            //     })
-            //     return;
-            // }
+
             document.cookie = `role_name=${roleName}; Path=/;`;
             document.cookie = `accessToken=${accessToken}; Path=/;`;
             document.cookie = `refreshToken=${refreshToken}; Path=/; `;
@@ -75,7 +57,7 @@ function Login() {
                 // console.log(user, accessToken, refreshToken, roleName);
                 navigate('/userlist');
             } else {
-                navigate('/dashboard');
+                navigate('/projects');
             }
         } catch (error) {
             console.error('Login error:', error);
@@ -133,7 +115,7 @@ function Login() {
 
                 <div className="col-md-6 d-flex align-items-center justify-content-center">
                     <div className="card p-4 login-form-wrap" style={{ width: '450px' }}>
-                        <h2 className="text-left mb-4">{selectedRole === 'Staff' ? 'Staff Login' : 'Admin Login'}</h2>
+                        <h2 className="text-left mb-4">{selectedRole === 'Client' ? 'Client Login' : 'Admin Login'}</h2>
                         {(error.value !== "" && error.isShow === true) && <div className="alert alert-danger">{error.value}<div className={"close-quick-alert"} onClick={()=>setError({...error , isShow:false})}></div></div>}
                         <form onSubmit={login}>
 
@@ -197,7 +179,7 @@ function Login() {
                                             onChange={(e) => setSelectedRole(e.target.value)}
                                         >
 
-                                            <option value="Staff">Staff</option>
+                                            <option value="Client">Client</option>
                                             <option value="Admin">Admin</option>
 
                                         </select>

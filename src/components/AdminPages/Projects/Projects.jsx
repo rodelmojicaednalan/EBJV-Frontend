@@ -29,22 +29,36 @@ function Projects() {
     const fetchProjects = async () => {
       setLoading(true);
       try {
-        const response = await axiosInstance.get("/my-projects");
+        // Check user's role
+        const userResponse = await axiosInstance.get("/user");
+        const userRole = userResponse.data?.roles?.map(role => role.role_name);// Assuming `role` is returned from the API
+        console.log(userRole)
+
+        let response;
+        if (userRole == 'Admin') {
+          // Fetch all projects for Admin
+          response = await axiosInstance.get("/projects");
+        } else {
+          // Fetch only client's projects
+          response = await axiosInstance.get("/my-projects");
+        }
+
         const formattedData = response.data.data.map((project) => {
           const parsedFiles = JSON.parse(project.project_file);
           return {
             id: project.id,
             project_name: project.project_name,
             project_address: formatAddress(project.project_address),
-            project_owner: project.user_id,
+            project_owner: `${project.user.first_name} ${project.user.last_name}`,
             project_file: parsedFiles,
-            project_status: project.project_status
+            project_status: project.project_status,
           };
         });
+
         setData(formattedData);
         setFilteredData(formattedData);
       } catch (error) {
-        console.error("Error fetching Projects:", error);
+        console.error("Error fetching projects:", error);
       } finally {
         setLoading(false);
       }
@@ -52,14 +66,14 @@ function Projects() {
 
     const formatAddress = (address) => {
       return address
-        .split(",") // Split the address into parts based on commas
-        .map((part) => part.trim()) // Remove extra spaces from each part
-        .filter((part) => part.length > 0) // Filter out empty parts
-        .join(", "); // Join the remaining parts back together with a comma
+        .split(",")
+        .map((part) => part.trim())
+        .filter((part) => part.length > 0)
+        .join(", ");
     };
 
     fetchProjects();
-  }, [navigate]);
+  }, [navigate])
 
   //filter Projects
   useEffect(() => {
@@ -169,8 +183,8 @@ function Projects() {
       sortable: false,
     },
     {
-      name: "File Name",
-      selector: (row) => row.project_file,
+      name: "Project Owner",
+      selector: (row) => row.project_owner,
       sortable: true,
     },
 

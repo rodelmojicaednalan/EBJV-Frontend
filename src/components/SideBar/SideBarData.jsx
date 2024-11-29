@@ -189,6 +189,7 @@ export const AdminSidebarData = [
 ];
 
 export const StaffSidebarData = [
+  {/*
   {
     title: "Dashboard",
     path: "/dashboard",
@@ -215,13 +216,26 @@ export const StaffSidebarData = [
       />
     ),
     cName: "nav-text",
-  },
+  }, */},
   // {
   //   title: 'Queue List',
   //   path: '/queue-list',
   //   icon: <img src={queue_list} alt="Custom Icon" style={{ width: '24px', height: '24px' }} />,
   //   cName: 'nav-text'
   // },
+  {
+    title: "Projects",
+    path: "/projects",
+    icon: (
+      <img
+        className="navIcon"
+        src={projects}
+        alt="Custom Icon"
+        style={{ width: "24px", height: "24px" }}
+      />
+    ),
+    cName: "nav-text",
+  },
   {
     title: "Logout",
     path: "/",

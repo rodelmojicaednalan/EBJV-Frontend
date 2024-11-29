@@ -58,17 +58,17 @@ const  isSegmentCorrect = (url , pathNameURL) => {
         <Route path="/reset-password/:passwordToken" name="reset-password"  element={<ResetPassword />}/>
         <Route path="/open-email"  element={<CheckEmail />}/>
         <Route path="/user-management" element={<ProtectedRoute element={<UserRoleManagement />} allowedRoles={['Admin']} />} />
-        <Route path="/staff-logs" element={<ProtectedRoute element={<StaffLogs />} allowedRoles={['Admin', 'Staff']} />} />
+        <Route path="/staff-logs" element={<ProtectedRoute element={<StaffLogs />} allowedRoles={['Admin',]} />} />
 
-        <Route path="/projects" element={<ProtectedRoute element={<Projects />} allowedRoles={['Admin']} />} />
-        <Route path="/add-project" element={<ProtectedRoute element={<AddProject />} allowedRoles={['Admin']} />} />
-        <Route path="/edit-project/:projectId" element={<ProtectedRoute element={<EditProject />} allowedRoles={['Admin']} />} />
+        <Route path="/projects" element={<ProtectedRoute element={<Projects />} allowedRoles={['Admin', 'Client']} />} />
+        <Route path="/add-project" element={<ProtectedRoute element={<AddProject />} allowedRoles={['Admin', 'Client']} />} />
+        <Route path="/edit-project/:projectId" element={<ProtectedRoute element={<EditProject />} allowedRoles={['Admin', 'Client']} />} />
         <Route path="/add-new-user" element={<ProtectedRoute element={<AddNewUser />} allowedRoles={['Admin']} />} />
         <Route path="/edit-user/:userId" element={<ProtectedRoute element={<EditUser />} allowedRoles={['Admin']} />} />
         <Route path="/edit-user-role/:roleId" element={<ProtectedRoute element={<EditUserRole />} allowedRoles={['Admin']} />} />
         <Route path="/add-new-role" element={<ProtectedRoute element={<AddNewRole />} allowedRoles={['Admin']} />} />
 
-        <Route path="/my-profile" element={<ProtectedRoute element={<MyProfile />} allowedRoles={['Admin', 'Staff']} />} />
+        <Route path="/my-profile" element={<ProtectedRoute element={<MyProfile />} allowedRoles={['Admin', 'Client']} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

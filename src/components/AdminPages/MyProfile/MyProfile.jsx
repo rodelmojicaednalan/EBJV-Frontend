@@ -17,7 +17,6 @@ function MyProfile() {
   const [first_name, setFirstName] = useState("");
   const [last_name, setLastName] = useState("");
   const [role, setRole] = useState("");
-  const [branch, setBranch] = useState("");
   const [permissions, setPermissions] = useState([]);
 
   useEffect(() => {
@@ -25,7 +24,7 @@ function MyProfile() {
     const fetchUserDetails = async () => {
       try {
         const response = await axiosInstance.get("/user");
-        const { username, email, first_name, last_name, sex, roles, branch } = response.data;
+        const { username, email, first_name, last_name, sex, roles } = response.data;
         const role = roles.length > 0 ? roles[0].role_name : 'No Role';
 
         setUsername(username);
@@ -34,7 +33,6 @@ function MyProfile() {
         setLastName(last_name);
         setSex(sex);
         setRole(role);
-        setBranch(branch.join(", "));
         console.log(response.data);
       } catch (error) {
         console.error("Error fetching user details:", error);
