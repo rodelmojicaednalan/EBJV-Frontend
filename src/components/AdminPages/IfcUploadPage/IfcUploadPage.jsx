@@ -89,12 +89,12 @@ function IfcUploadPage() {
         <>
          <img
          src={view_icon}
-         title="View Branch Details"
+         title="View Model Details"
          alt="view"
          width="25"
          height="25"
          onClick={() =>
-          navigate("/supplies", {
+          navigate("/ifc-viewer", {
             state: { fileUrl: row.url, fileName: row.name },
           })
         }
