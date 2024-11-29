@@ -15,8 +15,6 @@ function EditUser() {
   const { userId } = useParams();
   const [last_name, setLastname] = useState("");
   const [first_name, setFirstname] = useState("");
-  const [branchOptions, setBranchOptions] = useState([]);
-  const [selectedBranches, setSelectedBranches] = useState([]);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role_name, setRoleName] = useState("");
@@ -30,21 +28,6 @@ function EditUser() {
   // const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
-    // Fetch branches
-    const fetchBranches = async () => {
-      try {
-        const response = await axiosInstance.get("/branches");
-        const options = response.data.map(branch => ({
-          value: branch.id,
-          label: branch.branch_name,
-        }));
-        setBranchOptions(options);
-      } catch (error) {
-        console.error("Error fetching branches:", error);
-      }
-    };
-    fetchBranches();
-
     // Fetch roles
     const fetchRoles = async () => {
       try {
@@ -63,10 +46,6 @@ function EditUser() {
           const userData = response.data;
           setLastname(userData.last_name);
           setFirstname(userData.first_name);
-          setSelectedBranches(userData.branches.map(branch => ({
-            value: branch.id,
-            label: branch.branch_name,
-          })));
           setConfirmPassword(userData.password);
           setEmail(userData.email);
           setPassword(userData.password);
@@ -89,7 +68,6 @@ function EditUser() {
     if (
       !last_name ||
       !first_name ||
-      !selectedBranches.length ||
       !password ||
       !confirmPassword ||
       !email ||
@@ -131,7 +109,6 @@ function EditUser() {
       const response = await axiosInstance.put(`/update-user/${userId}`, {
         last_name,
         first_name,
-        branch_ids: selectedBranches.map(branch => branch.value),
         password,
         email,
         sex,
@@ -143,7 +120,6 @@ function EditUser() {
       setError("");
       setLastname("");
       setFirstname("");
-      setSelectedBranches([]);
       setPassword("");
       setConfirmPassword("");
       setEmail("");
@@ -240,39 +216,6 @@ function EditUser() {
             </div>
           </div>
           <div className="d-flex justify-content-between ml-5 add-user-fields">
-          <div className="form-group add-branch-select" style={{ width: "205px", height: "0" }}>
-              <label>Branches:</label>
-              <Select
-                closeMenuOnSelect={false}
-                components={animatedComponents}
-                isMulti
-                options={branchOptions}
-                value={selectedBranches}
-                onChange={setSelectedBranches}
-                menuPlacement="auto"
-                menuPosition="fixed"
-                styles={{
-                  control: (provided, { isFocused }) => ({
-                    ...provided,
-                    maxHeight: "300px",
-                    overflowY: "auto",
-                    width: isFocused ? "310px" : "208px", // Default width is 200px; expands to 310px on focus
-                    transition: "width 0.3s ease", // Smooth transition when width changes
-                  }),
-                  valueContainer: (provided) => ({
-                    ...provided,
-                    maxHeight: "300px",
-                    overflowY: "auto",
-                  }),
-                  menu: (provided) => ({
-                    ...provided,
-                    right: "0",
-                    transform: "translate(100%, 100%)",
-                  }),
-                }}
-                menuPortalTarget={document.body}
-              />
-            </div>
             <div className="form-group role-field">
               <label>Role:</label>
               <br />

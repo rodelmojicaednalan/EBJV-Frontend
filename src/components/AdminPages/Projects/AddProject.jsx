@@ -1,85 +1,64 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axiosInstance from "../../../../axiosInstance.js";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import check from "../../../assets/images/check.png";
 import { FiChevronLeft } from 'react-icons/fi';
 import StickyHeader from "../../SideBar/StickyHeader";
-
-
+import upload_icon from "../../../assets/images/uploading.png";
+import { AuthContext } from "../../Authentication/authContext";
+import { useLoader } from "../../Loaders/LoaderContext";
 
 function AddNewProject() {
-  const [branch, setBranch] = useState("");
-  const [addressLine1, setAddressLine1] = useState("");
-  const [addressLine2, setAddressLine2] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState(""); // Changed to be a dropdown for Australian states
-  const [zipCode, setZipCode] = useState("");
-  const [country, setCountry] = useState("Australia"); // Set default country to Australia
-  const [openTime, setOpenTime] = useState("");
-  const [closeTime, setCloseTime] = useState("");
-  const [status, setStatus] = useState("Closed");
+  const { user } = useContext(AuthContext);
+  const [loadingIfc, setLoadingIfc] = useState(false);
+  const [projectName, setProjectName] = useState("");
+  const [projectAddress, setProjectAddress] = useState("");
+  const [projectStatus, setProjectStatus] = useState("Active");
+  const [projectOwner, setProjectOwner] = useState("");
+  const [projectFiles, setProjectFiles] = useState([])
 
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { setLoading } = useLoader();
 
-  // list of countries
-  const australianStates = [
-    "New South Wales",
-    "Victoria",
-    "Queensland",
-    "Western Australia",
-    "South Australia",
-    "Tasmania",
-    "Australian Capital Territory",
-    "Northern Territory",
-  ];
+  useEffect(() => {
+    if (user && user.id) {
+      setProjectOwner(user.id);
+      setLoading(false); // Automatically set the projectOwner to the logged-in user's ID
+    } else {
+      setLoading(true);
+    }
+  }, [user]);
 
-  const addBranch = async (e) => {
+  const addProject = async (e) => {
     e.preventDefault();
-
-    const branchAddress = `${addressLine1}, ${addressLine2}, ${city}, ${state}, ${zipCode}, ${country}`;
-
-    const operatingHours = {
-      open: openTime,
-      close: closeTime,
-    };
-
-    const newBranchData = {
-      branch_name: branch,
-      branch_address: branchAddress,
-      operating_hours: operatingHours,
-      status: status,
-    };
-
-    if (!branch || !city || !state || !zipCode || !country || !openTime || !closeTime) {
+    if (!projectName || !projectAddress || !projectOwner || !projectFiles) {
       setError("All fields are required.");
       setTimeout(() => setError(""), 3000);
       return;
     }
-    if (openTime >= closeTime) {
-      setError("Invalid operating hours. Open time should be before close time.");
-      setTimeout(() => setError(""), 3000)
-      return;
-    }
 
     try {
-      await axiosInstance.post("/create-branch", newBranchData);
-
+      const formData = new FormData();
+      formData.append("project_name", projectName);
+      formData.append("project_address", projectAddress);
+      formData.append("user_id", projectOwner);
+      formData.append("project_status", projectStatus);
+      projectFiles.forEach((file) => formData.append("project_file", file));
+  
+      await axiosInstance.post("/create-project", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+  
       setError("");
-      setBranch("");
-      setAddressLine1("");
-      setAddressLine2("");
-      setCity("");
-      setState("");
-      setZipCode("");
-      setCountry("");
-      setOpenTime("");
-      setCloseTime("");
-      setStatus("");
+      setProjectName("");
+      setProjectAddress("");
+      setProjectOwner("");
+      setProjectFiles([]);
       Swal.fire({
-        title: "Branch Added Successfully",
-        text: `${branch} has been added to the system.`,
+        title: "Project Added Successfully",
+        text: `${projectName} has been added to the system.`,
         imageUrl: check,
         imageWidth: 100,
         imageHeight: 100,
@@ -89,9 +68,67 @@ function AddNewProject() {
         navigate("/projects");
       });
     } catch (error) {
-      console.error("Error adding branch:", error);
+      console.error("Error adding project:", error);
     }
   };
+
+  const handleIfcUpload = (file) => {
+
+    if (!file.name.endsWith(".ifc")) {
+    Swal.fire("Error", "Only IFC files are allowed.", "error");
+    return;
+  }
+
+    if (file) {
+      setLoadingIfc(true);
+      try {
+        setProjectFiles((prev) => [...prev, file]); // Store the raw File object
+        Swal.fire({
+          title: "Success!",
+          text: "Model uploaded successfully.",
+          imageUrl: check,
+          imageWidth: 100,
+          imageHeight: 100,
+          confirmButtonText: "OK",
+          confirmButtonColor: "#0ABAA6",
+        });
+      } catch (error) {
+        console.error("Error loading IFC file:", error);
+        Swal.fire("Error", "Failed to load IFC file", "error");
+      } finally {
+        setLoadingIfc(false);
+      }
+    }
+  };
+  
+
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    handleIfcUpload(file);
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    const files = Array.from(event.dataTransfer.files);
+    files.forEach((file) => handleIfcUpload(file));
+  };
+  
+
+  const handleDragOver = (event) => {
+    event.preventDefault(); // Prevent default to allow drop
+  };
+
+  const renderFilePreviews = () => {
+    if (projectFiles.length === 0) return <p>No files selected</p>;
+    return (
+      <ul>
+        {projectFiles.map((file, index) => (
+          <li key={index}>{file.name}</li> // File.name comes from File object
+        ))}
+      </ul>
+    );
+  };
+  
 
   return (
     <div className="container">
@@ -102,7 +139,7 @@ function AddNewProject() {
         </h3>
       </a>
       <div className="container-content">
-        <form onSubmit={addBranch} className="add-branch-form">
+        <form onSubmit={addProject} className="add-branch-form">
           <div style={{ position: "relative", textAlign: "center", justifyContent: "center", alignItems: "center" }}>
             {error && <div className="alert alert-danger" style={{ position: "absolute", left: "25%", top: "-10px", width: "50%", padding: "4px" }}>{error}</div>}
           </div>
@@ -112,44 +149,58 @@ function AddNewProject() {
               <input
                 type="text"
                 className="form-control"
-                value={branch}
-                onChange={(e) => setBranch(e.target.value)}
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
               />
             </div>
             <div className="form-group">
-              <label>Project Owner:</label>
+              <label>Project Address:</label>
               <input
                 type="text"
                 className="form-control"
-                value={addressLine1}
-                onChange={(e) => setAddressLine1(e.target.value)}
+                value={projectAddress}
+                onChange={(e) => setProjectAddress(e.target.value)}
               />
             </div>
-            <div className="form-group">
-              <label>Project Details:</label>
-              <input
-                type="text"
-                className="form-control"
-                value={addressLine2}
-                onChange={(e) => setAddressLine2(e.target.value)}
-              />
-            </div>
-          </div>
-
-     
-          <div className="d-flex justify-content-between ml-5 add-branch-fields">
             <div className="form-group status-field">
               <label>Status:</label>
               <br />
               <select
                 className="branch-status"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
+                value={projectStatus}
+                onChange={(e) => setProjectStatus(e.target.value)}
               >
                 <option value="Active">Active</option>
-                <option value="For Review">For Review</option>
+                <option value="Inactive">Inactive</option>
               </select>
             </div>
+          </div>
+
+          <div className="d-flex justify-content-between ml-5">
+          <div
+            className="upload-section"
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+          >
+            <img height={70} src={upload_icon} alt="" />
+            <p>Drag and drop IFC file here</p>
+            <p>or</p>
+            <input
+              type="file"
+              accept=".ifc"
+              onChange={handleFileSelect}
+              id="file-input"
+              disabled={loadingIfc}
+              style={{ display: "none" }}
+            />
+            <label htmlFor="file-input" className="upload-click">
+              Browse Files
+            </label>
+            <div className="file-preview-section">
+              <h4>Selected IFC File:</h4>
+              {renderFilePreviews()}
+            </div>
+          </div>
           </div>
 
           <button className="submit-btn mb-4 mt-4 submit-branch-btn" type="submit">

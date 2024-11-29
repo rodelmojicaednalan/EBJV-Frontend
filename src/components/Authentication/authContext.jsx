@@ -17,7 +17,7 @@ export const AuthContextProvider = ({ children }) => {
     const token = getCookie('accessToken');
 
     if (token) {
-      axiosInstance.get('/users')
+      axiosInstance.get('/user')
         .then(response => {
           setUser(response.data);
           setIsAuthenticated(true);

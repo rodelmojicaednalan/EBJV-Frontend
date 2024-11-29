@@ -24,8 +24,6 @@ function StaffLogs() {
   const [search, setSearch] = useState('');
   const [selectedLogs, setSelectedLogs] = useState([]); // To handle mass delete
   const [loggedInUser, setLoggedInUser] = useState(null);
-  const [branchFilter, setBranchFilter] = useState(''); // New state for branch filter
-  const [branches, setBranches] = useState([]);
   const [roles, setRoles] = useState([]);
   const [roleFilter, setRoleFilter] = useState('');
   const { setLoading } = useLoader();
@@ -42,7 +40,6 @@ function StaffLogs() {
           sex: staff_logs?.user?.sex || 'N/A',
           date: staff_logs?.createdAt ? new Date(staff_logs.createdAt).toLocaleString() : 'N/A',
           role: staff_logs?.user?.roles?.[0]?.role_name || 'N/A',
-          branch: staff_logs?.user?.branches?.map(r => r.branch_name).join(", ") || 'N/A',
           action: staff_logs?.action === 'logout' ? 'Logged Out' :
                   staff_logs?.action === 'login' ? 'Logged In' : staff_logs?.action || 'Unknown Action',
           // sex: staff_logs?.user?.sex || 'N/A'
@@ -57,17 +54,8 @@ function StaffLogs() {
       }
     };
 
-    const fetchBranches = async () => {
-      try {
-        const response = await axiosInstance.get('/branches');
-        setBranches(response.data); // Assuming backend returns a list of branches
-      } catch (error) {
-        console.error('Error fetching branches:', error);
-      }
-    };
 
     fetchLogs();
-    fetchBranches();
   }, [navigate]);
 
   const handleDeleteLog = async (id) => {
@@ -282,13 +270,6 @@ function StaffLogs() {
       return true;
     })
     .filter(item => {
-      // Apply branch-based filtering
-      if (branchFilter) {
-        return item.branch.includes(branchFilter); // Match branch name to selected branch
-      }
-      return true;
-    })
-    .filter(item => {
       // Apply search-based filtering
       return item.name.toLowerCase().includes(search.toLowerCase());
     });
@@ -298,7 +279,7 @@ function StaffLogs() {
     <StickyHeader/>
       <div className="row">
         <div className="col-lg-12 col-md-6">
-          <h3 className="title-page">Staff Logs </h3>
+          <h3 className="title-page">Activity Logs </h3>
           <div className='top-filter'>
             <select
               name="filter"
@@ -311,19 +292,6 @@ function StaffLogs() {
               {roles.map(role => (
                 <option key={role.id} value={role.role_name}>
                   {role.role_name}
-                </option>
-              ))}
-            </select>
-            <select
-              name="filter"
-              id="filter"
-              value={branchFilter}
-              onChange={e => setBranchFilter(e.target.value)}
-            >
-              <option value="">All Branches</option>
-              {branches.map(branch => (
-                <option key={branch.id} value={branch.branch_name}>
-                  {branch.branch_name}
                 </option>
               ))}
             </select>

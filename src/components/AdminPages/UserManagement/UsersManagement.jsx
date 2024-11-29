@@ -145,7 +145,7 @@ function UserRoleManagement() {
             height="25"
             style={{ cursor: "pointer" }}
           />
-          {row.role_name !== "Admin" && row.role_name !== "Staff" && (
+          {row.role_name !== "Admin" && row.role_name !== "Client" && (
             <img
               className="ml-3"
               src={delete_icon}
@@ -199,16 +199,10 @@ function UserRoleManagement() {
           </Modal.Header>
           <Modal.Body>
             <h2>{selectedUserRole.role_name} Permissions</h2>
-            {/* {selectedUserRole.permissions
-              .filter((permission) => {
-                return (
-                  selectedUserRole.role_name !== "Admin" ||
-                  permission.permission_name !== "Generate Ticket"
-                );
-              })
+             {selectedUserRole.permissions
               .map((permission, index) => (
                 <p key={index}>{permission.permission_name}</p>
-              ))} */}
+              ))} 
           </Modal.Body>
         </Modal>
       )}

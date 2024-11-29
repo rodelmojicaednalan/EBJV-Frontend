@@ -19,29 +19,26 @@ function Projects() {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [selectedProjects, setSelectedProjects] = useState(null);
+  const [selectedprojectId, setSelectedprojectId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState([]);
-  const [selectedBranchId, setSelectedBranchId] = useState("");
   const { setLoading } = useLoader();
 
   useEffect(() => {
     const fetchProjects = async () => {
       setLoading(true);
       try {
-        const response = await axiosInstance.get("/branches");
-        const formattedData = response.data.map((branch) => {
-          const parsedOperatingHours = JSON.parse(branch.operating_hours); // Parse first
-
+        const response = await axiosInstance.get("/my-projects");
+        const formattedData = response.data.data.map((project) => {
+          const parsedFiles = JSON.parse(project.project_file);
           return {
-            id: branch.id,
-            branch_name: branch.branch_name,
-            address: formatAddress(branch.branch_address),
-            operating_hours: parsedOperatingHours,
-            status: getBranchStatus({
-              ...branch,
-              operating_hours: parsedOperatingHours,
-            }), // Pass parsed data here
+            id: project.id,
+            project_name: project.project_name,
+            project_address: formatAddress(project.project_address),
+            project_owner: project.user_id,
+            project_file: parsedFiles,
+            project_status: project.project_status
           };
         });
         setData(formattedData);
@@ -67,74 +64,34 @@ function Projects() {
   //filter Projects
   useEffect(() => {
     const results = data.filter(
-      (branch) =>
-        (selectedBranchId ? branch.id === parseInt(selectedBranchId) : true) &&
-        (branch.branch_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          branch.address.toLowerCase().includes(searchTerm.toLowerCase()))
+      (project) =>
+        (selectedprojectId ? project.id === parseInt(selectedprojectId) : true) &&
+        (project.project_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          project.address.toLowerCase().includes(searchTerm.toLowerCase()))
     );
     setFilteredData(results);
-  }, [searchTerm, data, selectedBranchId]);
+  }, [searchTerm, data, selectedprojectId]);
 
-  const handleBranchSelect = (e) => {
-    setSelectedBranchId(e.target.value);
-    console.log("Selected Branch ID:", e.target.value);
-  };
-
-  const getBranchStatus = (branch) => {
-    if (!branch.operating_hours || typeof branch.operating_hours !== "object") {
-      return "Undefined";
-    }
-    const currentTime = new Date();
-    const options = {
-      timeZone: "Australia/Sydney",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    };
-    const formatter = new Intl.DateTimeFormat([], options);
-    const [hours, minutes, seconds] = formatter.format(currentTime).split(":");
-    const currentSeconds =
-      parseInt(hours, 10) * 3600 +
-      parseInt(minutes, 10) * 60 +
-      parseInt(seconds, 10);
-
-    const openTime = branch.operating_hours.open.split(":");
-    const closeTime = branch.operating_hours.close.split(":");
-
-    const openSeconds =
-      parseInt(openTime[0], 10) * 3600 +
-      parseInt(openTime[1], 10) * 60 +
-      parseInt(openTime[2] || 0, 10);
-    let closeSeconds =
-      parseInt(closeTime[0], 10) * 3600 +
-      parseInt(closeTime[1], 10) * 60 +
-      parseInt(closeTime[2] || 0, 10);
-
-    if (closeSeconds < openSeconds) {
-      closeSeconds += 24 * 3600;
-    }
-
-    return currentSeconds >= openSeconds && currentSeconds <= closeSeconds
-      ? "Open"
-      : "Closed";
+  const handleprojectSelect = (e) => {
+    setSelectedprojectId(e.target.value);
+    console.log("Selected project ID:", e.target.value);
   };
 
   //modal view
-  const handleViewClick = (branch) => {
-    setSelectedProjects(branch);
+  const handleViewClick = (project) => {
+    setSelectedProjects(project);
     setShowModal(true);
   };
   //close modal
   const handleCloseModal = () => {
     setShowModal(false);
   };
-  const handleEditBranchClick = (branchId) => {
-    navigate(`/edit-project/${branchId}`);
+  const handleEditprojectClick = (projectId) => {
+    navigate(`/edit-project/${projectId}`);
   };
 
-  //handle deleting of branch
-  const handleDeleteBranchClick = async (branchId) => {
+  //handle deleting of project
+  const handleDeleteprojectClick = async (projectId) => {
     Swal.fire({
       title: "Are you sure?",
       text: "You won’t be able to revert this!",
@@ -153,11 +110,11 @@ function Projects() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axiosInstance.delete(`/delete-branch/${branchId}`);
-          setData(data.filter((branch) => branch.id !== branchId));
+          await axiosInstance.delete(`/delete-project/${projectId}`);
+          setData(data.filter((project) => project.id !== projectId));
           Swal.fire({
             title: "Success!",
-            text: "Branch has been deleted.",
+            text: "project has been deleted.",
             imageUrl: check,
             imageWidth: 100,
             imageHeight: 100,
@@ -171,7 +128,7 @@ function Projects() {
         } catch (error) {
           Swal.fire({
             title: "Error!",
-            text: "There was an error deleting the branch.",
+            text: "There was an error deleting the project.",
             icon: "error",
             confirmButtonText: "OK",
             confirmButtonColor: "#EC221F",
@@ -188,38 +145,33 @@ function Projects() {
   //table columns
   const columns = [
     {
-      name: "Branch",
-      selector: (row) => row.branch_name,
+      name: "Project Name",
+      selector: (row) => row.project_name,
       sortable: true,
     },
     {
-      name: "Address",
-      selector: (row) => row.address,
+      name: "Project Address",
+      selector: (row) => row.project_address,
       sortable: true,
     },
     {
-      name: "Operating Hours",
-      selector: (row) => {
-        if (typeof row.operating_hours === "object") {
-          return `${row.operating_hours.open} - ${row.operating_hours.close}`;
-        }
-        return row.operating_hours;
-      },
-      sortable: false,
-    },
-    {
-      name: "Status",
+      name: "Project Status",
       selector: (row) => (
         <span
           style={{
-            color: row.status === "Open" ? "green" : "red",
+            color: row.project_status === "Active" ? "green" : "red",
             marginLeft: 0,
           }}
         >
-          {row.status}
+          {row.project_status}
         </span>
       ),
       sortable: false,
+    },
+    {
+      name: "File Name",
+      selector: (row) => row.project_file,
+      sortable: true,
     },
 
     {
@@ -228,7 +180,7 @@ function Projects() {
         <div>
           <img
             src={view_icon}
-            title="View Branch Details"
+            title="View Project Details"
             alt="view"
             width="25"
             height="25"
@@ -238,8 +190,8 @@ function Projects() {
           <img
             className="ml-3"
             src={edit_icon}
-            title="Edit Branch Details"
-            onClick={() => handleEditBranchClick(row.id)}
+            title="Edit project Details"
+            onClick={() => handleEditprojectClick(row.id)}
             style={{ cursor: "pointer" }}
             alt="edit"
             width="25"
@@ -249,9 +201,9 @@ function Projects() {
           <img
             className="ml-3"
             src={delete_icon}
-            title="Delete Branch"
+            title="Delete project"
             style={{ cursor: "pointer" }}
-            onClick={() => handleDeleteBranchClick(row.id)}
+            onClick={() => handleDeleteprojectClick(row.id)}
             alt="delete"
             width="25"
             height="25"
@@ -269,19 +221,6 @@ function Projects() {
         <div className="col-lg-12 col-md-6 custom-content-container">
           <h3 className="title-page">Projects</h3>
           <div className="top-filter">
-            <select
-              name="filter"
-              id="filter"
-              onChange={handleBranchSelect}
-              value={selectedBranchId}
-            >
-              <option value="">All Projects</option>
-              {data.map((branch) => (
-                <option key={branch.id} value={branch.id}>
-                  {branch.branch_name}
-                </option>
-              ))}
-            </select>
             <input
               id="search-bar"
               type="text"
@@ -314,20 +253,17 @@ function Projects() {
       {selectedProjects && (
         <Modal show={showModal} onHide={handleCloseModal}>
           <Modal.Header closeButton>
-            <Modal.Title>Branch Details</Modal.Title>
+            <Modal.Title>Project Details</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <div className="branch-container">
-              <h2>{selectedProjects.branch_name}</h2>
+            <div className="project-container">
+              <h2>{selectedProjects.project_name}</h2>
               <h5>Full Address:</h5>
-              <p>{selectedProjects.address}</p>
-              <h5>Operating Hours</h5>
-              <p>
-                Open: {selectedProjects.operating_hours?.open} - Close:{" "}
-                {selectedProjects.operating_hours?.close}
-              </p>
+              <p>{selectedProjects.project_address}</p>
               <h5>Status</h5>
-              <p>{selectedProjects.status}</p>
+              <p>{selectedProjects.project_status}</p>
+              <h5>Uploaded Model File Name:</h5>
+              <p>{selectedProjects.project_file}</p>
             </div>
           </Modal.Body>
           {/* <Modal.Footer>

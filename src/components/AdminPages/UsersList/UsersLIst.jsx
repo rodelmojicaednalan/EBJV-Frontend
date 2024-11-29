@@ -25,8 +25,6 @@ function UsersList() {
   const [filter, setFilter] = useState("");
   const [search, setSearch] = useState("");
 
-  const [branches, setBranches] = useState([]);
-  const [selectedBranchId, setSelectedBranchId] = useState("");
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [roles, setRoles] = useState([]);
   const [roleFilter, setRoleFilter] = useState("");
@@ -91,25 +89,6 @@ function UsersList() {
     fetchLoggedInUser();
   }, []);
 
-  useEffect(() => {
-    const fetchBranches = async () => {
-      try {
-        const response = await axiosInstance.get("/branches");
-        const formattedData = response.data.map((branch) => ({
-          id: branch.id,
-          branch_name: branch.branch_name,
-        }));
-        setBranches(formattedData);
-      } catch (error) {
-        console.error("Error fetching staff logs:", error);
-      }
-    };
-    fetchBranches();
-  }, []);
-
-  const handleBranchSelect = (e) => {
-    setSelectedBranchId(e.target.value);
-  };
 
   useEffect(() => {
     // Filter users whenever the filter or search state changes
@@ -133,19 +112,12 @@ function UsersList() {
         );
       }
 
-      if (selectedBranchId) {
-        tempUsers = tempUsers.filter((user) =>
-          user.branches?.some(
-            (branch) => branch.id === parseInt(selectedBranchId)
-          )
-        );
-      }
 
       setFilteredUsers(tempUsers);
     };
 
     applyFilters();
-  }, [filter, roleFilter, search, users, loggedInUser, selectedBranchId]);
+  }, [filter, roleFilter, search, users, loggedInUser]);
 
   const handleViewClick = (user) => {
     setSelectedUser(user);
@@ -224,7 +196,7 @@ function UsersList() {
   const columns = [
     {
       name: "Name",
-      width: "40%",
+      width: "30%",
       selector: (row) => (
         <div style={{ display: "flex", alignItems: "center" }}>
           <img
@@ -250,29 +222,18 @@ function UsersList() {
       ),
       sortable: true,
     },
-    // {
-    //   name: "Email",
-    //   selector: (row) => row.email || "N/A",
-    //   sortable: true,
-    // },
-    // {
-    //   name: "Username",
-    //   selector: (row) => row.username || "N/A",
-    //   sortable: true,
-    // },
-    {
-      name: "Branch",
-      selector: (row) =>
-        row.branches?.map((r) => r.branch_name).join(", ") || "N/A",
-      sortable: true,
-      style: {
-        width: "200px", 
-        whiteSpace: "nowrap", 
-        overflow: "hidden",
-        textOverflow: "ellipsis", 
-      },
-    },
-
+     {
+      name: "Email",
+      width: "25%",
+       selector: (row) => row.email || "N/A",
+       sortable: true,
+     },
+     {
+       name: "Username",
+       width: "15%",
+       selector: (row) => row.username || "N/A",
+       sortable: true,
+     },
     {
       name: "Role",
       width: "15%",
@@ -336,36 +297,9 @@ function UsersList() {
       <StickyHeader />
       <div className="row">
         <div className="col-lg-12 col-md-6 custom-content-container">
-          <h3 className="title-page">Account Management</h3>
+          <h3 className="title-page">Client Management</h3>
 
           <div className="top-filter">
-            <select
-              name="filter"
-              className=""
-              id="filter"
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-            >
-              <option value="">All Roles</option>
-              {roles.map((role) => (
-                <option key={role.id} value={role.role_name}>
-                  {role.role_name}
-                </option>
-              ))}
-            </select>
-            <select
-              name="filter"
-              id="filter"
-              value={selectedBranchId}
-              onChange={handleBranchSelect}
-            >
-              <option value="">All Branches</option>
-              {branches.map((branch) => (
-                <option key={branch.id} value={branch.id}>
-                  {branch.branch_name}
-                </option>
-              ))}
-            </select>
             <input
               id="search-bar"
               type="text"
@@ -413,9 +347,6 @@ function UsersList() {
                   </div>
                   <div>
                     Role: <p>{selectedUser.role}</p>
-                  </div>
-                  <div>
-                    Branch: <p>{selectedUser.branch}</p>
                   </div>
                   <div>
                     Email:
