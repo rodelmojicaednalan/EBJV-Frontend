@@ -5,6 +5,7 @@ import "../../../App.css";
 import "font-awesome/css/font-awesome.min.css";
 import view_icon from "../../../assets/images/list-view.png";
 import edit_icon from "../../../assets/images/edit-details.png";
+import view_model from "../../../assets/images/view-model.png";
 import delete_icon from "../../../assets/images/delete-log.png";
 import check from "../../../assets/images/check.png";
 
@@ -32,8 +33,6 @@ function Projects() {
         // Check user's role
         const userResponse = await axiosInstance.get("/user");
         const userRole = userResponse.data?.roles?.map(role => role.role_name);// Assuming `role` is returned from the API
-        console.log(userRole)
-
         let response;
         if (userRole == 'Admin') {
           // Fetch all projects for Admin
@@ -211,6 +210,23 @@ function Projects() {
             width="25"
             height="25"
           />
+
+      {row.project_file && row.project_file.length > 0 && (
+        <img
+          className="ml-3"
+          src={view_model}
+          title="View IFC Model"
+          alt="view_ifc"
+          width="25"
+          height="25"
+          onClick={() =>
+            navigate("/ifc-viewer", {
+              state: { fileUrl: row.project_file[0], fileName: row.project_name },
+            })
+          }
+          style={{ cursor: "pointer" }}
+        />
+      )}
 
           <img
             className="ml-3"

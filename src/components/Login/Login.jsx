@@ -10,7 +10,6 @@ import close from "../../assets/images/close.png";
 function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [selectedRole, setSelectedRole] = useState('Client');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState({value: "" , isShow : false});
     const navigate = useNavigate();
@@ -24,29 +23,6 @@ function Login() {
             });
 
             const { user, accessToken, refreshToken, roleName } = response.data;
-
-            if (selectedRole !== roleName) {
-                // setError(`You cannot log in as ${selectedRole}. Your account role is ${userRole}.`);
-
-                setError({
-                    value : "Invalid login, Please check your credentials",
-                    isShow : true 
-                });
-                // Swal.fire({
-                //     title: 'Role Mismatch',
-                //     text: 'Please select your assigned role.',
-                //     imageUrl: close,
-                //     imageWidth: 100,
-                //     imageHeight: 100,
-                //     confirmButtonText: "OK",
-                //     confirmButtonColor: "#EC221F",
-                //     customClass: {
-                //         confirmButton: "custom-error-confirm-button",
-                //         title: "custom-swal-title",
-                //     },
-                // })
-                return;
-            }
 
             document.cookie = `role_name=${roleName}; Path=/;`;
             document.cookie = `accessToken=${accessToken}; Path=/;`;
@@ -115,8 +91,16 @@ function Login() {
 
                 <div className="col-md-6 d-flex align-items-center justify-content-center">
                     <div className="card p-4 login-form-wrap" style={{ width: '450px' }}>
-                        <h2 className="text-left mb-4">{selectedRole === 'Client' ? 'Client Login' : 'Admin Login'}</h2>
-                        {(error.value !== "" && error.isShow === true) && <div className="alert alert-danger">{error.value}<div className={"close-quick-alert"} onClick={()=>setError({...error , isShow:false})}></div></div>}
+                        <h2 className="text-left mb-4">Login</h2>
+                        {error.value !== "" && error.isShow && (
+                            <div className="alert alert-danger">
+                                {error.value}
+                                <div
+                                    className="close-quick-alert"
+                                    onClick={() => setError({ ...error, isShow: false })}
+                                ></div>
+                            </div>
+                        )}
                         <form onSubmit={login}>
 
                             <label htmlFor="username">Username</label><br />
@@ -170,21 +154,6 @@ function Login() {
                                         </select>
                                     </h6>
                                 </div> */}
-                                <div className="d-flex">
-                                    <h6>
-                                        <select
-                                            id="role"
-                                            className="form-control-sm"
-                                            value={selectedRole}
-                                            onChange={(e) => setSelectedRole(e.target.value)}
-                                        >
-
-                                            <option value="Client">Client</option>
-                                            <option value="Admin">Admin</option>
-
-                                        </select>
-                                    </h6>
-                                </div>
                             </div>
                             <div className='d-flex justify-content-left mt-1'>
                                 <button type="submit" className="mt-2 custom-btn">Login</button>

@@ -45,7 +45,7 @@ function IfcViewer() {
   const fileUrl = location.state?.fileUrl; // File URL passed via state
 
   useEffect(() => {
-    if (fileUrl) {
+    if (fileUrl && fileUrl.endsWith('.ifc')) {
       // Initialize the IFC Viewer
       const viewerContainer = viewerContainerRef.current;
       const viewer = new IfcViewerAPI({ container: viewerContainer });
@@ -71,7 +71,10 @@ function IfcViewer() {
       // Cleanup on component unmount
       return () => {
         viewer.dispose();
+        viewerRef.current = null;
       };
+    } else {
+      Swal.fire("Invalid File", "Please upload a valid IFC file.", "error");
     }
   }, [fileUrl]);
   
@@ -88,21 +91,14 @@ function IfcViewer() {
 
   const handleZoomIn = () => {
     const viewer = viewerRef.current;
-    if (viewer) {
-      const currentFov = viewer.context.ifcCamera.cameraControls.camera.fov;
-      viewer.context.ifcCamera.cameraControls.camera.fov = currentFov * 0.9; // Zoom in by 10%
-      viewer.context.ifcCamera.cameraControls.update(); // Apply the update
-    }
+    if (viewer) viewer.context.ifcCamera.cameraControls.dolly(-0.5); // Zoom in
   };
-
+  
   const handleZoomOut = () => {
     const viewer = viewerRef.current;
-    if (viewer) {
-      const currentFov = viewer.context.ifcCamera.cameraControls.camera.fov;
-      viewer.context.ifcCamera.cameraControls.camera.fov = currentFov * 1.1; // Zoom out by 10%
-      viewer.context.ifcCamera.cameraControls.update(); // Apply the update
-    }
+    if (viewer) viewer.context.ifcCamera.cameraControls.dolly(0.5); // Zoom out
   };
+  
 
   const handleSendMessage = () => {
     if (newMessage.trim() !== "") {
@@ -118,7 +114,7 @@ function IfcViewer() {
     <div className="container">
       <StickyHeader />
       <div className="col-lg-12 col-md-6 custom-content-container margin-top">
-        <h3 className="title-page">IFC File Viewer</h3>
+      <h3 className="title-page">{fileUrl ? fileUrl.split('/').pop() : "No File Selected"}</h3>
         <div className="ifc-container">
           <div className="viewer-container" ref={viewerContainerRef}></div>
 
@@ -140,6 +136,9 @@ function IfcViewer() {
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Type a message..."
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') handleSendMessage();
+                }}
               />
               <button onClick={handleSendMessage}>Send</button>
             </div>
@@ -161,8 +160,13 @@ function IfcViewer() {
           </label>
          
         </div>
-        
-        {loadingIfc && <div className="loading-overlay">Loading File...</div>}
+        {!fileUrl && <div className="no-file"><p>No IFC file selected. Please upload a file to view.</p></div>}
+        {loadingIfc && (
+          <div className="loading-overlay">
+            <div className="spinner"></div>
+            Loading IFC File...
+          </div>
+        )}
       </div>
     </div>
   );

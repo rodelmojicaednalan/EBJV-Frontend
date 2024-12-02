@@ -5,7 +5,7 @@ import axios from 'axios';
 import {getCookie, setCookie} from './src/components/Authentication/getCookie'
 
 const axiosInstance = axios.create({
-    baseURL: 'https://ebjv-api.imseoninja.com/api',
+    baseURL: 'http://ebjv-api.olongapobataanzambalesads.com/api',
 });
 
 let isRefreshing = false;
