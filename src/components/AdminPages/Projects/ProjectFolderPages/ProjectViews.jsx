@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import DataTable from "react-data-table-component";
 import axiosInstance from "../../../../../axiosInstance.js";
 import Swal from "sweetalert2";
 import { useNavigate, useParams, Link } from "react-router-dom";
@@ -43,6 +44,65 @@ function ProjectViews() {
     fetchProjectDetails();
   }, [projectId]);
 
+  const sampleData = [
+    {
+      id: 1,
+      viewName: "Model1 View",
+      description: "Basic View",
+      shared: "Created by Me",
+      lastModified: "2024-12-01 14:35"
+
+    },
+    {
+      id: 2,
+      viewName: "Model1 View - Top",
+      description: "Top View",
+      shared: "Created by Me",
+      lastModified: "2024-11-28 09:12"
+
+    },
+    {
+      id: 3,
+      viewName: "Model1 View - Side",
+      description: "Left Rear Side View",
+      shared: "Shared with Me",
+      lastModified: "2024-11-25 16:50"
+
+    },
+    {
+      id: 4,
+      viewName: "Model1 View - Skeleton",
+      description: "Skeletal Structure View",
+      shared: "Shared with Me",
+      lastModified: "2024-11-22 13:27"
+    },
+  ];
+  
+  // Define columns for the table
+  const sampleColumns = [
+    {
+      name: "View Name",
+      selector: (row) => row.viewName,
+      sortable: true,
+    },
+    {
+      name: "Description",
+      selector: (row) => row.description,
+      sortable: true,
+    },
+    {
+      name: "Ownership",
+      selector: (row) => row.shared,
+      sortable: true,
+    },
+    {
+      name: "Modified",
+      selector: (row) => row.lastModified,
+      sortable: true,
+    },
+  ];
+
+
     return (
       <div className="container">
       <StickyHeader />
@@ -54,11 +114,28 @@ function ProjectViews() {
       <div className="container-content" id="project-folder-container">
       <ProjectSidebar projectId={projectId}/>
 
-      <div className="projectFolder-display">
+       <div className="projectFolder-display">
                 <div className="main"> 
                     <div className="container-fluid moduleFluid">
                       <div className="project-content">
-                      <h1>MODEL VIEWS PAGE</h1>
+
+                      <div className="table-header d-flex justify-content-between align-items-center mb-3">
+                        <div className="page-title">
+                          <h2>Views</h2>
+                        </div>
+                    
+                      </div>
+
+                      <DataTable
+                        className="dataTables_wrapperz mt-3"
+                        columns={sampleColumns}
+                        data={sampleData}
+                        pagination
+                        paginationPerPage={20}
+                        paginationRowsPerPageOptions={[20, 30]}
+                        responsive
+                      />
+
                       </div>
                     </div>
                 </div>

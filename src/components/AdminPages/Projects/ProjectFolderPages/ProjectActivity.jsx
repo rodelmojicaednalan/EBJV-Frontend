@@ -6,12 +6,15 @@ import check from "../../../../assets/images/check.png";
 import StickyHeader from "../../../SideBar/StickyHeader";
 import { AuthContext } from "../../../Authentication/authContext";
 import upload_icon from "../../../../assets/images/uploading.png";
+import view_model from "../../../../assets/images/view-model.png";
+import man from '../../../../assets/images/man.png'
 
 import '../ProjectStyles.css'
-import { FiChevronLeft } from 'react-icons/fi';
+import { FiChevronLeft, FiUser } from 'react-icons/fi';
 
 
 import ProjectSidebar from '../ProjectFolderSidebar';
+import { FaChevronLeft } from "react-icons/fa6";
 
 function ProjectActivity() {
   const { projectId } = useParams();
@@ -19,6 +22,8 @@ function ProjectActivity() {
   const [ownerName, setOwnerName] = useState("")
   const [existingFiles, setExistingFiles] = useState([]); // Existing files
   const [error, setError] = useState("");
+
+  const [activityCardData ,setActivityCardData] = useState([])
   const navigate = useNavigate();
 
 
@@ -27,45 +32,118 @@ function ProjectActivity() {
     const fetchProjectDetails = async () => {
       try {
         const response = await axiosInstance.get(`/project/${projectId}`);
-        const { project_name, user } = response.data;
+        const { project_name, user, files, updatedAt } = response.data;
         const parsedFiles = JSON.parse(response.data.project_file)
 
         setProjectName(project_name);
         setOwnerName(`${user.first_name} ${user.last_name}`)
-        setExistingFiles(parsedFiles); 
-        // Assuming `project_files` is an array of file objects
+        setExistingFiles(parsedFiles);
+
+        const formattedFiles = files.map((file) => ({
+          fileName: file.fileName, // Assuming the file object has this key
+          fileSize: `${(file.fileSize / (1024 * 1024)).toFixed(2)} MB`, // Convert bytes to KB
+          fileOwner: `${user.first_name} ${user.last_name}`,
+          lastModified: new Intl.DateTimeFormat('en-US', {
+            month: 'short',
+            day: '2-digit',
+            year: 'numeric'
+          }).format(new Date(updatedAt)),  // Format updatedAt
+        }));
+
+        setActivityCardData(formattedFiles)
+        console.log(response.data)
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
     };
+    
 
     fetchProjectDetails();
   }, [projectId]);
 
-    return (
-      <div className="container">
+  const cardData = [
+    {
+      id: 1,
+      fileName: "Model5.ifc",
+      fileOwner: "Charlie White",
+      lastModified: "2024-11-20 08:10",
+      fileSize: "300 KB",
+    },
+    {
+      id: 2,
+      fileName: "Model5.ifc",
+      fileOwner: "Charlie Brown",
+      lastModified: "2024-11-20 08:10",
+      fileSize: "300 KB",
+    },
+    {
+      id: 3,
+      fileName: "Model5.ifc",
+      fileOwner: "Charlie Brown",
+      lastModified: "2024-11-20 08:10",
+      fileSize: "300 KB",
+    },
+  ];
+  return (
+    <div className="container">
       <StickyHeader />
       <a href="/projects" className="back-btn">
         <h3 className="title-page">
-          <FiChevronLeft className="icon-left" /> {ownerName}'s {projectName} 
+          <FiChevronLeft className="icon-left" /> {ownerName}'s {projectName}
         </h3>
       </a>
       <div className="container-content" id="project-folder-container">
-      <ProjectSidebar projectId={projectId}/>
+        <ProjectSidebar projectId={projectId} />
 
-      <div className="projectFolder-display">
-                <div className="main"> 
-                    <div className="container-fluid moduleFluid">
-                      <div className="project-content">
-                      <h1>PROJECT ACTIVITY</h1>
+        <div className="projectFolder-display">
+          <div className="main">
+            <div className="container-fluid moduleFluid">
+              <div className="project-content">
+
+              <div className="table-header d-flex justify-content-between align-items-center mb-3">
+                        <div className="page-title">
+                          <h2>Activity</h2>
+                        </div>
+                    
+                      </div>
+
+                <div className="filter-top mb-1"></div>
+
+                <div className="activity-cards-box mt-1 d-flex">
+                  {cardData.map((data) => (
+                    <div
+                      key={data.id}
+                      className="activity-card container-fluid"
+                    >
+                      <div className="activity-time d-none d-md-flex ">
+                        <span className="text-muted">{data.lastModified}</span>
+                      </div>
+                      <div className="d-flex">
+                        <div className="d-none d-md-block activity-type">
+                         <img height={24} src={view_model} alt="" />
+                        </div>
+                        <div className="activity-container">
+                          <div className="activity-type-profile">
+                    
+                          </div>
+                          <div className="activity">
+                            <div className="row-center">
+                              <div> <img src={man} style={{height:"24px"}}/> <span style={{fontWeight:"500", textTransform:"uppercase"}}>{data.fileOwner} </span></div>
+                              <div> <span >Activity Description </span></div>
+                            </div>
+                            <div className="activity-desc"></div>
+                          </div>
+                        </div>
                       </div>
                     </div>
+                  ))}
                 </div>
+              </div>
+            </div>
           </div>
-
+        </div>
       </div>
-      </div>
-      );
-    }
-
+    </div>
+  );
+}
 export default ProjectActivity;
