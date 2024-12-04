@@ -41,42 +41,43 @@ function IfcViewer() {
   ]);
   const [newMessage, setNewMessage] = useState(""); 
   const location = useLocation(); 
+  const config = {
+    base: "https://ebjv-api.olongapobataanzambalesads.com/uploads",
+  };
 
+  const baseUrl = config.base
   const fileUrl = location.state?.fileUrl; // File URL passed via state
 
   useEffect(() => {
-    if (fileUrl && fileUrl.endsWith('.ifc')) {
-      // Initialize the IFC Viewer
-      const viewerContainer = viewerContainerRef.current;
-      const viewer = new IfcViewerAPI({ container: viewerContainer });
-      viewer.addAxes();
-      viewer.addGrid();
-      viewer.IFC.setWasmPath("/"); // Ensure the WASM path is correct
-      viewerRef.current = viewer;
-
-      // Load the IFC file once the viewer is initialized
-      const loadIfc = async () => {
+    const loadIfcFile = async () => {
+      if (fileUrl && fileUrl.endsWith('.ifc')) {
+        // Construct the full URL by appending the base URL
+        const fullFileUrl = `${baseUrl}/${fileUrl.split('/').pop()}`;
+        console.log(fullFileUrl)
+  
         try {
           setLoadingIfc(true);
-          await viewer.IFC.loadIfcUrl(fileUrl, true); // Load the IFC file
+          const viewerContainer = viewerContainerRef.current;
+          const viewer = new IfcViewerAPI({ container: viewerContainer });
+          viewer.addAxes();
+          viewer.addGrid();
+          viewer.IFC.setWasmPath("/"); // Ensure the WASM path is correct
+          viewerRef.current = viewer;
+  
+          // Load the IFC file
+          await viewer.IFC.loadIfcUrl(fullFileUrl, true);
         } catch (error) {
           Swal.fire("Error", "Failed to load IFC file", "error");
         } finally {
           setLoadingIfc(false);
         }
-      };
-
-      loadIfc();
-
-      // Cleanup on component unmount
-      return () => {
-        viewer.dispose();
-        viewerRef.current = null;
-      };
-    } else {
-      Swal.fire("Invalid File", "Please upload a valid IFC file.", "error");
-    }
-  }, [fileUrl]);
+      } else {
+        Swal.fire("Error", "No valid IFC file provided.", "error");
+      }
+    };
+  
+    loadIfcFile();
+  }, [fileUrl, baseUrl]);
   
 
   const handleViewFullIfc = () => {
@@ -85,7 +86,7 @@ function IfcViewer() {
     if (viewerContainer) {
       viewerContainer.requestFullscreen();
     }
-  };
+  }; 
 
 
 
@@ -115,6 +116,7 @@ function IfcViewer() {
       <StickyHeader />
       <div className="col-lg-12 col-md-6 custom-content-container margin-top">
       <h3 className="title-page">{fileUrl ? fileUrl.split('/').pop() : "No File Selected"}</h3>
+    
         <div className="ifc-container">
           <div className="viewer-container" ref={viewerContainerRef}></div>
 
@@ -168,6 +170,7 @@ function IfcViewer() {
           </div>
         )}
       </div>
+     
     </div>
   );
 }

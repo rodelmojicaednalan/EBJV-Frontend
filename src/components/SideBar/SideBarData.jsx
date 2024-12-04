@@ -1,31 +1,19 @@
 import React from "react";
-import users_list from "../../assets/images/accounts.png";
-import users_management from "../../assets/images/role-management.png";
-import staff_logs from "../../assets/images/staff_logs.png";
-import tickets_history from "../../assets/images/ticket-history.png";
-import projects from "../../assets/images/building.png";
-import log_out from "../../assets/images/log-out.png";
-import generate_ticket from "../../assets/images/print-ticket.png";
-import upload_resources from "../../assets/images/content.png";
-import ticketing from "../../assets/images/ticketing.png";
-import category from "../../assets/images/categorization.png";
-import brand_identity from "../../assets/images/brand-identity.png";
-import supply_icon from "../../assets/images/supply-icon.png";
 import "./SideBar.css";
 import { FiChevronDown } from 'react-icons/fi'; // Importing the Chevron Down icon
-
+import { FaUsers } from "react-icons/fa6";
+import { FaUsersCog } from "react-icons/fa";
+import { RxActivityLog } from "react-icons/rx";
+import { GrProjects } from "react-icons/gr";
+import { BiLogOut } from "react-icons/bi";
+import { MdOutline3dRotation } from "react-icons/md";
 
 export const AdminSidebarData = [
   {
     title: "Accounts",
     path: "/userlist",
     icon: (
-      <img
-        className="navIcon"
-        src={users_list}
-        alt="Custom Icon"
-        style={{ width: "24px", height: "24px" }}
-      />
+    <FaUsers style={{color: "#eb6314", width: "24px", height:"24px"}}/>
     ),
     cName: "nav-text",
   },
@@ -33,26 +21,16 @@ export const AdminSidebarData = [
     title: "Roles Management",
     path: "/user-management",
     icon: (
-      <img
-        className="navIcon"
-        src={users_management}
-        alt="Custom Icon"
-        style={{ width: "24px", height: "24px" }}
-      />
-    ),
+      <FaUsersCog style={{color: "#eb6314", width: "24px", height:"24px"}}/>
+      ),
     cName: "nav-text",
   },
   {
     title: "Activity Log",
     path: "/staff-logs",
     icon: (
-      <img
-        className="navIcon"
-        src={staff_logs}
-        alt="Custom Icon"
-        style={{ width: "24px", height: "24px" }}
-      />
-    ),
+      <RxActivityLog style={{color: "#eb6314", width: "24px", height:"24px"}}/>
+      ),
     cName: "nav-text",
   },
   // {
@@ -111,13 +89,8 @@ export const AdminSidebarData = [
      title: "Projects",
      path: "/projects",
      icon: (
-       <img
-         className="navIcon"
-         src={projects}
-         alt="Custom Icon"
-         style={{ width: "24px", height: "24px" }}
-       />
-     ),
+      <GrProjects style={{color: "#eb6314", width: "24px", height:"24px"}}/>
+      ),
      cName: "nav-text",
    },
   // {
@@ -133,17 +106,13 @@ export const AdminSidebarData = [
   //   ),
   //   cName: "nav-text",
   // },
+  
   {
-    title: "IFC List",
+    title: "IFC Test",
     path: "/uploaded-ifc-file",
     icon: (
-      <img
-        className="navIcon"
-        src={supply_icon}
-        alt="Custom Icon"
-        style={{ width: "24px", height: "24px" }}
-      />
-    ),
+      <MdOutline3dRotation style={{color: "#eb6314", width: "24px", height:"24px"}}/>
+      ),
     cName: "nav-text",
   },
   // {
@@ -176,13 +145,8 @@ export const AdminSidebarData = [
     title: "Logout",
     path: "/",
     icon: (
-      <img
-        className="navIcon"
-        src={log_out}
-        alt="Custom Icon"
-        style={{ width: "24px", height: "24px" }}
-      />
-    ),
+      <BiLogOut style={{color: "#eb6314", width: "24px", height:"24px"}}/>
+      ),
     cName: "nav-text",
     onClick: (event, logout) => logout(event),
   },
@@ -227,26 +191,16 @@ export const StaffSidebarData = [
     title: "Projects",
     path: "/projects",
     icon: (
-      <img
-        className="navIcon"
-        src={projects}
-        alt="Custom Icon"
-        style={{ width: "24px", height: "24px" }}
-      />
-    ),
+      <GrProjects style={{color: "#eb6314", width: "24px", height:"24px"}}/>
+      ),
     cName: "nav-text",
   },
   {
     title: "Logout",
     path: "/",
     icon: (
-      <img
-        className="navIcon"
-        src={log_out}
-        alt="Custom Icon"
-        style={{ width: "24px", height: "24px" }}
-      />
-    ),
+      <BiLogOut style={{color: "#eb6314", width: "24px", height:"24px"}}/>
+      ),
     cName: "nav-text",
     onClick: (event, logout) => logout(event),
   },

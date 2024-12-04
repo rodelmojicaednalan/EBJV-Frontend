@@ -1,5 +1,5 @@
 .add-user-btn {
-  background-color: #26303A;
+  background-color: #eb6314;
   color: #FFFFFF;
   border-radius: 5px;
   border: none !important;
@@ -8,8 +8,8 @@
 }
 
 .manage-ticket-btn {
-  background-color: #26303A !important;
-  border-color: #26303A !important;
+  background-color: #eb6314 !important;
+  border-color: #eb6314 !important;
   justify-content: center !important;
   display: flex !important;
   width: auto;
@@ -18,8 +18,8 @@
   top: 15px;
 }
 .manage-ticket-btn-2 {
-  background-color: #26303A !important;
-  border-color: #26303A !important;
+  background-color: #eb6314 !important;
+  border-color: #eb6314 !important;
   justify-content: center !important;
   display: flex !important;
   width: auto;
@@ -28,8 +28,8 @@
   top: 15px;
 }
 .manage-ticket-btn:hover {
-  background-color: #484f57 ;
-  border-color: #484f57 ;
+  background-color: #c74a44 ;
+  border-color: #c74a44 ;
   font-weight: 400;
 }
 

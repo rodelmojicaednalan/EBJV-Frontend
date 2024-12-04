@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
 import "../../../App.css";
 import "font-awesome/css/font-awesome.min.css";
-import view_icon from "../../../assets/images/list-view.png";
+import view_icon from "../../../assets/images/view-project-folder.png";
 import edit_icon from "../../../assets/images/edit-details.png";
 import view_model from "../../../assets/images/view-model.png";
 import delete_icon from "../../../assets/images/delete-log.png";
@@ -99,8 +99,8 @@ function Projects() {
   const handleCloseModal = () => {
     setShowModal(false);
   };
-  const handleEditprojectClick = (projectId) => {
-    navigate(`/edit-project/${projectId}`);
+  const handleViewProjectFolder = (projectId) => {
+    navigate(`/project-folder/${projectId}`);
   };
 
   //handle deleting of project
@@ -193,14 +193,14 @@ function Projects() {
         <div>
           <img
             src={view_icon}
-            title="View Project Details"
+            title="Open Project Folder"
             alt="view"
             width="25"
             height="25"
-            onClick={() => handleViewClick(row)}
+            onClick={() => handleViewProjectFolder(row.id)}
             style={{ cursor: "pointer" }}
           />
-          <img
+         {/* <img
             className="ml-3"
             src={edit_icon}
             title="Edit project Details"
@@ -209,7 +209,7 @@ function Projects() {
             alt="edit"
             width="25"
             height="25"
-          />
+          /> */}
 
       {row.project_file && row.project_file.length > 0 && (
         <img

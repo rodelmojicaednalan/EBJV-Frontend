@@ -1,0 +1,95 @@
+#project-folder-container {
+    display: flex;
+    flex-flow: row nowrap;
+    height: calc(100% - 2rem); 
+    width: 100%;
+    position: absolute;
+
+}
+/* Sidebar Styling */
+  .navmenu{
+      padding: 0;
+  }
+
+  .subnav{
+      margin-left: 20px;
+  }
+
+  #nav-label {
+    text-decoration: none;
+    color: #212A31;
+    padding: 1px 5px 3px 5px;
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
+    font-size: 1.1rem;
+  }
+  
+  #nav-item:hover, .subgroup-items:hover, .big-nav-wrapper:hover {
+    background-color: #fec19db8;
+    padding: 0px 5px 1px 5px;
+    border-radius: 3px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  .nav-item-group.active,
+.nav-item-subgroup.active {
+  background-color: #fec19db8; /* Highlight color */
+  border-left: 4px solid #eb6314; /* Accent */
+  padding-left: 4px;
+}
+
+  
+  #nav-icons{
+    color: #eb6314;
+  }
+
+.projectFolder-sidebar {
+    width: 16rem;
+    background-color: #FFF;
+    padding: 35px 0 0 20px;
+    border-right: 1px solid #ddd;
+    border: 1px solid #fec19db8;
+  }
+  
+  .projectFolder-sidebar ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  
+  .projectFolder-sidebar li {
+    margin: 16px 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+  
+  /* Main Content Styling */
+  .projectFolder-display {
+    flex-grow: 1; /* Takes the remaining space */
+    padding: 50px;
+    background-color: #FFF;
+    overflow-y: auto; /* In case content overflows */
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+  }
+
+.moduleFluid {
+    width: 100%;
+  }
+  
+  /* Media Queries for Responsiveness */
+  @media (max-width: 768px) {
+    .container-content {
+      flex-direction: column; /* Stack the sidebar and content */
+    }
+  
+    .projectFolder-sidebar {
+      width: 100%; /* Sidebar takes full width on smaller screens */
+      margin-bottom: 20px; /* Space between sidebar and content */
+    }
+  
+    .projectFolder-display {
+      width: 100%;
+    }
+  }

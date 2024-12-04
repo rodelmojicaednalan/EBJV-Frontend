@@ -8,6 +8,19 @@ import UsersList from './components/AdminPages/UsersList/UsersLIst';
 import Projects from './components/AdminPages/Projects/Projects';
 import AddProject from './components/AdminPages/Projects/AddProject';
 import EditProject from './components/AdminPages/Projects/EditProjects';
+import ProjectFolder from './components/AdminPages/Projects/ProjectFolder';
+
+import ProjectViews from './components/AdminPages/Projects/ProjectFolderPages/ProjectViews';
+import ProjectTopics from './components/AdminPages/Projects/ProjectFolderPages/ProjectTopics';
+import ProjectToDo from './components/AdminPages/Projects/ProjectFolderPages/ProjectToDo';
+import ProjectReleases from './components/AdminPages/Projects/ProjectFolderPages/ProjectReleases';
+import ProjectExplorer from './components/AdminPages/Projects/ProjectFolderPages/ProjectExplorer';
+import ProjectContributors from './components/AdminPages/Projects/ProjectFolderPages/ProjectContributors';
+import ProjectActivity from './components/AdminPages/Projects/ProjectFolderPages/ProjectActivity';
+
+import ProjectSettings from './components/AdminPages/Projects/ProjectFolderPages/ProjectSettingsPages/EditProject';
+import TopicSettings from './components/AdminPages/Projects/ProjectFolderPages/ProjectSettingsPages/TopicSettings';
+import UnitSettings from './components/AdminPages/Projects/ProjectFolderPages/ProjectSettingsPages/UnitSettings';
 
 import StaffLogs from './components/AdminPages/StaffLogs/StaffLogs';
 import AddNewUser from './components/AdminPages/UsersList/AddNewUser';
@@ -63,6 +76,19 @@ const  isSegmentCorrect = (url , pathNameURL) => {
         <Route path="/projects" element={<ProtectedRoute element={<Projects />} allowedRoles={['Admin', 'Client']} />} />
         <Route path="/add-project" element={<ProtectedRoute element={<AddProject />} allowedRoles={['Admin', 'Client']} />} />
         <Route path="/edit-project/:projectId" element={<ProtectedRoute element={<EditProject />} allowedRoles={['Admin', 'Client']} />} />
+        <Route path="/project-folder/:projectId" element={<ProtectedRoute element={<ProjectFolder />} allowedRoles={['Admin', 'Client']} />} />
+
+        <Route path="/project-folder/:projectId/data/project-explorer" element={<ProtectedRoute element={<ProjectExplorer />} allowedRoles={['Admin', 'Client']} />} />
+        <Route path="/project-folder/:projectId/data/project-views" element={<ProtectedRoute element={<ProjectViews />} allowedRoles={['Admin', 'Client']} />} />
+        <Route path="/project-folder/:projectId/data/project-releases" element={<ProtectedRoute element={<ProjectReleases />} allowedRoles={['Admin', 'Client']} />} />
+        <Route path="/project-folder/:projectId/project-activity" element={<ProtectedRoute element={<ProjectActivity />} allowedRoles={['Admin', 'Client']} />} />
+        <Route path="/project-folder/:projectId/project-topics" element={<ProtectedRoute element={<ProjectTopics />} allowedRoles={['Admin', 'Client']} />} />
+        <Route path="/project-folder/:projectId/project-ToDos" element={<ProtectedRoute element={<ProjectToDo />} allowedRoles={['Admin', 'Client']} />} />
+        <Route path="/project-folder/:projectId/project-contributors" element={<ProtectedRoute element={<ProjectContributors />} allowedRoles={['Admin', 'Client']} />} />
+        <Route path="/project-folder/:projectId/settings/edit-project" element={<ProtectedRoute element={<ProjectSettings />} allowedRoles={['Admin', 'Client']} />} />
+        <Route path="/project-folder/:projectId/settings/topic-settings" element={<ProtectedRoute element={<TopicSettings />} allowedRoles={['Admin', 'Client']} />} />
+        <Route path="/project-folder/:projectId/settings/unit-settings" element={<ProtectedRoute element={<UnitSettings />} allowedRoles={['Admin', 'Client']} />} />
+ 
         <Route path="/add-new-user" element={<ProtectedRoute element={<AddNewUser />} allowedRoles={['Admin']} />} />
         <Route path="/edit-user/:userId" element={<ProtectedRoute element={<EditUser />} allowedRoles={['Admin']} />} />
         <Route path="/edit-user-role/:roleId" element={<ProtectedRoute element={<EditUserRole />} allowedRoles={['Admin']} />} />

@@ -119,6 +119,7 @@ function IfcUploadPage() {
   return (
     <div className="container">
       <StickyHeader />
+      <div className="row">
       <div className="col-lg-12 col-md-6 custom-content-container">
         <h3 className="title-page">IFC File Upload</h3>
 
@@ -158,6 +159,7 @@ function IfcUploadPage() {
           className="dataTables_wrapper"
         />
       </div>
+    </div>
     </div>
   );
 }

@@ -14,11 +14,13 @@
     font-weight: 400;
     padding-left: 2rem;
   }
+
   .time-display {
     color: white;
     font-size: 16px;
     margin-top: 30px !important;
   }
+
   .time-display h6 {
     font-size: 19px !important;
     font-weight: 600;
@@ -27,6 +29,7 @@
   .time-display p {
     font-size: 12px !important;
   }
+
   .nav-text {
     display: flex;
     justify-content: start;
@@ -34,13 +37,16 @@
     list-style: none;
     height: 44px !important;
   }
+
   .navIcon {
     width: 20px !important;
     height: 20px !important;
   }
+
   .logo {
     margin-bottom: 60px !important;
   }
+
   .sticky-header-container {
     position: sticky;
     width: 100%;
@@ -52,6 +58,7 @@
     margin-left: 0;
     margin-bottom: 30px;
   }
+
   .sticky-header .profile {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -63,28 +70,37 @@
     margin-right: 26px;
     cursor: pointer;
     width: 220px;
-    background-color: #26303A;
+    /*background-color: #212a31;*/
     padding: 10px 25px 10px 20px;
     border-radius: 5px;
-    border: 1px solid #457a74;
+    /*border: 1px solid #457a74;*/
     margin-bottom: 20px;
     /* float: right; */
   }
 }
 
 .toggle-btn {
-  display: none;
+  /* margin-left: 20px; */
+  position: fixed;
+  left: 50px;
+  top: 20px;
+  z-index: 11;
+  color: #ffffff;
+  cursor: pointer;
 }
+
 /* mobile responsiveness */
 
 @media (max-width: 480px) {
   .nav-menu-items {
     width: 100%;
   }
+
   .navIcon {
     width: 20px !important;
     height: 20px !important;
   }
+
   .nav-text a {
     /* margin-top: 100px !important; */
     text-decoration: none;
@@ -97,6 +113,7 @@
     font-weight: 400;
     padding-left: 2rem;
   }
+
   .time-display {
     color: white;
     font-size: 18px;
@@ -111,9 +128,10 @@
     font-size: 13px;
   }
 }
+
 @media (max-width: 768px) {
   .nav-menu {
-    background-color: #26303A;
+    background-color: #212a31;
     width: 250px;
     height: 100vh;
     display: flex;
@@ -134,13 +152,14 @@
     margin-right: 0px;
     cursor: pointer;
     width: 220px;
-    background-color: #26303A;
+    /*background-color: #212a31;*/
     padding: 10px 25px 10px 20px;
     border-radius: 5px;
-    border: 1px solid #457a74;
+    /*border: 1px solid #457a74;*/
     margin-bottom: 20px;
     float: right;
   }
+
   .toggle-btn {
     display: flex;
     position: fixed;
@@ -155,10 +174,12 @@
     transition: background-color 0.3s;
     flex-direction: column;
   }
+
   .sidebar-nav {
     height: 100% !important;
     overflow: auto;
   }
+
   .profile {
     display: flex;
     justify-content: center;
@@ -168,10 +189,12 @@
     padding: 3px 20px 3px 15px !important;
     cursor: pointer;
   }
+
   .profile span h5,
   .profile p {
     font-size: 11px;
   }
+
   .sticky-header-container .sticky-header {
     position: sticky;
     width: 100%;
@@ -183,6 +206,7 @@
     margin-left: 0;
     /* margin-bottom: 30px; */
   }
+
   .nav-text a {
     /* margin-top: 100px !important; */
     text-decoration: none;
@@ -195,13 +219,16 @@
     font-weight: 400;
     padding-left: 2rem;
   }
+
   .nav-menu-items {
     overflow: scroll;
   }
+
   .time-display {
     color: white;
     font-size: 18px;
   }
+
   .nav-text {
     display: flex;
     justify-content: start;
@@ -209,14 +236,16 @@
     list-style: none;
     height: 45pxt;
   }
+
   .navIcon {
     width: 20px !important;
     height: 20px !important;
   }
 }
+
 @media (min-width: 768px) and (max-width: 1024px) {
   .nav-menu {
-    background-color: #26303A;
+    background-color: #212a31;
     width: 250px;
     height: 100vh;
     display: flex;
@@ -237,13 +266,14 @@
     margin-right: 0px;
     cursor: pointer;
     width: 220px;
-    background-color: #26303A;
+    /*background-color: #212a31;*/
     padding: 10px 25px 10px 20px;
     border-radius: 5px;
-    border: 1px solid #457a74;
+    /*border: 1px solid #457a74;*/
     margin-bottom: 20px;
     float: right;
   }
+
   .toggle-btn {
     display: flex;
     position: fixed;
@@ -258,10 +288,12 @@
     transition: background-color 0.3s;
     flex-direction: column;
   }
+
   .sidebar-nav {
     height: 100% !important;
     overflow: auto;
   }
+
   .profile {
     display: flex;
     justify-content: center;
@@ -271,10 +303,12 @@
     padding: 3px 20px 3px 15px !important;
     cursor: pointer;
   }
+
   .profile span h5,
   .profile p {
     font-size: 11px;
   }
+
   .sticky-header-container .sticky-header {
     position: sticky;
     width: 100%;
@@ -286,6 +320,7 @@
     margin-left: 0;
     /* margin-bottom: 30px; */
   }
+
   .nav-text a {
     /* margin-top: 100px !important; */
     text-decoration: none;
@@ -298,13 +333,16 @@
     font-weight: 400;
     padding-left: 2rem;
   }
+
   .nav-menu-items {
     overflow: scroll;
   }
+
   .time-display {
     color: white;
     font-size: 18px;
   }
+
   .nav-text {
     display: flex;
     justify-content: start;
@@ -312,20 +350,25 @@
     list-style: none;
     height: 45pxt;
   }
+
   .navIcon {
     width: 20px !important;
     height: 20px !important;
   }
 }
+
 .bar {
-  height: 4px; /* Height of the hamburger bars */
-  width: 30px; /* Width of the hamburger bars */
-  background-color: black; /* Color of the bars */
-  margin: 3px 0; /* Space between the bars */
+  height: 5px;
+  /* Height of the hamburger bars */
+  width: 30px;
+  /* Width of the hamburger bars */
+  background-color: #eb6314;
+  /* Color of the bars */
+  margin: 3px 0;
+  /* Space between the bars */
 }
 
 .logo {
- 
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
@@ -344,18 +387,24 @@ h1 {
 }
 
 .nav-menu {
-  background-color: #26303A;
+  background-color: #FFF;
   width: 250px;
-  height: 100vh;
+  height: auto;
   display: flex;
   /* justify-content: center; */
-  /* position: fixed; */
-  top: 0;
+  position: fixed;
+  /* top: 0; */
   transition: 850ms;
   align-items: center;
+
   flex-direction: column;
   z-index: 9;
+  margin-left: 50px;
+  margin-top: 5rem;
+  border-radius: 10px;
+  
 }
+
 .curve {
   height: 79.3px;
   width: 80px;
@@ -392,19 +441,23 @@ h1 {
 
 .nav-text a {
   text-decoration: none;
-  color: #f5f5f5;
+  color: #161e24;
   font-size: 13px;
   width: 100%;
   height: 100%;
   display: flex;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  font-weight: 400;
-  padding-left: 2rem;
+  font-weight: 500;
+  padding-left: 0rem;
 }
+
 .navIcon {
   width: 17px !important;
   height: 17px !important;
 }
+
 .nav-divider {
   border: 1px solid #fff;
   margin: 0 0;
@@ -412,13 +465,13 @@ h1 {
 }
 
 .sidebar-nav-list:hover {
-  background-color: #484f57;
+  background-color: #fec19db8;
   transition: background-color 0.2s ease-in-out;
   border-radius: 4px;
 }
 
 .sidebar-nav-list.active {
-  background-color: #484f57;
+  background-color: #fec19db8;
   border-radius: 4px;
 }
 
@@ -431,6 +484,12 @@ h1 {
   overflow: auto;
   -ms-overflow-style: none;
   scrollbar-width: none;
+  border: 1px solid #fec19db8;
+  border-radius: 5px;
+}
+
+#nav-icons{
+  color: #eb6314;
 }
 
 /* Hide scrollbar for Webkit browsers (Chrome, Safari, etc.) */
@@ -439,11 +498,11 @@ h1 {
 }
 
 .submenu {
-  background-color: #484f57;
+  background-color: #0d4f4d;
 }
 
 span {
-  margin-left: 16px;
+  margin-left: 0;
 }
 
 ul {
@@ -468,36 +527,39 @@ ul {
   margin-right: 74px;
   cursor: pointer;
   width: 240px;
-  background-color: #26303A;
+  /* background-color: #212a31; */
   padding: 10px 25px 10px 20px;
   border-radius: 5px;
-  border: 1px solid #457a74;
+  /* border: 1px solid #457a74; */
   margin-bottom: 20px;
   float: right;
 }
 
 .profile h5 {
-  margin: 0; /* Remove extra space */
+  margin: 0;
+  /* Remove extra space */
   font-size: 16px;
   font-weight: 600;
-  color: #ffffff;
+  color: #161e24;
 }
 
 .profile div {
   display: flex;
-  flex-direction: column; /* Stack name and email */
-  gap: 3px; /* Minimal space between name and email */
+  flex-direction: column;
+  /* Stack name and email */
+  gap: 3px;
+  /* Minimal space between name and email */
 }
 
 .profile span {
-  color: #cfcfcf;
+  color: #161e24;
   font-size: 14px;
 }
 
 .profile p {
   margin: 0;
   padding: 0;
-  color: #cfcfcf89;
+  color: #161e2448;
 }
 
 .profile-divider {
@@ -505,7 +567,7 @@ ul {
   right: 5px;
   position: fixed;
   top: 3rem;
-  background-color: #26303A;
+  background-color: #212a31;
 }
 
 .sticky-header-container {
@@ -513,17 +575,19 @@ ul {
   width: 100%;
   height: 4.3rem;
   top: 0rem;
-  background-color: #fdffff;
+  background-color: #FFF;
   padding-top: 2px;
   z-index: 1;
   margin-left: 0;
   margin-bottom: 30px;
+  box-shadow: 0px 0px 3px 2px rgba(27, 28, 28, 0.577);
+
 }
 
 .time-display {
   color: #fff;
   font-size: 20px;
-  background-color: #484f57;
+  background-color: #161e24;
   border-radius: 3px;
   padding: 15px 0 15px 0 !important;
   width: 200px;
@@ -539,32 +603,18 @@ ul {
   font-size: 12.5px;
   margin-bottom: 0px !important;
 }
+
 .ellipsis {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 150px; /* Set max-width as per your layout requirements */
+  max-width: 150px;
+  /* Set max-width as per your layout requirements */
 }
 
 .sticky-header .profile h5,
 .sticky-header .profile .email-text {
   margin: 0;
   padding: 0;
-}
-
-.portal-text {
-  font-family: 'Arial', sans-serif; /* Or a custom font */
-  font-weight: bold; /* Ensures the text stands out */
-  font-size: 24px; /* Adjust based on your design needs */
-  color: #fdffff; /* Matches your theme color */
-  text-transform: uppercase; /* Gives a professional, clean look */
-  letter-spacing: 2px; /* Adds space between letters for better readability */
-  text-align: center; /* Centers the text for better placement */
-  padding: 10px; /* Adjusts padding around the text */
-  margin: 0; /* Ensures no unwanted spacing */
-  background-color: transparent; /* Makes sure no background color interferes */
-  display: inline-block; /* Keeps the text inline with other content */
-  box-sizing: border-box; /* Ensures padding and margins are handled correctly */
-  transition: color 0.3s, transform 0.3s; /* Smooth transition effects */
 }
 
