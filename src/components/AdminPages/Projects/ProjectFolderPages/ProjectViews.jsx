@@ -9,7 +9,11 @@ import { AuthContext } from "../../../Authentication/authContext";
 import upload_icon from "../../../../assets/images/uploading.png";
 
 import '../ProjectStyles.css'
-import { FiChevronLeft } from 'react-icons/fi';
+import { FiChevronLeft, FiChevronDown } from 'react-icons/fi';
+import { FaCaretDown } from "react-icons/fa";
+import { BiDotsVertical } from "react-icons/bi";
+import { IoGrid } from "react-icons/io5";
+import { FaThList } from "react-icons/fa";
 
 
 import ProjectSidebar from '../ProjectFolderSidebar';
@@ -123,16 +127,39 @@ function ProjectViews() {
                         <div className="page-title">
                           <h2>Views</h2>
                         </div>
-                    
                       </div>
-
+                      <div className="view-group d-flex mb-3">
+                          <div className="view-button-container">
+                            <div className="view-buttons">
+                              <div className="views-btn mr-n1 pb-2 active"> 3D View </div>
+                              <div className="views-btn mr-n1 pb-2"> 2D View </div>
+                            </div>
+                          </div>
+                        </div>
+                      <div className="view-filters">
+                          <div className="filter-container null">
+                            <div className="filters">
+                                <div id="filter-categ-container">
+                                    <div className="filter-type mr-n1">Owner <FaCaretDown/> </div>
+                                    <div className="filter-type mr-n1">Users <FaCaretDown/> </div>
+                                    <div className="filter-type mr-n1">Groups <FaCaretDown/> </div>
+                                    <div className="filter-type mr-n1">Date Modified <FaCaretDown/> </div>
+                                </div>
+                            </div>
+                          </div>
+                      </div>         
                       <DataTable
                         className="dataTables_wrapperz mt-3"
                         columns={sampleColumns}
                         data={sampleData}
                         pagination
-                        paginationPerPage={20}
-                        paginationRowsPerPageOptions={[20, 30]}
+                        paginationPerPage={10}
+                        paginationRowsPerPageOptions={[10, 20, 30]}
+                        paginationComponentOptions={{
+                          rowsPerPageText: 'Views displayed:',
+                          rangeSeparatorText: 'out of',
+                          noRowsPerPage: true, // Hide the rows per page dropdown
+                        }}
                         responsive
                       />
 

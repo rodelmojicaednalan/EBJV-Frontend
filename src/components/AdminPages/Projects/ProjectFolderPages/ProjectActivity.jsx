@@ -15,6 +15,7 @@ import { FiChevronLeft, FiUser } from 'react-icons/fi';
 
 import ProjectSidebar from '../ProjectFolderSidebar';
 import { FaChevronLeft } from "react-icons/fa6";
+import { FaCaretDown, FaFileExcel, FaHistory } from "react-icons/fa";
 
 function ProjectActivity() {
   const { projectId } = useParams();
@@ -66,22 +67,49 @@ function ProjectActivity() {
       id: 1,
       fileName: "Model5.ifc",
       fileOwner: "Charlie White",
-      lastModified: "2024-11-20 08:10",
+      lastModified: "Nov 12, 2024 3:15 AM",
       fileSize: "300 KB",
+      activityDesc: "added topic to file"
     },
     {
       id: 2,
       fileName: "Model5.ifc",
-      fileOwner: "Charlie Brown",
-      lastModified: "2024-11-20 08:10",
+      fileOwner: "Charlie Red",
+      lastModified: "Nov 8, 2024 11:41 AM",
       fileSize: "300 KB",
+      activityDesc: "modified file name"
     },
     {
       id: 3,
-      fileName: "Model5.ifc",
+      fileName: "Model72.ifc",
       fileOwner: "Charlie Brown",
-      lastModified: "2024-11-20 08:10",
+      lastModified: "Nov 8, 2024 6:33 AM",
       fileSize: "300 KB",
+      activityDesc: "added file"
+    },
+    {
+      id: 4,
+      fileName: "Modelxx31.ifc",
+      fileOwner: "Charlie Green",
+      lastModified: "Nov 7, 2024 1:12 PM",
+      fileSize: "300 KB",
+      activityDesc: "Commented on Topic A"
+    },
+    {
+      id: 5,
+      fileName: "",
+      fileOwner: "Charlie Brown",
+      lastModified: "Nov 7, 2024 12:07 PM",
+      fileSize: "300 KB",
+      activityDesc: "added Topic A "
+    },
+    {
+      id: 6,
+      fileName: "",
+      fileOwner: "Charlie Brown",
+      lastModified: "Nov 7, 2024 11:33 AM",
+      fileSize: "300 KB",
+      activityDesc: "created Project "
     },
   ];
   return (
@@ -104,23 +132,38 @@ function ProjectActivity() {
                         <div className="page-title">
                           <h2>Activity</h2>
                         </div>
-                    
+                        <div className="button-group d-flex">
+                          <button id="excelExport"className="btn btn-primary add-btn" title="Export to Excel">
+                            <FaFileExcel/>
+                          </button>
+                        </div>
                       </div>
 
-                <div className="filter-top mb-1"></div>
+                      <div className="view-filters mb-4">
+                          <div className="filter-container null">
+                            <div className="filters">
+                                <div id="filter-categ-container">
+                                    <div className="filter-type mr-n1">Activity Type <FaCaretDown/> </div>
+                                    <div className="filter-type mr-n1">Users <FaCaretDown/> </div>
+                                    <div className="filter-type mr-n1">Groups <FaCaretDown/> </div>
+                                    <div className="filter-type mr-n1">Date Modified <FaCaretDown/> </div>
+                                </div>
+                            </div>
+                          </div>
+                      </div> 
 
                 <div className="activity-cards-box mt-1 d-flex">
                   {cardData.map((data) => (
                     <div
                       key={data.id}
-                      className="activity-card container-fluid"
+                      className="activity-card container-fluid mb-2"
                     >
                       <div className="activity-time d-none d-md-flex ">
                         <span className="text-muted">{data.lastModified}</span>
                       </div>
                       <div className="d-flex">
                         <div className="d-none d-md-block activity-type">
-                         <img height={24} src={view_model} alt="" />
+                          <FaHistory style={{height:"24px", width:"24px", color:"#eb6314"}}/>
                         </div>
                         <div className="activity-container">
                           <div className="activity-type-profile">
@@ -129,9 +172,9 @@ function ProjectActivity() {
                           <div className="activity">
                             <div className="row-center">
                               <div> <img src={man} style={{height:"24px"}}/> <span style={{fontWeight:"500", textTransform:"uppercase"}}>{data.fileOwner} </span></div>
-                              <div> <span >Activity Description </span></div>
+                              <div> <span style={{fontStyle: "italic", fontWeight:"light"}} > {data.activityDesc} </span></div>
                             </div>
-                            <div className="activity-desc"></div>
+                            <div className="activity-file"> {data.fileName} </div>
                           </div>
                         </div>
                       </div>

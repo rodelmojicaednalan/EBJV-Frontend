@@ -22,19 +22,19 @@ function Navbar({ role }) {
   // const [email, setEmail] = useState("")
 
   const [currentTime, setCurrentTime] = useState("");
-  const [openMenu, setOpenMenu] = useState(window.innerWidth > 1920);
+  const [openMenu, setOpenMenu] = useState(false);
   const [position, setPosition] = useState({ left: "5px" });
   const [dropdownOpenIndex, setDropdownOpenIndex] = useState(null);
 
-  useEffect(() => {
+ /* useEffect(() => {
     const handleResize = () => {
-      setOpenMenu(window.innerWidth > 1920);
+      setOpenMenu(false);
     };
 
     window.addEventListener("resize", handleResize);
 
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, []); */
 
   const toggleMenu = () => {
     setOpenMenu(!openMenu);
@@ -137,9 +137,7 @@ function Navbar({ role }) {
     } else {
       navigate(item.path);
       setActiveIndex(index);
-      if (window.innerWidth <= 1024) {
-        setOpenMenu(false);
-      }
+      setOpenMenu(false);
     }
   };
 

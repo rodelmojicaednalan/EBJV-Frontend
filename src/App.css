@@ -77,6 +77,10 @@ button:hover {
   align-items: center;
   color: #161e24
 }
+
+#proj-folder-title{
+  position: absolute;
+}
 h3 {
   font-size: 19px;
   font-weight: 500;

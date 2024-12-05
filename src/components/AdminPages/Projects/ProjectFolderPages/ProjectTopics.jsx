@@ -9,10 +9,13 @@ import upload_icon from "../../../../assets/images/uploading.png";
 
 import '../ProjectStyles.css'
 import { FiChevronLeft, FiClock } from 'react-icons/fi';
-import { FaBookmark } from "react-icons/fa6";
-import { FaRegCalendar } from "react-icons/fa";
-import { GrStatusGoodSmall } from "react-icons/gr";
+import { FaBookmark, FaCircleInfo  } from "react-icons/fa6";
+import { FaRegCalendar, FaCaretDown, FaListAlt  } from "react-icons/fa";
+import { GrStatusGoodSmall, GrSort } from "react-icons/gr";
 import { RiEdit2Fill } from "react-icons/ri";
+import { BiDotsVertical } from "react-icons/bi";
+import { MdCompress } from "react-icons/md";
+import { GoAlertFill } from "react-icons/go";
 
 
 import ProjectSidebar from '../ProjectFolderSidebar';
@@ -69,6 +72,80 @@ function ProjectTopics() {
     fetchProjectDetails();
   }, [projectId]);
 
+
+  const topicDummyData = [
+    {
+      id: 1,
+      title: "New Structural Design for ABG Group",
+      assignedTo: "Sean Carter",
+      createdBy: "Marshall Mathers",
+      createdAt: "Dec 02, 2024 10:53 AM",
+      priority: "High Priority",
+      status: "In Progress",
+      type: "Inquiry",
+      deadline: "Dec 15, 2024",
+      icons: {
+        priorityIcon: <FaBookmark style={{ color: "gold" }} />,
+        statusIcon: <GrStatusGoodSmall style={{ color: "green" }} />,
+        typeIcon: <FaCircleInfo style={{ color: "royalBlue" }} />,
+        deadlineIcon: <FaRegCalendar />,
+      },
+    },
+    {
+      id: 2,
+      title: "Architecture Update on House Remodeling",
+      assignedTo: "Kyrie Irving",
+      createdBy: "LeBron James",
+      createdAt: "Dec 01, 2024 3:45 PM",
+      priority: "Normal Priority",
+      status: "Pending",
+      type: "Remark",
+      deadline: "Dec 10, 2024",
+      icons: {
+        priorityIcon: <FaBookmark style={{ color: "royalBlue" }} />,
+        statusIcon: <GrStatusGoodSmall style={{ color: "orange" }} />,
+        typeIcon: <RiEdit2Fill style={{ color: "darkorange" }} />,
+        deadlineIcon: <FaRegCalendar />,
+      },
+    },
+    {
+      id: 3,
+      title: "Adjustments to Structure for 2nd Avenue Warehouse",
+      assignedTo: "Peter Parker",
+      createdBy: "Frank Castle",
+      createdAt: "Nov 30, 2024 11:15 AM",
+      priority: "Low Priority",
+      status: "Completed",
+      type: "Request",
+      deadline: "Dec 05, 2024",
+      icons: {
+        priorityIcon: <FaBookmark style={{ color: "green" }} />,
+        statusIcon: <GrStatusGoodSmall style={{ color: "royalBlue" }} />,
+        typeIcon: <FaListAlt  style={{ color: "teal" }} />,
+        deadlineIcon: <FaRegCalendar />,
+      },
+    },
+    {
+      id: 4,
+      title: "Revisions on Flooring for New Building",
+      assignedTo: "Yoo Jimin",
+      createdBy: "Kim Minjeong",
+      createdAt: "Nov 30, 2024 11:15 AM",
+      priority: "Critical Priority",
+      status: "New",
+      type: "Fault",
+      deadline: "Dec 05, 2024",
+      icons: {
+        priorityIcon: <FaBookmark style={{ color: "red" }} />,
+        statusIcon: <GrStatusGoodSmall style={{ color: "blue" }} />,
+        typeIcon: <GoAlertFill style={{ color: "red" }} />,
+        deadlineIcon: <FaRegCalendar />,
+      },
+    },
+
+  ];
+  
+
     return (
       <div className="container">
       <StickyHeader />
@@ -89,46 +166,82 @@ function ProjectTopics() {
                         <div className="page-title">
                           <h2>Topics</h2>
                         </div>
-                    
+                        <div className="button-group d-flex">
+                          <button className="btn btn-icon grid-view-btn" title="Compress">
+                            <MdCompress /> 
+                          </button>
+                          <button className="btn btn-icon list-view-btn" title="Sort">
+                            <GrSort/>
+                          </button>
+                          <button className="btn btn-icon menu-btn" title="More">
+                            <BiDotsVertical/>
+                          </button>
+                          <button id="addbtn"className="btn btn-primary add-btn" title="Add Topic">
+                             New
+                          </button>
+                        </div>
                       </div>
+
+                      <div className="view-filters mb-2">
+                          <div className="filter-container null">
+                            <div className="filters">
+                                <div id="filter-categ-container">
+                                    <div className="filter-type mr-n1">Type <FaCaretDown/> </div>
+                                    <div className="filter-type mr-n1">Priority <FaCaretDown/> </div>
+                                    <div className="filter-type mr-n1">Status <FaCaretDown/> </div>
+                                    <div className="filter-type mr-n1">Tags <FaCaretDown/> </div>
+                                </div>
+                            </div>
+                          </div>
+                      </div> 
+
 
                       <div className="activity-cards-box mt-2 d-flex">
-
-                        <div className="topic-card container-fluid">
-                          <div className="topic-time d-none d-md-flex ">
-                            <span className="text-muted"> Dec 02, 2024 10:53 AM </span>
-                          </div>
-
-                          <div className="flex-row">
-                            <div className="activity flex-1">
-                            <div className="topic-title">Topic Title</div>
-                              <div className="row-distribute">
-                              
-                                <div className="topic-users flex-row">
-                                  <div className="assignee"> <p><strong>Assigned to:</strong> {ownerName}</p> </div>
-                                  <div className="creator"> <p><strong>Created by:</strong> {ownerName}</p></div>
+                        {topicDummyData.map((topic) => (
+                          <div key={topic.id} className="topic-card container-fluid">
+                            <div className="topic-time d-none d-md-flex ">
+                              <span className="text-muted">{topic.createdAt}</span>
+                            </div>
+                            <div className="flex-row">
+                              <div className="activity flex-1">
+                                <div className="topic-title">{topic.title}</div>
+                                <div className="row-distribute">
+                                  <div className="topic-users flex-row">
+                                    <div className="assignee">
+                                      <p>
+                                        <strong>Assigned to:</strong> {topic.assignedTo}
+                                      </p>
+                                    </div>
+                                    <div className="creator">
+                                      <p>
+                                        <strong>Created by:</strong> {topic.createdBy}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="topic-config">
+                                    <ul className="flex-row">
+                                      <li className="mr-2">
+                                        {topic.icons.priorityIcon} {topic.priority}
+                                      </li>
+                                      <li className="mr-2">
+                                        {topic.icons.statusIcon} {topic.status}
+                                      </li>
+                                      <li className="mr-2">
+                                        {topic.icons.typeIcon} {topic.type}
+                                      </li>
+                                      <li className="mr-2">
+                                        {topic.icons.deadlineIcon} {topic.deadline}
+                                      </li>
+                                    </ul>
+                                  </div>
                                 </div>
-                                <div className="topic-config">
-                                  <ul className="flex-row">
-                                    <li className="mr-2"><FaBookmark className="topic-icons" style={{color:"royalBlue"}}/> Topic Priority</li>
-                                    <li className="mr-2"><GrStatusGoodSmall className="topic-icons" style={{color:"green"}}/> Topic Status</li>
-                                    <li className="mr-2"><RiEdit2Fill className="topic-icons" style={{color:"royalBlue"}}/> Topic Type</li>
-                                    <li className="mr-2"><FaRegCalendar/> Deadline</li>
-                                  </ul>
-                                </div>
+                                <div className="topic-desc"></div>
                               </div>
-
-
-                             <div className="topic-desc">
-
-                             </div>
-                           </div>
-
+                            </div>
                           </div>
-
-                        </div>
-
+                        ))}
                       </div>
+
 
                       </div>
                     </div>

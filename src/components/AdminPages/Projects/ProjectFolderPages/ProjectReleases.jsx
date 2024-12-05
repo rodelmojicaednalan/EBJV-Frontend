@@ -10,7 +10,7 @@ import DataTable from "react-data-table-component";
 
 import '../ProjectStyles.css'
 import { FiChevronLeft, FiEdit, FiMoreVertical } from "react-icons/fi";
-
+import { FaCaretDown } from "react-icons/fa";
 
 import ProjectSidebar from '../ProjectFolderSidebar';
 
@@ -52,31 +52,31 @@ function ProjectReleases() {
   const sampleData = [
     {
       id: 1,
-      name: "Model 1",
+      name: "Release 1",
       file: "1",
       dueDate: "Dec 05, 2024",
-      recipient: "Company XYZ",
+      recipient: "Dirk Nowitzki",
     },
     {
       id: 2,
-      name: "Model 1",
+      name: "Release 1.2",
       file: "1",
       dueDate: "Dec 05, 2024",
-      recipient: "Company XYZ",
+      recipient: "LeBron James",
     },
     {
       id: 3,
-      name: "Model 1",
-      file: "1",
+      name: "Release 2",
+      file: "3",
       dueDate: "Dec 05, 2024",
-      recipient: "Company XYZ",
+      recipient: "LeBron James",
     },
     {
       id: 4,
-      name: "Model 1",
-      file: "1",
+      name: "Pre-Final Release",
+      file: "2",
       dueDate: "Dec 05, 2024",
-      recipient: "Company XYZ",
+      recipient: "Kawhi Leonard",
     },
   ];
 
@@ -142,6 +142,7 @@ function ProjectReleases() {
       ),
     },
   ];
+
   return (
     <div className="container">
       <StickyHeader />
@@ -162,16 +163,37 @@ function ProjectReleases() {
                         <div className="page-title">
                           <h2>Releases</h2>
                         </div>
-                    
+                        <div className="button-group d-flex">
+                          <button id="addbtn"className="btn btn-primary add-btn" title="Add New Release">
+                              New
+                          </button>
+                        </div>
                       </div>
-
+                      <div className="view-filters">
+                          <div className="filter-container null">
+                            <div className="filters">
+                                <div id="filter-categ-container">
+                                    <div className="filter-type mr-n1">Owner <FaCaretDown/> </div>
+                                    <div className="filter-type mr-n1">Users <FaCaretDown/> </div>
+                                    <div className="filter-type mr-n1">Groups <FaCaretDown/> </div>
+                                    <div className="filter-type mr-n1">Status <FaCaretDown/> </div>
+                                    <div className="filter-type mr-n1">Due Date <FaCaretDown/> </div>
+                                </div>
+                            </div>
+                          </div>
+                      </div> 
                       <DataTable
                         className="dataTables_wrapperz mt-3"
                         columns={sampleColumns}
                         data={sampleData}
                         pagination
-                        paginationPerPage={20}
-                        paginationRowsPerPageOptions={[20, 30]}
+                        paginationPerPage={10}
+                        paginationRowsPerPageOptions={[10, 20, 30]}
+                        paginationComponentOptions={{
+                          rowsPerPageText: 'Views displayed:',
+                          rangeSeparatorText: 'out of',
+                          noRowsPerPage: true, // Hide the rows per page dropdown
+                        }}
                         responsive
                       />
 

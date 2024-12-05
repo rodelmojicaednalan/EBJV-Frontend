@@ -100,7 +100,7 @@ function Projects() {
     setShowModal(false);
   };
   const handleViewProjectFolder = (projectId) => {
-    navigate(`/project-folder/${projectId}`);
+    navigate(`/project-folder/${projectId}/data/project-explorer`);
   };
 
   //handle deleting of project

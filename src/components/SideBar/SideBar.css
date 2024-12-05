@@ -81,7 +81,7 @@
 
 .toggle-btn {
   /* margin-left: 20px; */
-  position: fixed;
+  position: absolute;
   left: 50px;
   top: 20px;
   z-index: 11;
