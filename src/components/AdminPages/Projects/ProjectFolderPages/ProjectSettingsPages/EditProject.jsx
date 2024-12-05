@@ -161,6 +161,7 @@ function EditProject() {
                                   <div className="value"> {updatedAt} </div>
                                 </div>
                               </div>
+                              <div className="row ml-1">
                               <div className="col-6 col-sm-6 col-md-3">
                                 <div className="label-group">
                                   <label> Size: </label>
@@ -185,6 +186,8 @@ function EditProject() {
                                   <div className="value"> 2 </div>
                                 </div>
                               </div>
+                              </div>
+                              
                             </div>
                           </div>
 
