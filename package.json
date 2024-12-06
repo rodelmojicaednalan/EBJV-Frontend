@@ -14,6 +14,11 @@
     "@parametricos/bcf-js": "^0.2.6",
     "@react-pdf-viewer/core": "^3.12.0",
     "@react-pdf/renderer": "^3.4.4",
+    "@thatopen/components": "^2.4.3",
+    "@thatopen/components-front": "^2.4.2",
+    "@thatopen/fragments": "^2.4.0",
+    "@thatopen/ui": "^2.4.1",
+    "@thatopen/ui-obc": "^2.4.1",
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
     "cdbreact": "^1.5.19",
@@ -39,7 +44,8 @@
     "react-sweetalert2": "^0.6.0",
     "react-switch": "^7.0.0",
     "react-to-print": "^2.15.1",
-    "three": "0.132.0",
+    "three": "^0.171.0",
+    "web-ifc": "^0.0.66",
     "web-ifc-viewer": "^1.0.218"
   },
   "devDependencies": {
