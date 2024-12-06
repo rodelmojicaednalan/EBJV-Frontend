@@ -108,7 +108,7 @@ function IfcViewer() {
   }, []);
 
   return (
-    <div className="container" ref={containerRef}d>
+    <div className="container" ref={containerRef}>
       {/* <div ></div> */}
     </div>
   );
