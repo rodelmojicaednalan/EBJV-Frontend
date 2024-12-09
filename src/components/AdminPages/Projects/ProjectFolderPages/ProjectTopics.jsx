@@ -32,6 +32,18 @@ function ProjectTopics() {
   const [topicData ,setTopicData] = useState([])
   const navigate = useNavigate();
 
+  const [activeDropdown, setActiveDropdown] = useState(null);
+
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleMenuToggle = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const handleMenuOptionClick = (option) => {
+    setMenuOpen(false);
+    Swal.fire(`Function to: ${option}`);
+  };
 
   useEffect(() => {
     // Fetch project details and populate fields
@@ -71,6 +83,49 @@ function ProjectTopics() {
 
     fetchProjectDetails();
   }, [projectId]);
+
+
+
+  const sampleFilters = [
+    {
+      type: "Type",
+      options: ["Undefined", "Comment", "Issue", "Request", "Fault", "Inquiry", "Solution", "Remark", "Clash"],
+    },
+    {
+      type: "Priority",
+      options: ["Low", "Normal", "High", "Critical"],
+    },
+    {
+      type: "Status",
+      options: ["New", "In Progress", "Pending", "Closed", "Done"],
+    },
+    {
+      type: "Tags",
+      options: [""],
+    },
+  ];
+
+  const handleDropdownToggle = (filterType) => {
+    // Toggle the dropdown visibility for the clicked filter
+    setActiveDropdown((prev) => (prev === filterType ? null : filterType));
+  };
+
+  const renderDropdown = (filter) => {
+    return (
+      <div className="filter-dropdown">
+        {filter.options.map((option, index) => (
+          <div
+            key={index}
+            className="dropdown-item"
+            onClick={() => console.log(`${filter.type} selected: ${option}`)}
+          >
+            {option}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
 
 
   const topicDummyData = [
@@ -173,10 +228,32 @@ function ProjectTopics() {
                           <button className="btn btn-icon list-view-btn" title="Sort">
                             <GrSort/>
                           </button>
-                          <button className="btn btn-icon menu-btn" title="More">
-                            <BiDotsVertical/>
-                          </button>
-                          <button id="addbtn"className="btn btn-primary add-btn" title="Add Topic">
+                          <div className="menu-btn-container position-relative">
+                            <button
+                              className="btn btn-icon menu-btn"
+                              title="Menu"
+                              onClick={handleMenuToggle}
+                            >
+                              <BiDotsVertical />
+                            </button>
+                            {menuOpen && (
+                              <div className="dropdown-menu">
+                                <div
+                                  className="dropdown-item"
+                                  onClick={() => handleMenuOptionClick("Export Topics")}
+                                >
+                                  Export Topics
+                                </div>
+                                <div
+                                  className="dropdown-item"
+                                  onClick={() => handleMenuOptionClick("Import Topic")}
+                                >
+                                  Import Topics 
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <button id="addbtn"className="btn btn-primary add-btn" title="Add Topic" >
                              New
                           </button>
                         </div>
@@ -184,18 +261,22 @@ function ProjectTopics() {
 
                       <div className="view-filters mb-2">
                           <div className="filter-container null">
-                            <div className="filters">
-                                <div id="filter-categ-container">
-                                    <div className="filter-type mr-n1">Type <FaCaretDown/> </div>
-                                    <div className="filter-type mr-n1">Priority <FaCaretDown/> </div>
-                                    <div className="filter-type mr-n1">Status <FaCaretDown/> </div>
-                                    <div className="filter-type mr-n1">Tags <FaCaretDown/> </div>
-                                </div>
+                            <div className="filters d-flex">
+                                {sampleFilters.map((filter) => (
+                              <div
+                                key={filter.type}
+                                className="filter-type mr-n1"
+                                onClick={() => handleDropdownToggle(filter.type)}
+                              >
+                                {filter.type} <FaCaretDown />
+                                {activeDropdown === filter.type && renderDropdown(filter)}
+                              </div>
+                            ))}
                             </div>
                           </div>
                       </div> 
 
-
+                    
                       <div className="activity-cards-box mt-2 d-flex">
                         {topicDummyData.map((topic) => (
                           <div key={topic.id} className="topic-card container-fluid">
@@ -242,7 +323,7 @@ function ProjectTopics() {
                         ))}
                       </div>
 
-
+                    
                       </div>
                     </div>
                 </div>

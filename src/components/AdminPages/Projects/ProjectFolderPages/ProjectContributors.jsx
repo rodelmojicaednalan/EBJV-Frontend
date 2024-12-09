@@ -116,7 +116,11 @@ function ProjectContributors() {
                         <div className="page-title ml-2">
                           <h2>Project Contributors</h2>
                         </div>
-                    
+                        <div className="button-group d-flex">
+                            <button id="addbtn" className="btn btn-primary add-btn" title="Add">
+                              Invite People to Project
+                            </button>
+                          </div>
                       </div>
                       <div className="contributor-wrapper">
                         <div className="panel-left d-none d-md-flex">

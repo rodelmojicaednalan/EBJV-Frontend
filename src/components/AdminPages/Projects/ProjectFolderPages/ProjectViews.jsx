@@ -27,6 +27,7 @@ function ProjectViews() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
   useEffect(() => {
     // Fetch project details and populate fields
@@ -47,6 +48,48 @@ function ProjectViews() {
 
     fetchProjectDetails();
   }, [projectId]);
+
+ const sampleFilters = [
+    {
+      type: "Owner",
+      options: ["Created by Me", "Shared with Me",],
+    },
+    {
+      type: "Users",
+      options: ["UserName1", "UserName2", "UserName3"],
+    },
+    {
+      type: "Groups",
+      options: ["Group1", "Group2", "GroupABC"],
+    },
+    {
+      type: "Date Modified",
+      options: ["Today", "Last Week", "Last Month"],
+    },
+  ];
+
+  const handleDropdownToggle = (filterType) => {
+    // Toggle the dropdown visibility for the clicked filter
+    setActiveDropdown((prev) => (prev === filterType ? null : filterType));
+  };
+
+  const renderDropdown = (filter) => {
+    return (
+      <div className="filter-dropdown"  id="viewFilters">
+        {filter.options.map((option, index) => (
+          <div
+            key={index}
+            className="dropdown-item"
+            onClick={() => console.log(`${filter.type} selected: ${option}`)}
+          >
+            {option}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+
 
   const sampleData = [
     {
@@ -137,17 +180,21 @@ function ProjectViews() {
                           </div>
                         </div>
                       <div className="view-filters">
-                          <div className="filter-container null">
-                            <div className="filters">
-                                <div id="filter-categ-container">
-                                    <div className="filter-type mr-n1">Owner <FaCaretDown/> </div>
-                                    <div className="filter-type mr-n1">Users <FaCaretDown/> </div>
-                                    <div className="filter-type mr-n1">Groups <FaCaretDown/> </div>
-                                    <div className="filter-type mr-n1">Date Modified <FaCaretDown/> </div>
-                                </div>
-                            </div>
+                        <div className="filter-container">
+                          <div className="filters d-flex">
+                            {sampleFilters.map((filter) => (
+                              <div
+                                key={filter.type}
+                                className="filter-type mr-n1"
+                                onClick={() => handleDropdownToggle(filter.type)}
+                              >
+                                {filter.type} <FaCaretDown />
+                                {activeDropdown === filter.type && renderDropdown(filter)}
+                              </div>
+                            ))}
                           </div>
-                      </div>         
+                        </div>
+                      </div>        
                       <DataTable
                         className="dataTables_wrapperz mt-3"
                         columns={sampleColumns}

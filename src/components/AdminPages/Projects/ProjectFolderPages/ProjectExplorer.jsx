@@ -26,9 +26,20 @@ function ProjectExplorer() {
   const [fileSize, setFileSize] = useState([])
   const [error, setError] = useState("");
 
+  const [viewType, setViewType] = useState("list");
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const [explorerTable ,setExplorerTable] = useState([])
   const navigate = useNavigate();
 
+  const handleMenuToggle = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const handleMenuOptionClick = (option) => {
+    setMenuOpen(false);
+    Swal.fire(`Function to: ${option}`);
+  };
 
   useEffect(() => {
     // Fetch project details and populate fields
@@ -118,31 +129,79 @@ function ProjectExplorer() {
                           <h2>Explorer</h2>
                         </div>
                         <div className="button-group d-flex">
-                          <button className="btn btn-icon grid-view-btn" title="Grid View">
-                            <IoGrid /> 
+                          <button
+                            className={`btn btn-icon grid-view-btn ${viewType === "grid" ? "active" : ""}`}
+                            title="Grid View"
+                            onClick={() => setViewType("grid")}
+                          >
+                            <IoGrid />
                           </button>
-                          <button className="btn btn-icon list-view-btn" title="List View">
-                            <FaThList/>
+                          <button
+                            className={`btn btn-icon list-view-btn ${viewType === "list" ? "active" : ""}`}
+                            title="List View"
+                            onClick={() => setViewType("list")}
+                          >
+                            <FaThList />
                           </button>
-                          <button className="btn btn-icon menu-btn" title="Menu">
-                            <BiDotsVertical/>
-                          </button>
-                          <button id="addbtn"className="btn btn-primary add-btn" title="Add">
+                          <div className="menu-btn-container position-relative">
+                      <button
+                        className="btn btn-icon menu-btn"
+                        title="Menu"
+                        onClick={handleMenuToggle}
+                      >
+                        <BiDotsVertical />
+                      </button>
+                      {menuOpen && (
+                        <div className="dropdown-menu">
+                          <div
+                            className="dropdown-item"
+                            onClick={() => handleMenuOptionClick("Export to Excel")}
+                          >
+                            Export to Excel
+                          </div>
+                          <div
+                            className="dropdown-item"
+                            onClick={() => handleMenuOptionClick("Checkin")}
+                          >
+                            Checkin Files
+                          </div>
+                          <div
+                            className="dropdown-item"
+                            onClick={() => handleMenuOptionClick("Checkout")}
+                          >
+                            Checkout Files
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                          <button id="addbtn" className="btn btn-primary add-btn" title="Add">
                             + Add
                           </button>
                         </div>
                       </div>
 
-                      <DataTable
-                        className="dataTables_wrapperz mt-3"
-                        id="explorer-table"
-                        columns={explorerColumn}
-                        data={explorerTable}
-                        //pagination
-                        //paginationPerPage={20}
-                        //paginationRowsPerPageOptions={[20, 30]} 
-                        responsive
-                      />
+                      <div className={`project-display ${viewType}`}>
+                        {viewType === "grid" ? (
+                          <div className="grid-view">
+                            {explorerTable.map((row, index) => (
+                              <div key={index} className="grid-item">
+                                <h5>{row.fileName}</h5>
+                                <p>Owner: {row.fileOwner}</p>
+                                <p>Modified: {row.lastModified}</p>
+                                <p>Size: {row.fileSize}</p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <DataTable
+                            className="dataTables_wrapperz mt-3"
+                            id="explorer-table"
+                            columns={explorerColumn}
+                            data={explorerTable}
+                            responsive
+                          />
+                        )}
+                      </div>
 
                       </div>
                     </div>

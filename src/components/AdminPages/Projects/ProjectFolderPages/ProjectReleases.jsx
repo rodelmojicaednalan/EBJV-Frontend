@@ -21,6 +21,8 @@ function ProjectReleases() {
   const [existingFiles, setExistingFiles] = useState([]); // Existing files
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  
+  const [activeDropdown, setActiveDropdown] = useState(null);
   const [openDropdownId, setOpenDropdownId] = useState(null);
 
   const toggleDropdown = (id) => {
@@ -48,6 +50,51 @@ function ProjectReleases() {
 
     fetchProjectDetails();
   }, [projectId]);
+
+  const sampleFilters = [
+    {
+      type: "Owner",
+      options: ["Created by Me", "Shared with Me",],
+    },
+    {
+      type: "Users",
+      options: ["UserName1", "UserName2", "UserName3"],
+    },
+    {
+      type: "Groups",
+      options: ["Group1", "Group2", "GroupABC"],
+    },
+    {
+      type: "Status",
+      options: ["Draft", "Sent"],
+    },
+    {
+      type: "Due Date",
+      options: ["Today", "Last Week", "Last Month"],
+    },
+  ];
+
+  const handleDropdownToggle = (filterType) => {
+    // Toggle the dropdown visibility for the clicked filter
+    setActiveDropdown((prev) => (prev === filterType ? null : filterType));
+  };
+
+  const renderDropdown = (filter) => {
+    return (
+      <div className="filter-dropdown">
+        {filter.options.map((option, index) => (
+          <div
+            key={index}
+            className="dropdown-item"
+            onClick={() => console.log(`${filter.type} selected: ${option}`)}
+          >
+            {option}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
 
   const sampleData = [
     {
@@ -143,6 +190,46 @@ function ProjectReleases() {
     },
   ];
 
+  const handleAddNewRelease = () => {
+    Swal.fire({
+      title: 'Add New Release',
+      html: `
+        <div style="text-align: left;">
+          <label for="release-name" style="display: block; margin-bottom: 5px;">Release Name</label>
+          <input type="text" id="release-name" class="swal2-input" placeholder="Enter release name" style="margin-bottom: 15px;">
+          
+          <label for="due-date" style="display: block; margin-bottom: 5px;">Due Date</label>
+          <input type="date" id="due-date" class="swal2-input" placeholder="Select due date" style="margin-bottom: 15px;">
+          
+          <label for="recipients" style="display: block; margin-bottom: 5px;">Recipients</label>
+          <input type="text" id="recipients" class="swal2-input" placeholder="Enter recipients (comma-separated)">
+        </div>
+      `,
+      confirmButtonText: 'Add Release',
+      showCancelButton: true,
+      preConfirm: () => {
+        const releaseName = document.getElementById('release-name').value;
+        const dueDate = document.getElementById('due-date').value;
+        const recipients = document.getElementById('recipients').value;
+  
+        if (!releaseName || !dueDate || !recipients) {
+          Swal.showValidationMessage('Please fill in all fields.');
+          return null;
+        }
+  
+        return { releaseName, dueDate, recipients };
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const { releaseName, dueDate, recipients } = result.value;
+  
+        // Handle adding the new release (e.g., API call)
+        console.log('New Release:', { releaseName, dueDate, recipients });
+        Swal.fire('Success!', 'The new release has been added.', 'success');
+      }
+    });
+  };
+
   return (
     <div className="container">
       <StickyHeader />
@@ -164,24 +251,27 @@ function ProjectReleases() {
                           <h2>Releases</h2>
                         </div>
                         <div className="button-group d-flex">
-                          <button id="addbtn"className="btn btn-primary add-btn" title="Add New Release">
+                          <button id="addbtn"className="btn btn-primary add-btn" title="Add New Release"   onClick={handleAddNewRelease}>
                               New
                           </button>
                         </div>
                       </div>
                       <div className="view-filters">
-                          <div className="filter-container null">
-                            <div className="filters">
-                                <div id="filter-categ-container">
-                                    <div className="filter-type mr-n1">Owner <FaCaretDown/> </div>
-                                    <div className="filter-type mr-n1">Users <FaCaretDown/> </div>
-                                    <div className="filter-type mr-n1">Groups <FaCaretDown/> </div>
-                                    <div className="filter-type mr-n1">Status <FaCaretDown/> </div>
-                                    <div className="filter-type mr-n1">Due Date <FaCaretDown/> </div>
-                                </div>
-                            </div>
+                        <div className="filter-container">
+                          <div className="filters d-flex">
+                            {sampleFilters.map((filter) => (
+                              <div
+                                key={filter.type}
+                                className="filter-type mr-n1"
+                                onClick={() => handleDropdownToggle(filter.type)}
+                              >
+                                {filter.type} <FaCaretDown />
+                                {activeDropdown === filter.type && renderDropdown(filter)}
+                              </div>
+                            ))}
                           </div>
-                      </div> 
+                        </div>
+                      </div>  
                       <DataTable
                         className="dataTables_wrapperz mt-3"
                         columns={sampleColumns}

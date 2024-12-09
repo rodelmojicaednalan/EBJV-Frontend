@@ -26,13 +26,20 @@ function ProjectToDo() {
   const [existingFiles, setExistingFiles] = useState([]); // Existing assignees
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const [openDropdownId, setOpenDropdownId] = useState(null);
 
-  const toggleDropdown = (id) => {
-    console.log("Toggling dropdown for ID:", id);
-    setOpenDropdownId(openDropdownId === id ? null : id);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleMenuToggle = () => {
+    setMenuOpen(!menuOpen);
   };
 
+  const handleMenuOptionClick = (option) => {
+    setMenuOpen(false);
+    Swal.fire(`Function to: ${option}`);
+  };
+
+ 
   useEffect(() => {
     // Fetch project details and populate fields
     const fetchProjectDetails = async () => {
@@ -52,6 +59,54 @@ function ProjectToDo() {
 
     fetchProjectDetails();
   }, [projectId]);
+
+  const sampleFilters = [
+    {
+      type: "Owner",
+      options: ["Created by Me", "Shared with Me",],
+    },
+    {
+      type: "Users",
+      options: ["UserName1", "UserName2", "UserName3"],
+    },
+    {
+      type: "Groups",
+      options: ["Group1", "Group2", "GroupABC"],
+    },
+    {
+      type: "Status",
+      options: ["New", "In Progress", "Pending", "Done", "Closed"],
+    },
+    {
+      type: "Priority",
+      options: ["Low", "Normal", "High", "Critical"],
+    },
+    {
+      type: "Date Modified",
+      options: ["Today", "Last Week", "Last Month"],
+    },
+  ];
+
+  const handleDropdownToggle = (filterType) => {
+    // Toggle the dropdown visibility for the clicked filter
+    setActiveDropdown((prev) => (prev === filterType ? null : filterType));
+  };
+
+  const renderDropdown = (filter) => {
+    return (
+      <div className="filter-dropdown">
+        {filter.options.map((option, index) => (
+          <div
+            key={index}
+            className="dropdown-item"
+            onClick={() => console.log(`${filter.type} selected: ${option}`)}
+          >
+            {option}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   const sampleData = [
     {
@@ -188,9 +243,31 @@ function ProjectToDo() {
                           <h2>To Do List</h2>
                         </div>
                         <div className="button-group d-flex">
-                        <button className="btn btn-icon menu-btn" title="Menu">
-                            <BiDotsVertical/>
-                          </button>
+                        <div className="menu-btn-container position-relative">
+                            <button
+                              className="btn btn-icon menu-btn"
+                              title="Menu"
+                              onClick={handleMenuToggle}
+                            >
+                              <BiDotsVertical />
+                            </button>
+                            {menuOpen && (
+                              <div className="dropdown-menu">
+                                <div
+                                  className="dropdown-item"
+                                  onClick={() => handleMenuOptionClick("Export To Do")}
+                                >
+                                  Export to Excel
+                                </div>
+                                <div
+                                  className="dropdown-item"
+                                  onClick={() => handleMenuOptionClick("Import To Do")}
+                                >
+                                  Import from Excel 
+                                </div>
+                              </div>
+                            )}
+                          </div>
                           <button id="addbtn"className="btn btn-primary add-btn" title="Add New Release">
                               New
                           </button>
@@ -198,15 +275,17 @@ function ProjectToDo() {
                       </div>
                       <div className="view-filters">
                           <div className="filter-container null">
-                            <div className="filters">
-                                <div id="filter-categ-container">
-                                    <div className="filter-type mr-n1">Owner <FaCaretDown/> </div>
-                                    <div className="filter-type mr-n1">Users <FaCaretDown/> </div>
-                                    <div className="filter-type mr-n1">Groups <FaCaretDown/> </div>
-                                    <div className="filter-type mr-n1">Status <FaCaretDown/> </div>
-                                    <div className="filter-type mr-n1">Priority <FaCaretDown/> </div>
-                                    <div className="filter-type mr-n1">Date Modified <FaCaretDown/> </div>
+                            <div className="filters d-flex">
+                              {sampleFilters.map((filter) => (
+                                <div
+                                  key={filter.type}
+                                  className="filter-type mr-n1"
+                                  onClick={() => handleDropdownToggle(filter.type)}
+                                >
+                                  {filter.type} <FaCaretDown />
+                                  {activeDropdown === filter.type && renderDropdown(filter)}
                                 </div>
+                              ))}
                             </div>
                           </div>
                       </div> 
