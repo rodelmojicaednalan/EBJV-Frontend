@@ -107,14 +107,14 @@ export const AdminSidebarData = [
   //   cName: "nav-text",
   // },
   
-   {
-     title: "IFC Test",
-     path: "/uploaded-ifc-file",
-     icon: (
-       <MdOutline3dRotation style={{color: "#eb6314", width: "24px", height:"24px"}}/>
-       ),
-     cName: "nav-text",
-   },
+  //  {
+  //    title: "IFC Test",
+  //    path: "/uploaded-ifc-file",
+  //    icon: (
+  //      <MdOutline3dRotation style={{color: "#eb6314", width: "24px", height:"24px"}}/>
+  //      ),
+  //    cName: "nav-text",
+  //  },
   // {
   //   title: "Supplies Version 2",
   //   path: "/suppliesv2",
