@@ -1,6 +1,6 @@
 // Layout.js
 import React from 'react';
-import {BrowserRouter, Routes, Route, useLocation, Navigate  } from 'react-router-dom';
+import {BrowserRouter, Routes, Route, useLocation, Navigate, useParams  } from 'react-router-dom';
 import Login from './components/Login/Login';
 import SideBar from './components/SideBar/SideBar';
 import UsersList from './components/AdminPages/UsersList/UsersLIst';
@@ -44,29 +44,36 @@ import IfcViewer from './components/AdminPages/IfcViewer/IfcViewer';
 function Layout() {
   const location = useLocation();
   const userRole = getCookie('role_name');
-  const noSidebarPaths = ['/', '/not-authorized'];
 
-const  isSegmentCorrect = (url , pathNameURL) => {
-
-    const url_check = pathNameURL;
-    const regex = new RegExp(`/${url_check}/[a-zA-Z0-9]+$`);
+  const isSegmentCorrect = (url, pathNameURL) => {
+    const regex = new RegExp(`/${pathNameURL}/[a-zA-Z0-9]+$/`);
     return regex.test(url);
+  };
+  
+  // Function to check if the route should hide the sidebar
+  const shouldHideSidebar = () => {
+    const noSidebarPaths = ['/', '/not-authorized', '/forgot-password', '/open-email'];
+  
+    // Check static no-sidebar paths
+    if (noSidebarPaths.includes(location.pathname)) return true;
+  
+    // Check if the route matches project-folder or ifc-viewer
+    const isProjectFolder = /^\/project-folder\/[a-zA-Z0-9]+/.test(location.pathname);
+  const isIfcViewer = /^\/ifc-viewer\/[a-zA-Z0-9]+$/.test(location.pathname);
 
-  }
-
-  // Check if the current path should hide the sidebar
-  const shouldHideSidebar = noSidebarPaths.includes(location.pathname);
+  return isProjectFolder || isIfcViewer;
+  };
 //  console.log(location);
   return (
     <LoaderProvider>
     <AuthContextProvider>
     <>
-        {!shouldHideSidebar && location.pathname !== '/' && location.pathname !== '/forgot-password' && !isSegmentCorrect( location.pathname , "reset-password" ) && location.pathname !== '/open-email' && <SideBar role={userRole} />}
+       {!shouldHideSidebar() && <SideBar role={userRole} />}
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/userlist" element={<ProtectedRoute element={<UsersList />} allowedRoles={['Admin']} />} />
         <Route path="/uploaded-ifc-file" element={<ProtectedRoute element={<IfcUploadPage />} allowedRoles={['Admin']} />} />
-        <Route path="/Ifc-viewer" element={<ProtectedRoute element={<IfcViewer />} allowedRoles={['Admin']} />} />
+        <Route path="/ifc-viewer/:projectId" element={<ProtectedRoute element={<IfcViewer />} allowedRoles={['Admin']} />} />
         <Route path="/forgot-password"  element={<ForgotPassword />}/>
         <Route path="/reset-password/:passwordToken" name="reset-password"  element={<ResetPassword />}/>
         <Route path="/open-email"  element={<CheckEmail />}/>

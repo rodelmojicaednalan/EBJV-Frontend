@@ -32,6 +32,7 @@ const StickyHeader = () => {
   return (
     <div className="sticky-header-container">
       <div className="sticky-header">
+        
         <div className="profile" onClick={() => navigate("/my-profile")}>
           <img
             src={sex === "Male" ? man : woman}

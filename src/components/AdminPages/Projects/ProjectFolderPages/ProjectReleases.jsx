@@ -196,17 +196,21 @@ function ProjectReleases() {
       html: `
         <div style="text-align: left;">
           <label for="release-name" style="display: block; margin-bottom: 5px;">Release Name</label>
-          <input type="text" id="release-name" class="swal2-input" placeholder="Enter release name" style="margin-bottom: 15px;">
+          <input type="text" id="release-name" class="swal2-input" placeholder="Enter release name" style="margin-bottom: 15px; width:100%;">
           
           <label for="due-date" style="display: block; margin-bottom: 5px;">Due Date</label>
-          <input type="date" id="due-date" class="swal2-input" placeholder="Select due date" style="margin-bottom: 15px;">
+          <input type="date" id="due-date" class="swal2-input" placeholder="Select due date" style="margin-bottom: 15px; width:100%;">
           
           <label for="recipients" style="display: block; margin-bottom: 5px;">Recipients</label>
-          <input type="text" id="recipients" class="swal2-input" placeholder="Enter recipients (comma-separated)">
+          <input type="text" id="recipients" class="swal2-input" placeholder="Enter recipients (comma-separated)" style="width:100%;">
         </div>
       `,
       confirmButtonText: 'Add Release',
       showCancelButton: true,
+      customClass: {
+        confirmButton: "btn btn-success rel-btn-success",
+        cancelButton: "btn btn-danger rel-btn-danger"
+      },
       preConfirm: () => {
         const releaseName = document.getElementById('release-name').value;
         const dueDate = document.getElementById('due-date').value;

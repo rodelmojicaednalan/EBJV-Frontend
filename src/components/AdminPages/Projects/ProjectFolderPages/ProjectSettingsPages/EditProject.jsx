@@ -69,6 +69,42 @@ function EditProject() {
     fetchProjectDetails();
   }, [projectId]);
 
+  const handleLeaveProject = () => {
+    Swal.fire({
+      title: 'Are you sure to leave the project?',
+      text: 'This action is irreversible.',
+      icon: "warning",
+      confirmButtonText: 'Leave',
+      showCancelButton: true,
+      customClass: {
+        confirmButton: "btn btn-success contrib-btn-success",
+        cancelButton: "btn"
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire('Success!', 'You have left the project.', 'success');
+      }
+    });
+  };
+
+  const handleDeleteProject = () => {
+    Swal.fire({
+      title: 'Are you sure you want to delete this Project?',
+      text: 'This action is irreversible.',
+      icon: "warning",
+      confirmButtonText: 'Delete',
+      showCancelButton: true,
+      customClass: {
+        confirmButton: "btn btn-success contrib-btn-success",
+        cancelButton: "btn"
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire('Success!', 'You have left the project.', 'success');
+      }
+    });
+  };
+
   return (
     <div className="container">
     <StickyHeader />
@@ -210,7 +246,7 @@ function EditProject() {
                               </div>
                               <div className="col-12">
                                 <div className="input-group">
-                                  <label for="description"><span>End date: </span></label>
+                                  <label for="description"><span>Description: </span></label>
                                   <input id="description" className="" data-cy="description" type="text" autocomplete="off" maxlength="255" name="description"/>
                                 </div>
                               </div>
@@ -256,10 +292,10 @@ function EditProject() {
                           </div>
                           <hr></hr>
                           <div className="d-flex mb-5">
-                            <button id="leaveProjectbtn"className="btn btn-default add-btn mr-3" title="Leave">
+                            <button id="leaveProjectbtn"className="btn btn-default add-btn mr-3" title="Leave" onClick={handleLeaveProject}>
                               Leave Project
                             </button>
-                            <button id="deleteProjectbtn"className="btn btn-danger add-btn" title="Delete">
+                            <button id="deleteProjectbtn"className="btn btn-danger add-btn" title="Delete" onClick={handleDeleteProject}>
                               Delete Project
                             </button>
                           </div>

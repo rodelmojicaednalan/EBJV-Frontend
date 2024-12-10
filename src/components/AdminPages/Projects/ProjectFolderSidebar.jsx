@@ -23,7 +23,7 @@ const Sidebar = ({ projectId }) => {
         {/* Data Group */}
         <li className="nav-item-group">
           <div id="nav-group">
-            <div className="big-nav-wrapper">
+            <div className="big-nav-wrapper" onClick={() => navigate(`/project-folder/${projectId}/data/project-explorer`)}>
               <TbBrandDatabricks id="nav-icons" />
               <span id="nav-label">Data</span>
             </div>
@@ -122,7 +122,8 @@ const Sidebar = ({ projectId }) => {
         {/* Settings Group */}
         <li className="nav-item-group">
           <div id="nav-group">
-            <div className="big-nav-wrapper">
+            <div className="big-nav-wrapper" 
+                  onClick={() => navigate(`/project-folder/${projectId}/settings/edit-project`)}>
               <MdSettings id="nav-icons" />
               <span id="nav-label">Settings</span>
             </div>

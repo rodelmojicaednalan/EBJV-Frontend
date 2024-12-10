@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axiosInstance from "../../../../../axiosInstance.js";
 import DataTable from "react-data-table-component";
 import Swal from "sweetalert2";
@@ -12,6 +12,7 @@ import '../ProjectStyles.css'
 import { FiChevronLeft, FiChevronDown } from 'react-icons/fi';
 import { IoSearchSharp } from "react-icons/io5";
 import { BiDotsVertical } from "react-icons/bi";
+import { FaCaretDown } from "react-icons/fa";
 
 
 import ProjectSidebar from '../ProjectFolderSidebar';
@@ -27,6 +28,43 @@ function ProjectContributors() {
   const [explorerTable ,setExplorerTable] = useState([])
   const navigate = useNavigate();
 
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const [showSearchBox, setShowSearchBox] = useState(false);
+  const searchBoxRef = useRef(null);
+
+  const handleSearchClick = () => {
+    setShowSearchBox(true);
+  };
+
+  const handleBlur = (event) => {
+    // Check if the click is outside of the search box
+    if (!searchBoxRef.current.contains(event.target)) {
+      setShowSearchBox(false);
+    }
+  };
+
+  const handleMenuToggle = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const handleMenuOptionClick = (option) => {
+    setMenuOpen(false);
+    Swal.fire(`Function to: ${option}`);
+  };
+
+  useEffect(() => {
+    if (showSearchBox) {
+      document.addEventListener("mousedown", handleBlur);
+    } else {
+      document.removeEventListener("mousedown", handleBlur);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleBlur);
+    };
+  }, [showSearchBox]);
 
   useEffect(() => {
     // Fetch project details and populate fields
@@ -98,6 +136,144 @@ function ProjectContributors() {
     },
   ];
 
+  const handleAddNewGroup = () => {
+    Swal.fire({
+      title: 'Create Group',
+      html: `
+        <div style="text-align: left;">
+          <label for="project-group" style="display: block;">Group Name: </label>
+          <input type="text" id="project-group" class="swal2-input" placeholder="Enter title" style="margin-bottom: 10px; width: 100%; ">
+        </div>
+      `,
+      confirmButtonText: 'Create',
+      showCancelButton: true,
+      customClass: {
+        confirmButton: "btn btn-success contrib-btn-success",
+        cancelButton: "btn btn-danger contrib-btn-danger"
+      },
+      preConfirm: () => {
+        const projectGroup = document.getElementById('project-group').value;
+  
+        if (!projectGroup) {
+          Swal.showValidationMessage('Please fill in all fields.');
+          return null;
+        }
+  
+        return { projectGroup };
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const { projectGroup} = result.value;
+  
+        console.log('New group:', { projectGroup });
+        Swal.fire('Success!', 'A new group has been added.', 'success');
+      }
+    });
+  };
+
+
+  const handleInviteToProject = () => {
+    Swal.fire({
+      title: 'Invite Contributors',
+      html: `
+        <div style="text-align: left;">
+          <label for="project-invite" style="display: block;">People: </label>
+          <input type="text" id="project-invite" class="swal2-input" placeholder="Add people by email address..." style="margin-bottom: 10px; width: 100%; ">
+  
+          <div id="group-container">
+            <button id="add-to-group-btn" type="button" class="btn btn-primary" style="margin-bottom: 10px;">Add to Group</button>
+          </div>
+  
+          <div id="role-section" style="margin-top: 10px;">
+            <label style="display: block; font-weight: bold;">Select Role:</label>
+            <div>
+              <input type="radio" id="role-admin" name="role" value="Admin">
+              <label for="role-admin">Admin</label>
+            </div>
+            <div>
+              <input type="radio" id="role-user" name="role" value="User" checked>
+              <label for="role-user">User/Client</label>
+            </div>
+          </div>
+        </div>
+      `,
+      confirmButtonText: 'Invite',
+      showCancelButton: true,
+      customClass: {
+        confirmButton: "btn btn-success contrib-btn-success",
+        cancelButton: "btn btn-danger contrib-btn-danger"
+      },
+      didOpen: () => {
+        const addGroupBtn = document.getElementById('add-to-group-btn');
+        const groupContainer = document.getElementById('group-container');
+  
+        // Replace button with a text input when clicked
+        addGroupBtn.addEventListener('click', () => {
+          groupContainer.innerHTML = `
+            <label for="contrib-group-name" style="display: block;">Group Name: </label>
+            <input type="text" id="contrib-group-name" class="swal2-input" placeholder="Enter group name..." style="margin-bottom: 10px; width: 100%;">
+          `;
+        });
+      },
+      preConfirm: () => {
+        const projectInvite = document.getElementById('project-invite').value;
+        const groupNameInput = document.getElementById('group-name');
+        const selectedRole = document.querySelector('input[name="role"]:checked').value;
+  
+        const groupName = groupNameInput ? groupNameInput.value : null;
+  
+        if (!projectInvite) {
+          Swal.showValidationMessage('Please fill in the People field.');
+          return null;
+        }
+  
+        return { projectInvite, groupName, selectedRole };
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const { projectInvite, groupName, selectedRole } = result.value;
+  
+        console.log('New contributor details:', { projectInvite, groupName, selectedRole });
+        Swal.fire('Success!', 'New contributors have been added.', 'success');
+      }
+    });
+  };
+  
+
+  const sampleFilters = [
+    {
+      type: "Role",
+      options: ["Admin", "User",],
+    },
+    {
+      type: "Status",
+      options: ["Active", "Activation Pending", "Removed"],
+    },
+  
+  ];
+
+  const handleDropdownToggle = (filterType) => {
+    // Toggle the dropdown visibility for the clicked filter
+    setActiveDropdown((prev) => (prev === filterType ? null : filterType));
+  };
+
+  const renderDropdown = (filter) => {
+    return (
+      <div className="filter-dropdown" id="contrib-filter-dropdown">
+        {filter.options.map((option, index) => (
+          <div
+            key={index}
+            className="dropdown-item"
+            onClick={() => console.log(`${filter.type} selected: ${option}`)}
+          >
+            {option}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+
     return (
       <div className="container">
       <StickyHeader />
@@ -117,7 +293,7 @@ function ProjectContributors() {
                           <h2>Project Contributors</h2>
                         </div>
                         <div className="button-group d-flex">
-                            <button id="addbtn" className="btn btn-primary add-btn" title="Add">
+                            <button id="addbtn" className="btn btn-primary add-btn" title="Add" onClick={handleInviteToProject}>
                               Invite People to Project
                             </button>
                           </div>
@@ -128,7 +304,7 @@ function ProjectContributors() {
                             <div className="listPanel">
                               <div className="listHeader">
                                 <h3>Groups</h3>
-                                <button className="btn-default small">
+                                <button className="btn-default small" onClick={handleAddNewGroup}>
                                   New Group
                                 </button>
                               </div>
@@ -160,22 +336,91 @@ function ProjectContributors() {
                                   <div className="panelControls">
                                     <div className="filters-wrapper d-xl-flex d-none">
                                       <div className="filter-container null">
-                                        <div className="filters">
-                                          <div id="filter-categ-container">
-                                            <div className="filter-type mr-n1">Role <FiChevronDown/> </div>
-                                            <div className="filter-type mr-n1">Status <FiChevronDown/> </div>
+                                      <div className="view-filters">
+                                        <div className="filter-container null">
+                                          <div className="filters d-flex">
+                                            {sampleFilters.map((filter) => (
+                                              <div
+                                                key={filter.type}
+                                                className="filter-type mr-n1"
+                                                onClick={() => handleDropdownToggle(filter.type)}
+                                              >
+                                                {filter.type} <FaCaretDown />
+                                                {activeDropdown === filter.type && renderDropdown(filter)}
+                                              </div>
+                                            ))}
                                           </div>
                                         </div>
+                                    </div> 
                                       </div>
 
                                     </div>
-                                    <button className="search-button">
-                                      <IoSearchSharp className="search-icon"/>
-                                    </button>
+                                    <div style={{ position: "relative" }}>
+                                      <button
+                                        className="search-button"
+                                        onClick={handleSearchClick}
+                                        style={{ display: "flex", alignItems: "center" }}
+                                      >
+                                        <IoSearchSharp className="search-icon" />
+                                      </button>
+                                      {showSearchBox && (
+                                        <div
+                                          ref={searchBoxRef}
+                                          style={{
+                                            position: "absolute",
+                                            left: -290,
+                                            top: -12,
+                                            backgroundColor: "white",
+                                            border: "1px solid #ccc",
+                                            borderBottom: "1px solid #eb6314",
+                                            padding: "5px",
+                                            borderRadius: "4px",
+                                            zIndex: 1
+                                          }}
+                                        >
+                                          <input
+                                            type="text"
+                                            className="search-textbox"
+                                            placeholder="Find people..."
+                                            autoFocus
+                                            onBlur={handleBlur}
+                                            style={{
+                                              backgroundColor: "white",
+                                              width: "300px",
+                                              padding: "5px",
+                                              border: "none",
+                                              outline: "none",
+                                            }}
+                                          />
+                                        </div>
+                                      )}
+                                    </div>
                                     <div className="dropdown-pane-container">
-                                    <button className="more-button">
-                                      <BiDotsVertical className="more-icon"/>
-                                    </button>
+                                    <div className="menu-btn-container position-relative">
+                                      <button
+                                        className="btn btn-icon menu-btn"
+                                        title="Menu"
+                                        onClick={handleMenuToggle}
+                                      >
+                                        <BiDotsVertical />
+                                      </button>
+                                      {menuOpen && (
+                                        <div className="dropdown-menu" id="contrib-dropdown">
+                                          <div
+                                            className="dropdown-item"
+                                            onClick={() => handleMenuOptionClick("Export To Do")}
+                                          >
+                                            Export to Excel
+                                          </div>
+                                          <div
+                                            className="dropdown-item"
+                                            onClick={() => handleMenuOptionClick("Import To Do")}
+                                          >
+                                            Import from Excel 
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
                                     </div>
                                   </div>
 
@@ -187,9 +432,6 @@ function ProjectContributors() {
                                   id="explorer-table"
                                   columns={explorerColumn}
                                   data={explorerTable}
-                                  //pagination
-                                  //paginationPerPage={20}
-                                  //paginationRowsPerPageOptions={[20, 30]} 
                                   responsive
                                 />
                                 </div>

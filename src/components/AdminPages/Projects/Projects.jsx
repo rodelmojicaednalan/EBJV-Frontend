@@ -220,7 +220,7 @@ function Projects() {
           width="25"
           height="25"
           onClick={() =>
-            navigate("/ifc-viewer", {
+            navigate(`/ifc-viewer/${row.id}`, {
               state: { fileUrl: row.project_file[0], fileName: row.project_name },
             })
           }

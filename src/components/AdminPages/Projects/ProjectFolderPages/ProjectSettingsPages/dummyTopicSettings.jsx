@@ -4,6 +4,7 @@ import { IoIosListBox } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
 import { FiChevronDown } from "react-icons/fi";
 import { BsCircleFill, BsFillInfoCircleFill  } from "react-icons/bs";
+import { SketchPicker } from 'react-color';
 
 import { FaComments, FaPen, FaBug   } from "react-icons/fa";
 

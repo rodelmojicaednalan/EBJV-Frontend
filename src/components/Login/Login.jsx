@@ -79,8 +79,8 @@ function Login() {
         <div className="d-flex align-items-center justify-content-center custom-login">
             <div className="row">
                 <div className="col-md-6 d-flex flex-column align-items-center justify-content-center custom-col">
-                    <div className="header-title">
-                        <h1>EBJV Construction Modelling Portal</h1>
+                    <div className="header-title mt-5">
+                        <h1>EBJV Construction <br></br> Modelling Portal</h1>
                         <br />
 
                     </div>

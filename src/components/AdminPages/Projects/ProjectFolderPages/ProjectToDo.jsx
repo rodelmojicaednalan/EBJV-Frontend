@@ -222,6 +222,51 @@ function ProjectToDo() {
     },
   ];
 
+  const handleAddNewToDo = () => {
+    Swal.fire({
+      title: 'Add New To Do',
+      html: `
+        <div style="text-align: left;">
+          <label for="todo-title" style="display: block;">Title: </label>
+          <input type="text" id="todo-title" class="swal2-input" placeholder="Enter title" style="margin-bottom: 10px; width: 100%; ">
+          
+          <label for="todo-desc" style="display: flex;">Description</label>
+          <input type="text" id="todo-desc" class="swal2-input" placeholder="Enter description" style="margin-bottom: 10px; width: 100%;">
+          
+          <label for="todo-assignee" style="display: block;">Assignee</label>
+          <input type="text" id="todo-assignee" class="swal2-input" placeholder="Select people (comma-separated)" style="width: 100%;">
+        </div>
+      `,
+      confirmButtonText: 'Add Release',
+      showCancelButton: true,
+      customClass: {
+        confirmButton: "btn btn-success todo-btn-success",
+        cancelButton: "btn btn-danger todo-btn-danger"
+      },
+      preConfirm: () => {
+        const todoTitle = document.getElementById('todo-title').value;
+        const todoDesc = document.getElementById('todo-desc').value;
+        const todoAssignee = document.getElementById('todo-assignee').value;
+  
+        if (!todoTitle || !todoDesc || !todoAssignee) {
+          Swal.showValidationMessage('Please fill in all fields.');
+          return null;
+        }
+  
+        return { todoTitle, todoDesc, todoAssignee };
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const { todoTitle, todoDesc, todoAssignee } = result.value;
+  
+        // Handle adding the new release (e.g., API call)
+        console.log('New To Do:', { todoTitle, todoDesc, todoAssignee });
+        Swal.fire('Success!', 'The new to do has been added.', 'success');
+      }
+    });
+  };
+
+
     return (
     <div className="container">
       <StickyHeader />
@@ -268,7 +313,7 @@ function ProjectToDo() {
                               </div>
                             )}
                           </div>
-                          <button id="addbtn"className="btn btn-primary add-btn" title="Add New Release">
+                          <button id="addbtn"className="btn btn-primary add-btn" title="Add New Release" onClick={handleAddNewToDo}>
                               New
                           </button>
                         </div>

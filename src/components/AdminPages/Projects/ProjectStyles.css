@@ -76,7 +76,8 @@
 
 .moduleFluid {
     width: 100%;
-    height: 600px;
+    height: auto;
+    /*height: 600px;*/
   }
   
   .dataTables_wrapperz {
@@ -497,7 +498,8 @@ flex-direction: column;
   align-content: flex-start;
   display: flex;
   flex-flow: column nowrap;
-  min-height: 5.5rem;
+  min-height: 3rem;
+  margin-top: 5px;
   position: relative;
 }
 
@@ -812,6 +814,51 @@ padding-bottom: 5px;
   border: none;
 }
 
+.offcanvas-head{
+  border-bottom: 2px solid #67686a28;
+  color: #212A31;
+  cursor:default;
+}
+
+.offcanvas-head:hover{
+  color: #eb6314;
+}
+#offcanvas-btn:hover{
+  background-color: #eb6314;
+}
+
+#todo-title, #todo-desc, #todo-assignee, #release-name, #due-date, #recipients, 
+#project-group, #project-invite, #contrib-group-name{
+  margin: 0;
+}
+
+.todo-btn-success, .rel-btn-success, .contrib-btn-success, #add-to-group-btn{
+  background-color: #eb6314 !important;
+}
+.todo-btn-danger, .todo-btn-danger:hover, .rel-btn-danger, .rel-btn-danger:hover, 
+.contrib-btn-danger, .contrib-btn-danger:hover {
+  background-color: transparent !important;
+  color: #212A31;
+}
+
+#contrib-dropdown{
+  margin-left: -115px
+}
+#topConf-dropdown{
+  margin: -10px 0 0 -120px;
+}
+#contrib-filter-dropdown{
+  margin: .875rem 0 0 -20px;
+}
+
+#projectName, #startDate, #endDate, #description, #newTopicType, #newTopicStatus, #newTopicPriority{
+  background-color: #FFF;
+  border: 1px solid #5556581c;
+  border-bottom: 1px solid #212a3183;
+  height: 50px;
+  width: 100%;
+  padding: 10px;
+}
   /* Media Queries for Responsiveness */
   @media (max-width: 768px) {
     .container-content {

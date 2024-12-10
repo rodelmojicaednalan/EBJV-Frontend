@@ -20,6 +20,7 @@ import { GoAlertFill } from "react-icons/go";
 
 import ProjectSidebar from '../ProjectFolderSidebar';
 
+import Offcanvas from 'react-bootstrap/Offcanvas';
 function ProjectTopics() {
   const { projectId } = useParams();
   const [projectName, setProjectName] = useState("");
@@ -36,6 +37,8 @@ function ProjectTopics() {
 
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const [showCanvas, setShowCanvas] = useState(false);
+
   const handleMenuToggle = () => {
     setMenuOpen(!menuOpen);
   };
@@ -44,6 +47,9 @@ function ProjectTopics() {
     setMenuOpen(false);
     Swal.fire(`Function to: ${option}`);
   };
+
+  const handleCloseCanvas = () => setShowCanvas(false);
+  const handleShowCanvas = () => setShowCanvas(true);
 
   useEffect(() => {
     // Fetch project details and populate fields
@@ -253,11 +259,99 @@ function ProjectTopics() {
                               </div>
                             )}
                           </div>
-                          <button id="addbtn"className="btn btn-primary add-btn" title="Add Topic" >
+                          <button id="addbtn"className="btn btn-primary add-btn" title="Add Topic" onClick={handleShowCanvas}>
                              New
                           </button>
                         </div>
                       </div>
+
+                      <Offcanvas 
+                        show={showCanvas} 
+                        onHide={handleCloseCanvas} 
+                        placement="end" 
+                        backdrop="static"
+                        className="offcanvas"
+                      >
+                        <Offcanvas.Header closeButton className="offcanvas-head">
+                          <Offcanvas.Title>Add New Topic</Offcanvas.Title>
+                        </Offcanvas.Header>
+                        <Offcanvas.Body className="offcanvas-body">
+                          {/* Form Starts Here */}
+                          <form>
+                            <div className="form-group mb-3">
+                              <label htmlFor="topicTitle">Topic Title <small>(Required)</small></label>
+                              <input
+                                type="text"
+                                id="topicTitle"
+                                className="form-control"
+                                placeholder="Enter topic title"
+                              />
+                            </div>
+                            <div className="form-group mb-3">
+                              <label htmlFor="topicDescription">Description </label>
+                              <input
+                                type="textarea"
+                                id="topicDescription"
+                                className="form-control"
+                                placeholder="Enter topic description"
+                              />
+                            </div>
+                            <div className="form-group mb-3">
+                              <label htmlFor="assignedTo">Assigned To</label>
+                              <input
+                                type="text"
+                                id="assignedTo"
+                                className="form-control"
+                                placeholder="Enter assignee's name"
+                              />
+                            </div>
+                            <div className="form-group mb-3">
+                              <label htmlFor="priority">Priority</label>
+                              <select id="priority" className="form-control">
+                                <option value="low">Low</option>
+                                <option value="normal">Normal</option>
+                                <option value="high">High</option>
+                                <option value="critical">Critical</option>
+                              </select>
+                            </div>
+                            <div className="form-group mb-3">
+                              <label htmlFor="status">Status</label>
+                              <select id="status" className="form-control">
+                                <option value="new">New</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="pending">Pending</option>
+                                <option value="closed">Closed</option>
+                                <option value="done">Done</option>
+                              </select>
+                            </div>
+                            <div className="form-group mb-3">
+                              <label htmlFor="type">Type</label>
+                              <select id="type" className="form-control">
+                                <option value="undefined">Undefined</option>
+                                <option value="comment">Comment</option>
+                                <option value="issue">Issue</option>
+                                <option value="request">Request</option>
+                                <option value="fault">Fault</option>
+                                <option value="inquiry">Inquiry</option>
+                                <option value="solution">Solution</option>
+                                <option value="remark">Remark</option>
+                                <option value="clash">Clash</option>
+                              </select>
+                            </div>
+                            <div className="form-group mb-3">
+                              <label htmlFor="deadline">Deadline</label>
+                              <input
+                                type="date"
+                                id="deadline"
+                                className="form-control"
+                              />
+                            </div>
+                            <button type="submit" id="offcanvas-btn" className="btn btn-primary w-100">Save Topic</button>
+                          </form>
+                          {/* Form Ends Here */}
+                        </Offcanvas.Body>
+                      </Offcanvas>
+
 
                       <div className="view-filters mb-2">
                           <div className="filter-container null">
