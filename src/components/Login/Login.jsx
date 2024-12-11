@@ -31,7 +31,7 @@ function Login() {
             localStorage.setItem('loginSuccess', 'true');
             if (roleName === 'Admin') {
                 // console.log(user, accessToken, refreshToken, roleName);
-                navigate('/userlist');
+                navigate('/projects');
             } else {
                 navigate('/projects');
             }

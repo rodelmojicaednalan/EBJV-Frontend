@@ -64,8 +64,8 @@ function ProjectActivity() {
 
   const sampleFilters = [
     {
-      type: "Owner",
-      options: ["Created by Me", "Shared with Me",],
+      type: "Activity Type",
+      options: ["Files", "Folders", "Users", "Views", "Clashsets", "Releases", "ToDo", "Topics", "Comments", "Share", "Other"],
     },
     {
       type: "Users",
@@ -155,13 +155,13 @@ function ProjectActivity() {
   return (
     <div className="container">
       <StickyHeader />
-      <a href="/projects" className="back-btn">
-        <h3 className="title-page">
-          <FiChevronLeft className="icon-left" /> {ownerName}'s {projectName}
-        </h3>
-      </a>
+      <h3 className="title-page" id="projectFolder-title">
+        {ownerName}'s {projectName} 
+      </h3>
       <div className="container-content" id="project-folder-container">
-        <ProjectSidebar projectId={projectId} />
+      <div className="projectFolder-sidebar-container">
+      <ProjectSidebar projectId={projectId}/>
+      </div>
 
         <div className="projectFolder-display">
           <div className="main">
@@ -214,7 +214,7 @@ function ProjectActivity() {
                     
                           </div>
                           <div className="activity">
-                            <div className="row-center">
+                            <div className="row">
                               <div> <img src={man} style={{height:"24px"}}/> <span style={{fontWeight:"500", textTransform:"uppercase"}}>{data.fileOwner} </span></div>
                               <div> <span style={{fontStyle: "italic", fontWeight:"light"}} > {data.activityDesc} </span></div>
                             </div>

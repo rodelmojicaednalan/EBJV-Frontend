@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import man from "../../assets/images/man.png";
 import woman from "../../assets/images/woman.png";
 import axiosInstance from "../../../axiosInstance.js";
-
 const StickyHeader = () => {
   const navigate = useNavigate();
   const [first_name, setFirstName] = useState("");
@@ -32,7 +31,6 @@ const StickyHeader = () => {
   return (
     <div className="sticky-header-container">
       <div className="sticky-header">
-        
         <div className="profile" onClick={() => navigate("/my-profile")}>
           <img
             src={sex === "Male" ? man : woman}

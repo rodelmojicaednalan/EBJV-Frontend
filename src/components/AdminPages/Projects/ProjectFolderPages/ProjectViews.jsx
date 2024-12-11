@@ -153,13 +153,13 @@ function ProjectViews() {
     return (
       <div className="container">
       <StickyHeader />
-      <a href="/projects" className="back-btn">
-        <h3 className="title-page">
-          <FiChevronLeft className="icon-left" /> {ownerName}'s {projectName} 
-        </h3>
-      </a>
+      <h3 className="title-page" id="projectFolder-title">
+        {ownerName}'s {projectName} 
+      </h3>
       <div className="container-content" id="project-folder-container">
+      <div className="projectFolder-sidebar-container">
       <ProjectSidebar projectId={projectId}/>
+      </div>
 
        <div className="projectFolder-display">
                 <div className="main"> 

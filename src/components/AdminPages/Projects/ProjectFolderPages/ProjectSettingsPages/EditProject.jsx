@@ -30,6 +30,36 @@ function EditProject() {
   const [explorerTable ,setExplorerTable] = useState([])
   const navigate = useNavigate();
 
+  const [dropdownStates, setDropdownStates] = useState({});
+
+  const handleMenuOptionClick = (option) => {
+    Swal.fire(`Function to: ${option}`);
+  };
+
+  const toggleDropdown = (id) => {
+    setDropdownStates((prevState) => ({
+      ...prevState,
+      [id]: !prevState[id], // Toggle the specific dropdown state
+    }));
+  };
+
+  const closeAllDropdowns = () => {
+    setDropdownStates({});
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      closeAllDropdowns();
+    };
+
+    // Add an event listener to close dropdowns when clicking outside
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
+
 
   useEffect(() => {
     // Fetch project details and populate fields
@@ -108,14 +138,13 @@ function EditProject() {
   return (
     <div className="container">
     <StickyHeader />
-    <a href="/projects" className="back-btn">
-      <h3 className="title-page" id="proj-folder-title">
-        <FiChevronLeft className="icon-left" /> {ownerName}'s {projectName} 
+    <h3 className="title-page" id="projectFolder-title">
+        {ownerName}'s {projectName} 
       </h3>
-    </a>
     <div className="container-content" id="project-folder-container">
-        <ProjectSidebar projectId={projectId} />
-   
+    <div className="projectFolder-sidebar-container">
+      <ProjectSidebar projectId={projectId}/>
+      </div>
 
     <div className="projectFolder-display">
               <div className="main"> 
@@ -123,7 +152,7 @@ function EditProject() {
                     <div className="project-content">
 
                     
-                   <div className="content-row">
+                   <div className="row">
                      <div className="col-md-12 header">
                      <div className="table-header d-flex justify-content-between align-items-center mb-3">
                       <div className="page-title">
@@ -144,7 +173,7 @@ function EditProject() {
                             <header> 
                               <h3> Details </h3>
                             </header>
-                            <div className="content-row">
+                            <div className="row">
                               <div className="col-12">
                                 <div className="input-group">
                                   <label for="projectName">
@@ -247,7 +276,7 @@ function EditProject() {
                               <div className="col-12">
                                 <div className="input-group">
                                   <label for="description"><span>Description: </span></label>
-                                  <input id="description" className="" data-cy="description" type="text" autocomplete="off" maxlength="255" name="description"/>
+                                  <input id="description" style={{height:"4rem"}} data-cy="description" type="textarea" autocomplete="off" maxlength="255" name="description"/>
                                 </div>
                               </div>
                             </div>
@@ -264,9 +293,34 @@ function EditProject() {
                               <div className="map-heading"> 
                                 <h5> Project Boundary </h5>
                                 <div className="dropdown-pane-container connect-dropdown-menu m-width-0">
-                                  <button id="crs-boundary-btn" className="dropdownpane-link button icon-medium tertiary icon-cirlce">
+                                  <button id="crs-boundary-btn" className="dropdownpane-link button icon-medium tertiary icon-cirlce"
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // Prevent click outside from triggering
+                                    toggleDropdown("projectBoundary");
+                                  }}
+                                  >
                                     <RiEdit2Fill/>
                                   </button>
+                                  {dropdownStates["projectBoundary"] && (
+                                <div
+                                  className="dropdown-menu"
+                                  id="boundary-dropdown"
+                                  onClick={(e) => e.stopPropagation()} // Prevent click inside dropdown from closing it
+                                >
+                                  <div
+                                    className="dropdown-item"
+                                    onClick={() => handleMenuOptionClick("Draw Boundary on Map")}
+                                  >
+                                    Draw Boundary on Map
+                                  </div>
+                                  <div
+                                    className="dropdown-item"
+                                    onClick={() => handleMenuOptionClick("Input Boundary Coordinates")}
+                                  >
+                                    Input Boundary Coordinates
+                                  </div>
+                                </div>
+                              )}
                                 </div>
                               </div>
                               <div className="map-container"> 
@@ -280,9 +334,40 @@ function EditProject() {
                               <div className="mt-2 crs-heading"> 
                                 <h5> Coordinate Reference System </h5>
                                 <div className="dropdown-pane-container connect-dropdown-menu m-width-0">
-                                  <button id="crs-boundary-btn" className="dropdownpane-link button icon-medium tertiary icon-cirlce">
-                                    <RiEdit2Fill/>
-                                  </button>
+                                  <button id="crs-boundary-btn" className="dropdownpane-link button icon-medium tertiary icon-cirlce"
+                                    onClick={(e) => {
+                                      e.stopPropagation(); // Prevent click outside from triggering
+                                      toggleDropdown("projectCRS");
+                                    }}
+                                    >
+                                      <RiEdit2Fill/>
+                                    </button>
+                                    {dropdownStates["projectCRS"] && (
+                                  <div
+                                    className="dropdown-menu"
+                                    id="CRS-dropdown"
+                                    onClick={(e) => e.stopPropagation()} // Prevent click inside dropdown from closing it
+                                  >
+                                    <div
+                                      className="dropdown-item"
+                                      onClick={() => handleMenuOptionClick("Choose published coordinate system")}
+                                    >
+                                      Choose published coordinate system
+                                    </div>
+                                    <div
+                                      className="dropdown-item"
+                                      onClick={() => handleMenuOptionClick("Upload calibration file")}
+                                    >
+                                      Upload calibration file
+                                    </div>
+                                    <div
+                                      className="dropdown-item"
+                                      onClick={() => handleMenuOptionClick("Remove coordinate system")}
+                                    >
+                                      Remove coordinate system
+                                    </div>
+                                  </div>
+                                )}
                                 </div>
                               </div>
                               <div className="crs-container"> 

@@ -6,6 +6,9 @@
     position: absolute;
 
 }
+#projectFolder-title{
+  margin-left: -80%;
+}
 /* Sidebar Styling */
   .navmenu{
       padding: 0;
@@ -21,12 +24,16 @@
     padding: 1px 5px 3px 5px;
     border-radius: 3px;
     transition: background-color 0.3s ease;
-    font-size: 1.1rem;
+    font-size: 1rem;
+    font-weight: 600;
   }
-  
+    
+  #nav-item, .subgroup-items, .big-nav-wrapper {
+    padding: 0px 5px 1px 5px;
+  }
+
   #nav-item:hover, .subgroup-items:hover, .big-nav-wrapper:hover {
     background-color: #fec19db8;
-    padding: 0px 5px 1px 5px;
     border-radius: 3px;
     border-radius: 3px;
     cursor: pointer;
@@ -42,14 +49,14 @@
   
   #nav-icons{
     color: #eb6314;
+    margin-right: .60rem;
   }
 
 .projectFolder-sidebar {
-    width: 16rem;
-    background-color: #FFF;
-    padding: 35px 0 0 20px;
-    border-right: 1px solid #ddd;
-    border: 1px solid #fec19db8;
+    width: 15rem;
+    background-color: inherit;
+    padding: 2.2rem 0 0 15px;
+
   }
   
   .projectFolder-sidebar ul {
@@ -59,10 +66,15 @@
   
   .projectFolder-sidebar li {
     margin: 16px 0;
-    font-size: 1.3rem;
+    font-size: 0.8rem;
     font-weight: 600;
   }
-  
+
+.projectFolder-sidebar-container{
+    background-color: #FFF;
+    border-right: 1px solid #ddd;
+    border: 1px solid #fec19db8;
+}
   /* Main Content Styling */
   .projectFolder-display {
     flex-grow: 1; /* Takes the remaining space */
@@ -257,6 +269,8 @@
 .dropdown-item {
   padding: 5px 10px;
   cursor: pointer;
+  font-size: 1rem;
+  font-weight: 400;
 }
 
 .dropdown-item:hover {
@@ -847,11 +861,25 @@ padding-bottom: 5px;
 #topConf-dropdown{
   margin: -10px 0 0 -120px;
 }
+#boundary-dropdown{
+  margin: -20px 0 0 -200px;
+}
+#CRS-dropdown{
+  margin: -20px 0 0 -260px;
+}
+#toDo-dropdown, #topic-dropdown{
+  margin: -10px 0 0 -120px;
+}
 #contrib-filter-dropdown{
   margin: .875rem 0 0 -20px;
 }
 
-#projectName, #startDate, #endDate, #description, #newTopicType, #newTopicStatus, #newTopicPriority{
+
+#projectName, #startDate, #endDate, #description, 
+#newTopicType, #newTopicStatus, #newTopicPriority,
+.input-focus-group > #unitSystem, #unitLength, #unitLengthValue,
+#unitArea, #unitAreaValue, #unitVolume, #unitVolumeValue,
+#unitWeight, #unitWeightValue, #unitAngle, #unitAngleValue{
   background-color: #FFF;
   border: 1px solid #5556581c;
   border-bottom: 1px solid #212a3183;
@@ -859,6 +887,45 @@ padding-bottom: 5px;
   width: 100%;
   padding: 10px;
 }
+
+.input-group.checkradio, .label-group.checkradio {
+  display: flex;
+  flex-flow: row wrap;
+  min-height: 3rem;
+}
+
+.input-group.checkradio .group-items, .label-group.checkradio .group-items {
+  align-items: center;
+  display: flex;
+  flex-flow: row nowrap;
+  margin-right: 1rem;
+}
+
+.checkbox, .radio {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto !important;
+  height: 2.5rem;
+  justify-content: center;
+  position: relative;
+  width: 2.5rem;
+}
+
+.input-group.checkradio .group-items label, .label-group.checkradio .group-items > label {
+  color: inherit;
+  font-size: .875rem;
+  min-height: auto;
+  margin-top: 8px;
+}
+
+.custom-input {
+  box-sizing: border-box;
+  height: 1.2rem;
+  position: relative;
+  width: 1.2rem;
+  z-index: 1;
+}
+
   /* Media Queries for Responsiveness */
   @media (max-width: 768px) {
     .container-content {

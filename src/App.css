@@ -36,6 +36,7 @@ button:hover {
   /* Optional shadow effect */
 }
 
+
 /* Components Style */
 .resources-content-container {
   width: 100%;
@@ -75,7 +76,7 @@ button:hover {
   top: 22px;
   display: flex;
   align-items: center;
-  color: #161e24
+  color: #161e24;
 }
 
 #proj-folder-title{
@@ -1158,7 +1159,7 @@ input[type="date"] {
   }
 
   .title-page {
-    position: relative;
+    position: fixed;
     z-index: 0;
     top: 20px;
   }

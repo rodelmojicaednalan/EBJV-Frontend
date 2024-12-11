@@ -39,8 +39,8 @@ function TopicSettings() {
   const navigate = useNavigate();
 
   const [editingRowId, setEditingRowId] = useState(null);
-  const [iconColorEditId, setIconColorEditId] = useState(null);
-  const [currentStatusColor, setCurrentStatusColor] = useState("") // Track the row being edited
+  const [iconColorEditId, setPriorityIconColorEditId] = useState(null);
+  const [currentPriorityColor, setCurrentStatusColor] = useState("") // Track the row being edited
   const [currentColor, setCurrentColor] = useState("#fff"); // Current selected color
 
   const handleColorChange = (color) => {
@@ -56,11 +56,11 @@ function TopicSettings() {
     );
     setSampleData3((prevData) =>
       prevData.map((item) =>
-        item.id === iconColorEditId ? { ...item, statusColor: currentStatusColor } : item
+        item.id === iconColorEditId ? { ...item, statusColor: currentPriorityColor } : item
       )
     );
     setEditingRowId(null); 
-    setIconColorEditId(null);
+    setPriorityIconColorEditId(null);
   };
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -144,36 +144,36 @@ function TopicSettings() {
     const [data, setData] = useState([
       {
         id: 1,
-        default: <input type="radio" name="default" />,
-        active: <input type="checkbox" defaultChecked />,
+        default: <input className="custom-input" type="radio" name="default" />,
+        active: <input  className="custom-input" type="checkbox" defaultChecked />,
         color: "crimson",
         status: "Closed",
       },
       {
         id: 2,
-        default: <input type="radio" name="default" />,
-        active: <input type="checkbox" />,
+        default: <input className="custom-input" type="radio" name="default" />,
+        active: <input  className="custom-input" type="checkbox" defaultChecked />,
         color: "royalBlue",
         status: "New",
       },
       {
         id: 3,
-        default: <input type="radio" name="default" />,
-        active: <input type="checkbox" defaultChecked />,
+        default: <input className="custom-input" type="radio" name="default" />,
+        active: <input  className="custom-input" type="checkbox" defaultChecked />,
         color: "darkGreen",
         status: "In Progress",
       },
       {
         id: 4,
-        default: <input type="radio" name="default" />,
-        active: <input type="checkbox" />,
+        default: <input className="custom-input" type="radio" name="default" />,
+        active: <input  className="custom-input" type="checkbox"  />,
         color: "orange",
         status: "Pending",
       },
       {
         id: 5,
-        default: <input type="radio" name="default" />,
-        active: <input type="checkbox" />,
+        default: <input className="custom-input" type="radio" name="default" />,
+        active: <input  className="custom-input" type="checkbox" defaultChecked />,
         color: "blue",
         status: "Done",
       },
@@ -221,7 +221,7 @@ function TopicSettings() {
       },
       {
         name: "Color",
-        width: "30%",
+        width: "20%",
         selector: (row) => (
           <span
             style={{ cursor: "pointer", display: "inline-flex", alignItems: "center" }}
@@ -238,7 +238,7 @@ function TopicSettings() {
       },
       {
         name: "Status",
-        width: "25%",
+        width: "30%",
         selector: (row) => row.status,
         sortable: true,
       },
@@ -266,7 +266,7 @@ function TopicSettings() {
         <span
           style={{ cursor: "pointer", display: "inline-flex", alignItems: "center" }}
           onClick={() => {
-            setIconColorEditId(row.id);
+            setPriorityIconColorEditId(row.id);
             setCurrentStatusColor(row.statusColor);
           }}
         >
@@ -277,7 +277,7 @@ function TopicSettings() {
     },
     {
       name: "Priority",
-      width: "70%",
+      width: "65%",
       selector: (row) => row.priority,
       sortable: true,
     },
@@ -301,13 +301,14 @@ function TopicSettings() {
     return (
       <div className="container">
       <StickyHeader />
-      <a href="/projects" className="back-btn">
-        <h3 className="title-page">
-          <FiChevronLeft className="icon-left" /> {ownerName}'s {projectName} 
-        </h3>
-      </a>
+      <h3 className="title-page" id="projectFolder-title">
+        {ownerName}'s {projectName} 
+      </h3>
       <div className="container-content" id="project-folder-container">
+      <div className="projectFolder-sidebar-container">
       <ProjectSidebar projectId={projectId}/>
+      </div>
+
 
       <div className="projectFolder-display">
                 <div className="main"> 
@@ -422,26 +423,6 @@ function TopicSettings() {
                             data={sampleData1}
                             responsive
                           />
-                            {editingRowId && (
-                              <div
-                                style={{
-                                  position: "absolute",
-                                  zIndex: 1000,
-                                  top: "100%",
-                                  left: "40%",
-                                  backgroundColor: "white",
-                                  padding: "10px",
-                                  border: "1px solid #ccc",
-                                  borderRadius: "5px",
-                                }}
-                              >
-                                <SketchPicker color={currentColor} onChange={handleColorChange} />
-                                <div style={{ marginTop: "10px", display:"flex" }}>
-                                  <button className="btn" onClick={saveColor}>Save</button>
-                                  <button className="btn" onClick={() => setEditingRowId(null)}>Cancel</button>
-                                </div>
-                              </div>
-                            )}
                           </div>
                         </div>
                       </div>
@@ -526,6 +507,26 @@ function TopicSettings() {
                             data={data}
                             responsive
                           />
+                          {editingRowId && (
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  zIndex: 1000,
+                                  top: "10%",
+                                  left: "40%",
+                                  backgroundColor: "white",
+                                  padding: "10px",
+                                  border: "1px solid #ccc",
+                                  borderRadius: "5px",
+                                }}
+                              >
+                                <SketchPicker color={currentColor} onChange={handleColorChange} />
+                                <div style={{ marginTop: "10px", display:"flex" }}>
+                                  <button className="btn" onClick={saveColor}>Save</button>
+                                  <button className="btn" onClick={() => setEditingRowId(null)}>Cancel</button>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -620,10 +621,10 @@ function TopicSettings() {
                                   borderRadius: "5px",
                               }}
                             >
-                              <SketchPicker color={currentColor} onChange={handleColorChange} />
+                              <SketchPicker color={currentPriorityColor} onChange={handleColorChange} />
                               <div style={{ marginTop: "10px", display: "flex" }}>
                                 <button className="btn" onClick={saveColor}>Save</button>
-                                <button className="btn" onClick={() => setIconColorEditId(null)}>Cancel</button>
+                                <button className="btn" onClick={() => setPriorityIconColorEditId(null)}>Cancel</button>
                               </div>
                             </div>
                           )}
