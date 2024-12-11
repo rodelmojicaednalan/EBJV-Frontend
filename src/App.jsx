@@ -59,9 +59,8 @@ function Layout() {
   
     // Check if the route matches project-folder or ifc-viewer
     const isProjectFolder = /^\/project-folder\/[a-zA-Z0-9]+/.test(location.pathname);
-  const isIfcViewer = /^\/ifc-viewer\/[a-zA-Z0-9]+$/.test(location.pathname);
 
-  return isProjectFolder || isIfcViewer;
+   return isProjectFolder; 
   };
 //  console.log(location);
   return (

@@ -4,24 +4,53 @@ import * as OBC from '@thatopen/components';
 import * as BUI from '@thatopen/ui';
 import * as CUIT from '../../tables';
 import * as CUIB from '../../buttons';
+import * as OBF from "@thatopen/components-front";
 import axiosInstance from '../../../../axiosInstance';
 import StickyHeader from "../../SideBar/StickyHeader";
+import Loader from '../../Loaders/Loader';
+
+import {
+  FiUpload,
+  FiMessageCircle,
+  FiMaximize,
+  FiFolder,
+  FiZoomIn,
+  FiZoomOut,
+  FiArrowLeft,
+  FiRotateCw,
+  FiMousePointer,
+  FiSquare,
+  FiCrop,
+  FiScissors,
+  FiCamera,
+  FiCheckSquare,
+  // FiCube,
+  FiEye,
+  FiHelpCircle,
+  FiSettings,
+  FiColumns,
+  FiChevronDown,
+} from "react-icons/fi";
 
 BUI.Manager.init();
 
 function IfcViewer() {
   const containerRef = useRef(null);
   const location = useLocation();
+  const [isLoading, setIsLoading] = useState(true)
+  const [cameraControls, setCameraControls] = useState(false);  
 
   const fileUrl = location.state?.fileUrl;
-  // const []
-
-  console.log(fileUrl);
+  // const []+
 
   // const handleFileSelect = (event) => {
   //   const file = event.target.files[0];
   //   handleIfcUpload(file);
   // };
+
+  const hanldeCameraControls = () => {
+    setCameraControls(!cameraControls);
+  };
 
   useEffect(() => {
     if (fileUrl) {
@@ -89,8 +118,28 @@ function IfcViewer() {
           updateClassificationsTree({ classifications });
         });
 
+        const [propertiesTable, updatePropertiesTable] = CUIT.tables.elementProperties({
+          components,
+          fragmentIdMap: {},
+        });
+        
+        propertiesTable.preserveStructureOnFilter = true;
+        propertiesTable.indentationInText = false;
+
+        const highlighter = components.get(OBF.Highlighter);
+        highlighter.setup({ world });
+
+        highlighter.events.select.onHighlight.add((fragmentIdMap) => {
+          updatePropertiesTable({ fragmentIdMap });
+        });
+
+        highlighter.events.select.onClear.add(() =>
+          updatePropertiesTable({ fragmentIdMap: {} }),
+        );
+
         const loadIfc = async () => {
           try {
+            setIsLoading(true)
             const response = await axiosInstance.get(`/uploads/${fileUrl}`);
             const fileContent = response.data; 
 
@@ -100,6 +149,9 @@ function IfcViewer() {
             const model = await fragmentIfcLoader.load(buffer);
             model.name = 'example';
             world.scene.three.add(model);
+            const indexer = components.get(OBC.IfcRelationsIndexer);
+            await indexer.process(model);
+            setIsLoading(false)
           } catch (error) {
             console.error('Error loading IFC:', error);
           }
@@ -110,10 +162,28 @@ function IfcViewer() {
         const panel = BUI.Component.create(() => {
           const [loadIfcBtn] = CUIB.buttons.loadIfc({ components });
 
+          const onTextInput = (e) => {
+            const input = e.target
+            propertiesTable.queryString = input.value !== "" ? input.value : null;
+          };
+        
+          const expandTable = (e) => {
+            const button = e.target
+            propertiesTable.expanded = !propertiesTable.expanded;
+            button.label = propertiesTable.expanded ? "Collapse" : "Expand";
+          };
+
           return BUI.html`
            <bim-panel label="Classifications Tree">
             <bim-panel-section label="Classifications">
               ${classificationsTree}
+            </bim-panel-section>
+            <bim-panel-section label="Element Data">
+              <div style="display: flex; gap: 0.5rem;">
+                <bim-button @click=${expandTable} label=${propertiesTable.expanded ? "Collapse" : "Expand"}></bim-button> 
+              </div> 
+              <bim-text-input @input=${onTextInput} placeholder="Search Property" debounce="250"></bim-text-input>
+              ${propertiesTable}
             </bim-panel-section>
            </bim-panel> 
           `;
@@ -143,8 +213,48 @@ function IfcViewer() {
   return (
     <div className="container" ref={containerRef}>
        <StickyHeader />
+       {/* <TopBar /> */}
+       
+       {isLoading ? <Loader/> : 
+       <div className="col-lg-12 col-md-6 custom-content-container margin-top">
+        
+        </div>}
     </div>
   );
 }
 
 export default IfcViewer;
+
+function TopBar(){
+  // return (
+    // <div className="top-bar">
+    //       <div className="top-bar-content">
+    //         <button className="top-bar-button">
+    //           <FiArrowLeft /> Back
+    //         </button>
+    //         <div className="icon-group">
+    //           <div onClick={hanldeCameraControls}>
+    //             <FiRotateCw /> <FiChevronDown size={15}/>
+    //           </div>
+    //           {cameraControls && (
+    //             <div style={{ position: "absolute", top: "50px" }}>
+    //               sample dropdwon
+    //             </div>
+    //           )}
+    //           <FiMousePointer className="active-icon" />
+    //           <FiSquare />
+    //           <FiMaximize />
+    //           <FiCrop />
+    //           <FiScissors />
+    //           <FiCamera />
+    //           <FiCheckSquare />
+    //           <FiEye className="active-icon" />
+    //           <span className="reset-model">Reset model</span>
+    //           <FiHelpCircle />
+    //           <FiSettings />
+    //           <FiColumns />
+    //         </div>
+    //       </div>
+    //     </div>
+  // )
+}
