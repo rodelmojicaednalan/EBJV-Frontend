@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import DataTable from "react-data-table-component";
 import "../../../App.css";
 import "font-awesome/css/font-awesome.min.css";
@@ -10,21 +10,38 @@ import delete_icon from "../../../assets/images/delete-log.png";
 import check from "../../../assets/images/check.png";
 
 import { useNavigate } from "react-router-dom";
-import { Modal } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 import Swal from "sweetalert2";
 import axiosInstance from "../../../../axiosInstance.js";
 import { useLoader } from "../../Loaders/LoaderContext";
 import StickyHeader from "../../SideBar/StickyHeader";
+import { AuthContext } from "../../Authentication/authContext";
 
 function Projects() {
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [data, setData] = useState([]);
-  const [selectedProjects, setSelectedProjects] = useState(null);
   const [selectedprojectId, setSelectedprojectId] = useState(null);
-  const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const { setLoading } = useLoader();
+  const [projectOwner, setProjectOwner] = useState("");
+
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newProject, setNewProject] = useState({
+    title: "",
+    location: "",
+    file: null,
+  });
+
+  useEffect(() => {
+    if (user && user.id) {
+      setProjectOwner(user.id);
+      setLoading(false); // Automatically set the projectOwner to the logged-in user's ID
+    } else {
+      setLoading(true);
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -47,10 +64,8 @@ function Projects() {
           return {
             id: project.id,
             project_name: project.project_name,
-            project_address: formatAddress(project.project_address),
             project_owner: `${project.user.first_name} ${project.user.last_name}`,
             project_file: parsedFiles,
-            project_status: project.project_status,
           };
         });
 
@@ -61,14 +76,6 @@ function Projects() {
       } finally {
         setLoading(false);
       }
-    };
-
-    const formatAddress = (address) => {
-      return address
-        .split(",")
-        .map((part) => part.trim())
-        .filter((part) => part.length > 0)
-        .join(", ");
     };
 
     fetchProjects();
@@ -85,22 +92,38 @@ function Projects() {
     setFilteredData(results);
   }, [searchTerm, data, selectedprojectId]);
 
-  const handleprojectSelect = (e) => {
-    setSelectedprojectId(e.target.value);
-    console.log("Selected project ID:", e.target.value);
-  };
-
-  //modal view
-  const handleViewClick = (project) => {
-    setSelectedProjects(project);
-    setShowModal(true);
-  };
-  //close modal
-  const handleCloseModal = () => {
-    setShowModal(false);
-  };
   const handleViewProjectFolder = (projectId) => {
     navigate(`/project-folder/${projectId}/data/project-explorer`);
+  };
+
+  // add project 
+  const handleAddNewProject = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("project_name", newProject.projectName);
+      formData.append("user_id", projectOwner);
+      //formData.append("project_location", newProject.location);
+      formData.append("project_file", newProject.file);
+
+      await axiosInstance.post("/create-project", formData);
+
+      Swal.fire({
+        title: "Success!",
+        text: "Project has been added successfully.",
+        icon: "success",
+        confirmButtonText: "OK",
+      });
+
+      setShowAddModal(false);
+      setNewProject({ title: "", location: "", file: null });
+    } catch (error) {
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to add the project. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
   };
 
   //handle deleting of project
@@ -159,30 +182,13 @@ function Projects() {
   const columns = [
     {
       name: "Project Name",
+      width: "40%",
       selector: (row) => row.project_name,
       sortable: true,
     },
     {
-      name: "Project Address",
-      selector: (row) => row.project_address,
-      sortable: true,
-    },
-    {
-      name: "Project Status",
-      selector: (row) => (
-        <span
-          style={{
-            color: row.project_status === "Active" ? "green" : "red",
-            marginLeft: 0,
-          }}
-        >
-          {row.project_status}
-        </span>
-      ),
-      sortable: false,
-    },
-    {
       name: "Project Owner",
+      width: "35%",
       selector: (row) => row.project_owner,
       sortable: true,
     },
@@ -200,17 +206,6 @@ function Projects() {
             onClick={() => handleViewProjectFolder(row.id)}
             style={{ cursor: "pointer" }}
           />
-         {/* <img
-            className="ml-3"
-            src={edit_icon}
-            title="Edit project Details"
-            onClick={() => handleEditprojectClick(row.id)}
-            style={{ cursor: "pointer" }}
-            alt="edit"
-            width="25"
-            height="25"
-          /> */}
-
       {row.project_file && row.project_file.length > 0 && (
         <img
           className="ml-3"
@@ -227,7 +222,6 @@ function Projects() {
           style={{ cursor: "pointer" }}
         />
       )}
-
           <img
             className="ml-3"
             src={delete_icon}
@@ -259,7 +253,7 @@ function Projects() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             <button
-              onClick={() => navigate("/add-project")}
+              onClick={() => setShowAddModal(true)}
               className="btn btn-primary float-end add-user-btn"
             >
               {/* <i className="fa fa-plus"></i>  */}
@@ -276,33 +270,59 @@ function Projects() {
               paginationRowsPerPageOptions={[20, 30]}
             />
           </div>
-          
         </div>
       </div>
-
-      {selectedProjects && (
-        <Modal show={showModal} onHide={handleCloseModal}>
-          <Modal.Header closeButton>
-            <Modal.Title>Project Details</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <div className="project-container">
-              <h2>{selectedProjects.project_name}</h2>
-              <h5>Full Address:</h5>
-              <p>{selectedProjects.project_address}</p>
-              <h5>Status</h5>
-              <p>{selectedProjects.project_status}</p>
-              <h5>Uploaded Model File Name:</h5>
-              <p>{selectedProjects.project_file}</p>
+      <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Add New Project</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form>
+            <div className="mb-3">
+              <label htmlFor="projectName" className="form-label">Project Name</label>
+              <input
+                type="text"
+                className="form-control"
+                id="projectName"
+                value={newProject.projectName}
+                onChange={(e) => setNewProject({ ...newProject, projectName: e.target.value })}
+              />
             </div>
-          </Modal.Body>
-          {/* <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseModal}>
-              Close
-            </Button>
-          </Modal.Footer> */}
-        </Modal>
-      )}
+            <div className="mb-3">
+              <label htmlFor="projectLocation" className="form-label">Location</label>
+              <select
+                className="form-select"
+                id="projectLocation"
+                value={newProject.location}
+                onChange={(e) => setNewProject({ ...newProject, location: e.target.value })}
+              >
+                <option value="North America">North America</option>
+                <option value="Europe">Europe</option>
+                <option value="Asia">Asia</option>
+                <option value="Australia">Australia</option>
+              </select>
+            </div>
+            <div className="mb-3">
+              <label htmlFor="projectFile" className="form-label">Upload File</label>
+              <input
+                type="file"
+                accept=".ifc"
+                className="form-control"
+                id="projectFile"
+                onChange={(e) => setNewProject({ ...newProject, file: e.target.files[0] })}
+              />
+            </div>
+          </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button id="closeAdd" variant="secondary" onClick={() => setShowAddModal(false)}>
+            Close
+          </Button>
+          <Button id="saveAdd" variant="primary" onClick={handleAddNewProject}>
+            Save Project
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

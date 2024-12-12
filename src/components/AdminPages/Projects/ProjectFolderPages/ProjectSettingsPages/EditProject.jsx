@@ -74,8 +74,20 @@ function EditProject() {
         setOwnerName(`${user.first_name} ${user.last_name}`)
         setExistingFiles(parsedFiles);
 
-        setCreatedAt(createdAt);
-        setUpdatedAt(updatedAt);
+        setCreatedAt(new Intl.DateTimeFormat('en-US', {
+          month: 'short',
+          day: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: 'numeric'
+        }).format(new Date(createdAt)));
+        setUpdatedAt(new Intl.DateTimeFormat('en-US', {
+          month: 'short',
+          day: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: 'numeric'
+        }).format(new Date(updatedAt)),);
 
         const formattedFiles = files.map((file) => ({
           fileName: file.fileName, // Assuming the file object has this key
@@ -84,7 +96,9 @@ function EditProject() {
           lastModified: new Intl.DateTimeFormat('en-US', {
             month: 'short',
             day: '2-digit',
-            year: 'numeric'
+            year: 'numeric',
+            hour: '2-digit',
+            minute: 'numeric'
           }).format(new Date(updatedAt)),  // Format updatedAt
         }));
 
@@ -217,13 +231,13 @@ function EditProject() {
                               <div className="col-12">
                                 <div className="label-group">
                                   <label> Date Created: </label>
-                                  <div className="value"> {createdAt} </div>
+                                  <div className="value"> {createdAt} by {ownerName} </div>
                                 </div>
                               </div>
                               <div className="col-12">
                                 <div className="label-group">
                                   <label> Last Modified: </label>
-                                  <div className="value"> {updatedAt} </div>
+                                  <div className="value"> {updatedAt} by {ownerName} </div>
                                 </div>
                               </div>
                               <div className="row ml-1">

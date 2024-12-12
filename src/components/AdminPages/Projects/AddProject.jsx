@@ -13,8 +13,7 @@ function AddNewProject() {
   const { user } = useContext(AuthContext);
   const [loadingIfc, setLoadingIfc] = useState(false);
   const [projectName, setProjectName] = useState("");
-  const [projectAddress, setProjectAddress] = useState("");
-  const [projectStatus, setProjectStatus] = useState("Active");
+  const [projectLocation, setProjectLocation] = useState("");
   const [projectOwner, setProjectOwner] = useState("");
   const [projectFiles, setProjectFiles] = useState([])
 
@@ -33,7 +32,7 @@ function AddNewProject() {
 
   const addProject = async (e) => {
     e.preventDefault();
-    if (!projectName || !projectAddress || !projectOwner || !projectFiles) {
+    if (!projectName || !projectOwner || !projectFiles) {
       setError("All fields are required.");
       setTimeout(() => setError(""), 3000);
       return;
@@ -42,9 +41,8 @@ function AddNewProject() {
     try {
       const formData = new FormData();
       formData.append("project_name", projectName);
-      formData.append("project_address", projectAddress);
       formData.append("user_id", projectOwner);
-      formData.append("project_status", projectStatus);
+      formData.append("project_location", projectLocation);
       projectFiles.forEach((file) => formData.append("project_file", file));
   
       await axiosInstance.post("/create-project", formData, {
@@ -53,7 +51,6 @@ function AddNewProject() {
   
       setError("");
       setProjectName("");
-      setProjectAddress("");
       setProjectOwner("");
       setProjectFiles([]);
       Swal.fire({
@@ -153,25 +150,18 @@ function AddNewProject() {
                 onChange={(e) => setProjectName(e.target.value)}
               />
             </div>
-            <div className="form-group">
-              <label>Project Address:</label>
-              <input
-                type="text"
-                className="form-control"
-                value={projectAddress}
-                onChange={(e) => setProjectAddress(e.target.value)}
-              />
-            </div>
-            <div className="form-group status-field">
-              <label>Status:</label>
+            <div className="form-group ">
+              <label>Location:</label>
               <br />
               <select
-                className="branch-status"
-                value={projectStatus}
-                onChange={(e) => setProjectStatus(e.target.value)}
+                className="form-control"
+                value={projectLocation}
+                onChange={(e) => setProjectLocation(e.target.value)}
               >
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
+                <option value="North America">North America</option>
+                <option value="Europe">Europe</option>
+                <option value="Asia">Asia</option>
+                <option value="Australia">Australia</option>
               </select>
             </div>
           </div>

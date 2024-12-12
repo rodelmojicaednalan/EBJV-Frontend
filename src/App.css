@@ -35,6 +35,12 @@ button:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
   /* Optional shadow effect */
 }
+#closeAdd:hover{
+  background-color: #626262;
+}
+#saveAdd:hover{
+  background-color: #eb6314 !important;
+}
 
 
 /* Components Style */
@@ -85,6 +91,10 @@ button:hover {
 h3 {
   font-size: 19px;
   font-weight: 500;
+}
+
+.upload-section{
+  width:95% !important;
 }
 
 /* Start of table style */
