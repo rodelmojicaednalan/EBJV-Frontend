@@ -149,21 +149,50 @@ function IfcViewer() {
           try {
             setIsLoading(true);
             const response = await axiosInstance.get(
-              `/uploads/${fileUrl}`
+              `/uploads/${fileUrl}`,
+              { responseType: 'arraybuffer' }
             );
-            const fileContent = response.data;
+            const arrayBuffer = response.data;
 
-            const encoder = new TextEncoder();
-            const buffer = encoder.encode(fileContent);
+            const worker = new Worker(
+              new URL('./encoderWorker.js', import.meta.url)
+            );
 
-            const model = await fragmentIfcLoader.load(buffer);
-            model.name = 'example';
-            world.scene.three.add(model);
-            const indexer = components.get(OBC.IfcRelationsIndexer);
-            await indexer.process(model);
-            setIsLoading(false);
+            worker.postMessage(arrayBuffer);
+
+            worker.onmessage = async (e) => {
+              const processedBuffer = e.data;
+
+              if (processedBuffer.error) {
+                console.error(
+                  'Error in worker:',
+                  processedBuffer.error
+                );
+                setIsLoading(false);
+                return;
+              }
+
+              const model = await fragmentIfcLoader.load(
+                processedBuffer
+              );
+              model.name = 'example';
+              world.scene.three.add(model);
+
+              const indexer = components.get(OBC.IfcRelationsIndexer);
+              await indexer.process(model);
+              setIsLoading(false);
+
+              worker.terminate();
+            };
+
+            worker.onerror = (err) => {
+              console.error('Worker error:', err);
+              setIsLoading(false);
+              worker.terminate();
+            };
           } catch (error) {
             console.error('Error loading IFC:', error);
+            setIsLoading(false);
           }
         };
 
