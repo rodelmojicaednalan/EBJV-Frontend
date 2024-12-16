@@ -26,6 +26,7 @@ function ProjectContributors() {
   const [error, setError] = useState("");
 
   const [contributors , setContributors] = useState([])
+  const [contributorCount, setContributorCount] = useState(0);
   const navigate = useNavigate();
 
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -91,6 +92,7 @@ function ProjectContributors() {
         }));
 
         setContributors(formattedContributors)
+        setContributorCount(contributors.length);
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
@@ -311,7 +313,7 @@ function ProjectContributors() {
                                     <li className="list-item item-btn px-2 selectable active">
                                       <div className="label-group">
                                         <div className="value">All contributors</div>
-                                        <label>1 User</label>
+                                        <label>{contributorCount} {contributorCount === 1 ? 'User' : 'Users'}</label>
                                       </div>
                                     </li>
                                   </ul>
