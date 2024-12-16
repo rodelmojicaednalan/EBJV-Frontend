@@ -55,32 +55,32 @@ function ProjectTopics() {
     // Fetch project details and populate fields
     const fetchProjectDetails = async () => {
       try {
-        const response = await axiosInstance.get(`/project/${projectId}`);
-        const { project_name, user, files, updatedAt, createdAt } = response.data;
-        const parsedFiles = JSON.parse(response.data.project_file)
+        const response = await axiosInstance.get(`/project-topics/${projectId}`);
+        const { project_name, owner, project_topics, project_file } = response.data;
 
         setProjectName(project_name);
-        setOwnerName(`${user.first_name} ${user.last_name}`)
-        setExistingFiles(parsedFiles);
+        setOwnerName(`${owner.first_name} ${owner.last_name}`)
+        setExistingFiles(project_file);
 
-        const formattedFiles = files.map((file) => ({
-          fileName: file.fileName, // Assuming the file object has this key
-          fileSize: `${(file.fileSize / (1024 * 1024)).toFixed(2)} MB`, // Convert bytes to KB
-          fileOwner: `${user.first_name} ${user.last_name}`,
-          dateCreated: new Intl.DateTimeFormat('en-US', {
+        const formattedTopics = project_topics.map((topic) => ({
+          id: topic.id,
+          name: topic.topicName,
+          description: topic.topicDescription,
+          assignee: topic.assignee,
+          type: topic.topicType,
+          status: topic.topicStatus,
+          priority: topic.topicPriority,
+          topicDue: new Intl.DateTimeFormat('en-US', {
             month: 'short',
             day: '2-digit',
             year: 'numeric'
-          }).format(new Date(createdAt)),
-          lastModified: new Intl.DateTimeFormat('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric'
-          }).format(new Date(updatedAt)),  // Format updatedAt
+          }).format(new Date(topicDueDate)),
+          tags: topic.topicTags,
+          createdAt: topic.dateCreated,
         }));
 
-        setTopicData(formattedFiles)
-        console.log(topicData.dateCreated)
+        setTopicData(formattedTopics)
+        console.log(topicData)
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
@@ -132,81 +132,34 @@ function ProjectTopics() {
     );
   };
 
-
-
-  const topicDummyData = [
-    {
-      id: 1,
-      title: "New Structural Design for ABG Group",
-      assignedTo: "Sean Carter",
-      createdBy: "Marshall Mathers",
-      createdAt: "Dec 02, 2024 10:53 AM",
-      priority: "High Priority",
-      status: "In Progress",
-      type: "Inquiry",
-      deadline: "Dec 15, 2024",
-      icons: {
-        priorityIcon: <FaBookmark style={{ color: "gold" }} />,
-        statusIcon: <GrStatusGoodSmall style={{ color: "green" }} />,
-        typeIcon: <FaCircleInfo style={{ color: "royalBlue" }} />,
-        deadlineIcon: <FaRegCalendar />,
-      },
+  const iconMappings = {
+    priority: {
+      low: <FaBookmark style={{ color: "green" }} />,
+      normal: <FaBookmark style={{ color: "royalBlue" }} />,
+      high: <FaBookmark style={{ color: "orange" }} />,
+      critical: <FaBookmark style={{ color: "red" }} />,
     },
-    {
-      id: 2,
-      title: "Architecture Update on House Remodeling",
-      assignedTo: "Kyrie Irving",
-      createdBy: "LeBron James",
-      createdAt: "Dec 01, 2024 3:45 PM",
-      priority: "Normal Priority",
-      status: "Pending",
-      type: "Remark",
-      deadline: "Dec 10, 2024",
-      icons: {
-        priorityIcon: <FaBookmark style={{ color: "royalBlue" }} />,
-        statusIcon: <GrStatusGoodSmall style={{ color: "orange" }} />,
-        typeIcon: <RiEdit2Fill style={{ color: "darkorange" }} />,
-        deadlineIcon: <FaRegCalendar />,
-      },
+    status: {
+      new: <GrStatusGoodSmall style={{ color: "green" }} />,
+      "in-progress": <GrStatusGoodSmall style={{ color: "orange" }} />,
+      pending: <GrStatusGoodSmall style={{ color: "royalBlue" }} />,
+      closed: <GrStatusGoodSmall style={{ color: "gray" }} />,
+      done: <GrStatusGoodSmall style={{ color: "blue" }} />,
     },
-    {
-      id: 3,
-      title: "Adjustments to Structure for 2nd Avenue Warehouse",
-      assignedTo: "Peter Parker",
-      createdBy: "Frank Castle",
-      createdAt: "Nov 30, 2024 11:15 AM",
-      priority: "Low Priority",
-      status: "Completed",
-      type: "Request",
-      deadline: "Dec 05, 2024",
-      icons: {
-        priorityIcon: <FaBookmark style={{ color: "green" }} />,
-        statusIcon: <GrStatusGoodSmall style={{ color: "royalBlue" }} />,
-        typeIcon: <FaListAlt  style={{ color: "teal" }} />,
-        deadlineIcon: <FaRegCalendar />,
-      },
+    type: {
+      undefined: <FaCircleInfo style={{ color: "gray" }} />,
+      comment: <RiEdit2Fill style={{ color: "royalBlue" }} />,
+      issue: <GoAlertFill style={{ color: "red" }} />,
+      request: <FaListAlt style={{ color: "teal" }} />,
+      fault: <GoAlertFill style={{ color: "orange" }} />,
+      inquiry: <FaCircleInfo style={{ color: "green" }} />,
+      solution: <RiEdit2Fill style={{ color: "green" }} />,
+      remark: <FaCircleInfo style={{ color: "gold" }} />,
+      clash: <GoAlertFill style={{ color: "darkred" }} />,
     },
-    {
-      id: 4,
-      title: "Revisions on Flooring for New Building",
-      assignedTo: "Yoo Jimin",
-      createdBy: "Kim Minjeong",
-      createdAt: "Nov 30, 2024 11:15 AM",
-      priority: "Critical Priority",
-      status: "New",
-      type: "Fault",
-      deadline: "Dec 05, 2024",
-      icons: {
-        priorityIcon: <FaBookmark style={{ color: "red" }} />,
-        statusIcon: <GrStatusGoodSmall style={{ color: "blue" }} />,
-        typeIcon: <GoAlertFill style={{ color: "red" }} />,
-        deadlineIcon: <FaRegCalendar />,
-      },
-    },
-
-  ];
+    deadline: <FaRegCalendar style={{ color: "gray" }} />, // Default deadline icon
+  };
   
-
     return (
       <div className="container">
       <StickyHeader />
@@ -372,40 +325,43 @@ function ProjectTopics() {
 
                     
                       <div className="activity-cards-box mt-2 d-flex">
-                        {topicDummyData.map((topic) => (
+                        {topicData.map((topic) => (
                           <div key={topic.id} className="topic-card container-fluid">
                             <div className="topic-time d-none d-md-flex ">
                               <span className="text-muted">{topic.createdAt}</span>
                             </div>
                             <div className="flex-row">
                               <div className="activity flex-1">
-                                <div className="topic-title">{topic.title}</div>
+                                <div className="topic-title">{topic.name}</div>
                                 <div className="row-distribute">
                                   <div className="topic-users flex-row">
                                     <div className="assignee">
                                       <p>
-                                        <strong>Assigned to:</strong> {topic.assignedTo}
+                                        <strong>Assigned to:</strong> {topic.assignee}
                                       </p>
                                     </div>
                                     <div className="creator">
                                       <p>
-                                        <strong>Created by:</strong> {topic.createdBy}
+                                        <strong>Created by:</strong> {ownerName}
                                       </p>
                                     </div>
                                   </div>
                                   <div className="topic-config">
                                     <ul className="flex-row">
                                       <li className="mr-2">
-                                        {topic.icons.priorityIcon} {topic.priority}
+                                        {iconMappings.priority[topic.priority.toLowerCase()] || iconMappings.priority.normal} 
+                                        {topic.priority}
                                       </li>
                                       <li className="mr-2">
-                                        {topic.icons.statusIcon} {topic.status}
+                                        {iconMappings.status[topic.status.toLowerCase()] || iconMappings.status.new} 
+                                        {topic.status}
                                       </li>
                                       <li className="mr-2">
-                                        {topic.icons.typeIcon} {topic.type}
+                                        {iconMappings.type[topic.type.toLowerCase()] || iconMappings.type.undefined} 
+                                        {topic.type}
                                       </li>
                                       <li className="mr-2">
-                                        {topic.icons.deadlineIcon} {topic.deadline}
+                                        {iconMappings.deadline} {topic.topicDue}
                                       </li>
                                     </ul>
                                   </div>

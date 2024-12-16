@@ -29,7 +29,7 @@ function Projects() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [newProject, setNewProject] = useState({
-    title: "",
+    projectName: "",
     location: "",
     file: null,
   });
@@ -51,6 +51,7 @@ function Projects() {
         const userResponse = await axiosInstance.get("/user");
         const userRole = userResponse.data?.roles?.map(role => role.role_name);// Assuming `role` is returned from the API
         let response;
+ 
         if (userRole == 'Admin') {
           // Fetch all projects for Admin
           response = await axiosInstance.get("/projects");
@@ -60,14 +61,16 @@ function Projects() {
         }
 
         const formattedData = response.data.data.map((project) => {
-          const parsedFiles = JSON.parse(project.project_file);
+        //const parsedFiles = JSON.parse(project.project_file);
           return {
             id: project.id,
             project_name: project.project_name,
-            project_owner: `${project.user.first_name} ${project.user.last_name}`,
-            project_file: parsedFiles,
+            project_owner: `${project.owner.first_name} ${project.owner.last_name}`,
+            project_location: project.location,
+            project_file: project.project_file,
           };
         });
+
 
         setData(formattedData);
         setFilteredData(formattedData);
@@ -102,7 +105,7 @@ function Projects() {
       const formData = new FormData();
       formData.append("project_name", newProject.projectName);
       formData.append("user_id", projectOwner);
-      //formData.append("project_location", newProject.location);
+      formData.append("project_location", newProject.location);
       formData.append("project_file", newProject.file);
 
       await axiosInstance.post("/create-project", formData);

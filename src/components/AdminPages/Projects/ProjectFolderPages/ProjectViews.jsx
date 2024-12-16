@@ -27,6 +27,8 @@ function ProjectViews() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const [viewsTable ,setViewsTable] = useState([])
+
   const [activeDropdown, setActiveDropdown] = useState(null);
 
   useEffect(() => {
@@ -34,17 +36,33 @@ function ProjectViews() {
     const fetchProjectDetails = async () => {
       try {
         const response = await axiosInstance.get(`/project/${projectId}`);
-        const { project_name, user } = response.data;
-        const parsedFiles = JSON.parse(response.data.project_file)
+        const { project_name, owner, project_views, project_file } = response.data;
+  
 
         setProjectName(project_name);
-        setOwnerName(`${user.first_name} ${user.last_name}`)
-        setExistingFiles(parsedFiles); 
-        // Assuming `project_files` is an array of file objects
+        setOwnerName(`${owner.first_name} ${owner.last_name}`)
+        setExistingFiles(project_file);
+
+        const formattedViews = project_views.map((view) => ({
+          viewName: view.view_name, // Assuming the file object has this key
+          viewOwner: `${owner.first_name} ${owner.last_name}`,
+          isOwner: view.is_owner,
+          viewDesc: view.view_description,
+          viewTags: view.assigned_tags,
+          lastModified: new Intl.DateTimeFormat('en-US', {
+            month: 'short',
+            day: '2-digit',
+            year: 'numeric'
+          }).format(new Date(updatedAt)),  // Format updatedAt
+        }));
+
+        setViewsTable(formattedViews)
+        console.log(viewsTable)
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
     };
+    
 
     fetchProjectDetails();
   }, [projectId]);
@@ -88,42 +106,6 @@ function ProjectViews() {
       </div>
     );
   };
-
-
-
-  const sampleData = [
-    {
-      id: 1,
-      viewName: "Model1 View",
-      description: "Basic View",
-      shared: "Created by Me",
-      lastModified: "2024-12-01 14:35"
-
-    },
-    {
-      id: 2,
-      viewName: "Model1 View - Top",
-      description: "Top View",
-      shared: "Created by Me",
-      lastModified: "2024-11-28 09:12"
-
-    },
-    {
-      id: 3,
-      viewName: "Model1 View - Side",
-      description: "Left Rear Side View",
-      shared: "Shared with Me",
-      lastModified: "2024-11-25 16:50"
-
-    },
-    {
-      id: 4,
-      viewName: "Model1 View - Skeleton",
-      description: "Skeletal Structure View",
-      shared: "Shared with Me",
-      lastModified: "2024-11-22 13:27"
-    },
-  ];
   
   // Define columns for the table
   const sampleColumns = [
@@ -134,12 +116,12 @@ function ProjectViews() {
     },
     {
       name: "Description",
-      selector: (row) => row.description,
+      selector: (row) => row.viewDesc,
       sortable: true,
     },
     {
       name: "Ownership",
-      selector: (row) => row.shared,
+      selector: (row) => row.isOwner,
       sortable: true,
     },
     {
@@ -198,7 +180,7 @@ function ProjectViews() {
                       <DataTable
                         className="dataTables_wrapperz mt-3"
                         columns={sampleColumns}
-                        data={sampleData}
+                        data={viewsTable}
                         pagination
                         paginationPerPage={10}
                         paginationRowsPerPageOptions={[10, 20, 30]}

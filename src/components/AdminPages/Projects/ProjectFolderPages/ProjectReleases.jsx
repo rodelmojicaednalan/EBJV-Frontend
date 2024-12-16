@@ -31,22 +31,43 @@ function ProjectReleases() {
   };
 
 
+  const [releasesTable ,setReleasesTable] = useState([])
+
   useEffect(() => {
     // Fetch project details and populate fields
     const fetchProjectDetails = async () => {
       try {
         const response = await axiosInstance.get(`/project/${projectId}`);
-        const { project_name, user } = response.data;
-        const parsedFiles = JSON.parse(response.data.project_file)
+        const { project_name, owner, project_releases, project_file } = response.data;
+  
 
         setProjectName(project_name);
-        setOwnerName(`${user.first_name} ${user.last_name}`)
-        setExistingFiles(parsedFiles); 
-        // Assuming `project_files` is an array of file objects
+        setOwnerName(`${owner.first_name} ${owner.last_name}`)
+        setExistingFiles(project_file);
+
+        const formattedViews = project_releases.map((release) => ({
+          releaseName: release.release_name, // Assuming the file object has this key
+          releaseOwner: `${owner.first_name} ${owner.last_name}`,
+          totalFiles: release.total_files,
+          dueDate: release.due_date,
+          recipients: release.recipients,
+          releaseStatus: release.release_status,
+          releaseNote: release.release_note,
+          viewTags: release.assigned_tags,
+          lastModified: new Intl.DateTimeFormat('en-US', {
+            month: 'short',
+            day: '2-digit',
+            year: 'numeric'
+          }).format(new Date(updatedAt)),  // Format updatedAt
+        }));
+
+        setReleasesTable(formattedViews)
+        console.log(releasesTable)
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
     };
+    
 
     fetchProjectDetails();
   }, [projectId]);
@@ -96,47 +117,17 @@ function ProjectReleases() {
   };
 
 
-  const sampleData = [
-    {
-      id: 1,
-      name: "Release 1",
-      file: "1",
-      dueDate: "Dec 05, 2024",
-      recipient: "Dirk Nowitzki",
-    },
-    {
-      id: 2,
-      name: "Release 1.2",
-      file: "1",
-      dueDate: "Dec 05, 2024",
-      recipient: "LeBron James",
-    },
-    {
-      id: 3,
-      name: "Release 2",
-      file: "3",
-      dueDate: "Dec 05, 2024",
-      recipient: "LeBron James",
-    },
-    {
-      id: 4,
-      name: "Pre-Final Release",
-      file: "2",
-      dueDate: "Dec 05, 2024",
-      recipient: "Kawhi Leonard",
-    },
-  ];
 
   // Define columns for the table
   const sampleColumns = [
     {
       name: "Name",
-      selector: (row) => row.name,
+      selector: (row) => row.releaseName,
       sortable: true,
     },
     {
       name: "Files",
-      selector: (row) => row.file,
+      selector: (row) => row.totalFiles,
       sortable: true,
     },
     {
@@ -146,7 +137,7 @@ function ProjectReleases() {
     },
     {
       name: "Recipients",
-      selector: (row) => row.recipient,
+      selector: (row) => row.recipients,
       sortable: true,
     },
     {
@@ -154,7 +145,7 @@ function ProjectReleases() {
       button: true,
       cell: (row) => (
         <button className="draft-btn">
-          <FiEdit size={18} color="#6A6976" /> Draft
+          <FiEdit size={18} color="#6A6976" /> row.releaseStatus
         </button>
       ),
     },
@@ -260,7 +251,7 @@ function ProjectReleases() {
                           </button>
                         </div>
                       </div>
-                      <div className="view-filters">
+                      <div className="release-filters">
                         <div className="filter-container">
                           <div className="filters d-flex">
                             {sampleFilters.map((filter) => (
@@ -279,7 +270,7 @@ function ProjectReleases() {
                       <DataTable
                         className="dataTables_wrapperz mt-3"
                         columns={sampleColumns}
-                        data={sampleData}
+                        data={releasesTable}
                         pagination
                         paginationPerPage={10}
                         paginationRowsPerPageOptions={[10, 20, 30]}

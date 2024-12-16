@@ -25,7 +25,7 @@ function ProjectContributors() {
   const [fileSize, setFileSize] = useState([])
   const [error, setError] = useState("");
 
-  const [explorerTable ,setExplorerTable] = useState([])
+  const [contributors , setContributors] = useState([])
   const navigate = useNavigate();
 
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -70,30 +70,27 @@ function ProjectContributors() {
     // Fetch project details and populate fields
     const fetchProjectDetails = async () => {
       try {
-        const response = await axiosInstance.get(`/project/${projectId}`);
-        const { project_name, user, files, updatedAt, project_status } = response.data;
-        const parsedFiles = JSON.parse(response.data.project_file)
+        const response = await axiosInstance.get(`/project-contributors/${projectId}`);
+        const { project_name, owner, contributors } = response.data;
 
         setProjectName(project_name);
-        setOwnerName(`${user.first_name} ${user.last_name}`)
-        setExistingFiles(parsedFiles);
+        setOwnerName(owner)
 
-        const formattedFiles = files.map((file) => ({
-          fileName: file.fileName, // Assuming the file object has this key
-          fileSize: `${(file.fileSize / (1024 * 1024)).toFixed(2)} MB`, // Convert bytes to KB
-          fileOwner: `${user.first_name} ${user.last_name}`,
-          projectStatus: project_status,
-          lastModified: new Intl.DateTimeFormat('en-US', {
+        const formattedContributors = contributors.map((contributor) => ({
+          contName: contributor.name,
+          contEmployer: contributor.employer,
+          contRole: contributor.role,
+          contStatus: contributor.status,
+          lastAccessed: new Intl.DateTimeFormat('en-US', {
             month: 'short',
             day: '2-digit',
             year: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
-          }).format(new Date(updatedAt)),  // Format updatedAt
+          }).format(new Date(contributor.last_login)),  // Format updatedAt
         }));
 
-        setExplorerTable(formattedFiles)
-        console.log(status)
+        setContributors(formattedContributors)
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
@@ -103,35 +100,35 @@ function ProjectContributors() {
     fetchProjectDetails();
   }, [projectId]);
 
-  const explorerColumn = [
+  const contTableColumn = [
     {
       name: "Name",
 
-      selector: (row) => row.fileOwner,
+      selector: (row) => row.contName,
       sortable: true,
     },
     {
       name: "Employer",
 
-      selector: (row) => "-",
+      selector: (row) => row.contEmployer,
       sortable: true,
     },
     {
       name: "Role",
 
-      selector: (row) => "~",
+      selector: (row) => row.contRole,
       sortable: true,
     },
     {
       name: "Status",
 
-      selector: (row) => row.projectStatus,
+      selector: (row) => row.contStatus,
       sortable: true,
     },
     {
-      name: "Last Modified",
+      name: "Last Accessed",
 
-      selector: (row) => row.lastModified,
+      selector: (row) => row.lastAccessed,
       sortable: true,
     },
   ];
@@ -309,7 +306,7 @@ function ProjectContributors() {
                                 </button>
                               </div>
                               <div className="listWrapper">
-                                <div classname="sub-section py-2">
+                                <div className="sub-section py-2">
                                   <ul className="list">
                                     <li className="list-item item-btn px-2 selectable active">
                                       <div className="label-group">
@@ -320,7 +317,7 @@ function ProjectContributors() {
                                   </ul>
                                 </div>
                                 <h6  id="customgroup" className="text-muted px-2"> Custom Groups </h6>
-                                <div classname="sub-section py-2">
+                                <div className="sub-section py-2">
                                   <p className="text-muted px-2"> No group found</p>
                                 </div>
                               </div>
@@ -430,8 +427,8 @@ function ProjectContributors() {
                                 <DataTable
                                   className="dataTables_wrapperx"
                                   id="explorer-table"
-                                  columns={explorerColumn}
-                                  data={explorerTable}
+                                  columns={contTableColumn}
+                                  data={contributors}
                                   responsive
                                 />
                                 </div>

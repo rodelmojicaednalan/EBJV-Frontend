@@ -32,18 +32,20 @@ function ProjectActivity() {
     // Fetch project details and populate fields
     const fetchProjectDetails = async () => {
       try {
-        const response = await axiosInstance.get(`/project/${projectId}`);
-        const { project_name, user, files, updatedAt } = response.data;
-        const parsedFiles = JSON.parse(response.data.project_file)
+        const response = await axiosInstance.get(`/project-activities/${projectId}`);
+        const { id, project_name, owner, project_activities, updatedAt } = response.data;
+
 
         setProjectName(project_name);
-        setOwnerName(`${user.first_name} ${user.last_name}`)
-        setExistingFiles(parsedFiles);
+        setOwnerName(`${owner.first_name} ${owner.last_name}`)
 
-        const formattedFiles = files.map((file) => ({
-          fileName: file.fileName, // Assuming the file object has this key
-          fileSize: `${(file.fileSize / (1024 * 1024)).toFixed(2)} MB`, // Convert bytes to KB
-          fileOwner: `${user.first_name} ${user.last_name}`,
+
+        const formattedActivities = project_activities.map((activity) => ({
+          id: id,
+          activityType: activity.activityType, // Assuming the file object has this key
+          activityDescription: activity.activityDescription,
+          relatedData: activity.relatedData,
+          activityOwner: `${owner.first_name} ${owner.last_name}`,
           lastModified: new Intl.DateTimeFormat('en-US', {
             month: 'short',
             day: '2-digit',
@@ -51,8 +53,8 @@ function ProjectActivity() {
           }).format(new Date(updatedAt)),  // Format updatedAt
         }));
 
-        setActivityCardData(formattedFiles)
-        console.log(response.data)
+        setActivityCardData(formattedActivities)
+        console.log(project_activities)
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
@@ -102,56 +104,56 @@ function ProjectActivity() {
     );
   };
 
-  const cardData = [
-    {
-      id: 1,
-      fileName: "Model5.ifc",
-      fileOwner: "Charlie White",
-      lastModified: "Nov 12, 2024 3:15 AM",
-      fileSize: "300 KB",
-      activityDesc: "added topic to file"
-    },
-    {
-      id: 2,
-      fileName: "Model5.ifc",
-      fileOwner: "Charlie Red",
-      lastModified: "Nov 8, 2024 11:41 AM",
-      fileSize: "300 KB",
-      activityDesc: "modified file name"
-    },
-    {
-      id: 3,
-      fileName: "Model72.ifc",
-      fileOwner: "Charlie Brown",
-      lastModified: "Nov 8, 2024 6:33 AM",
-      fileSize: "300 KB",
-      activityDesc: "added file"
-    },
-    {
-      id: 4,
-      fileName: "Modelxx31.ifc",
-      fileOwner: "Charlie Green",
-      lastModified: "Nov 7, 2024 1:12 PM",
-      fileSize: "300 KB",
-      activityDesc: "Commented on Topic A"
-    },
-    {
-      id: 5,
-      fileName: "",
-      fileOwner: "Charlie Brown",
-      lastModified: "Nov 7, 2024 12:07 PM",
-      fileSize: "300 KB",
-      activityDesc: "added Topic A "
-    },
-    {
-      id: 6,
-      fileName: "",
-      fileOwner: "Charlie Brown",
-      lastModified: "Nov 7, 2024 11:33 AM",
-      fileSize: "300 KB",
-      activityDesc: "created Project "
-    },
-  ];
+  // const cardData = [
+  //   {
+  //     id: 1,
+  //     fileName: "Model5.ifc",
+  //     fileOwner: "Charlie White",
+  //     lastModified: "Nov 12, 2024 3:15 AM",
+  //     fileSize: "300 KB",
+  //     activityDesc: "added topic to file"
+  //   },
+  //   {
+  //     id: 2,
+  //     fileName: "Model5.ifc",
+  //     fileOwner: "Charlie Red",
+  //     lastModified: "Nov 8, 2024 11:41 AM",
+  //     fileSize: "300 KB",
+  //     activityDesc: "modified file name"
+  //   },
+  //   {
+  //     id: 3,
+  //     fileName: "Model72.ifc",
+  //     fileOwner: "Charlie Brown",
+  //     lastModified: "Nov 8, 2024 6:33 AM",
+  //     fileSize: "300 KB",
+  //     activityDesc: "added file"
+  //   },
+  //   {
+  //     id: 4,
+  //     fileName: "Modelxx31.ifc",
+  //     fileOwner: "Charlie Green",
+  //     lastModified: "Nov 7, 2024 1:12 PM",
+  //     fileSize: "300 KB",
+  //     activityDesc: "Commented on Topic A"
+  //   },
+  //   {
+  //     id: 5,
+  //     fileName: "",
+  //     fileOwner: "Charlie Brown",
+  //     lastModified: "Nov 7, 2024 12:07 PM",
+  //     fileSize: "300 KB",
+  //     activityDesc: "added Topic A "
+  //   },
+  //   {
+  //     id: 6,
+  //     fileName: "",
+  //     fileOwner: "Charlie Brown",
+  //     lastModified: "Nov 7, 2024 11:33 AM",
+  //     fileSize: "300 KB",
+  //     activityDesc: "created Project "
+  //   },
+  // ];
   return (
     <div className="container">
       <StickyHeader />
@@ -197,7 +199,7 @@ function ProjectActivity() {
                       </div> 
 
                 <div className="activity-cards-box mt-1 d-flex">
-                  {cardData.map((data) => (
+                  {activityCardData.map((data) => (
                     <div
                       key={data.id}
                       className="activity-card container-fluid mb-2"
@@ -215,10 +217,10 @@ function ProjectActivity() {
                           </div>
                           <div className="activity">
                             <div className="row">
-                              <div> <img src={man} style={{height:"24px"}}/> <span style={{fontWeight:"500", textTransform:"uppercase"}}>{data.fileOwner} </span></div>
-                              <div> <span style={{fontStyle: "italic", fontWeight:"light"}} > {data.activityDesc} </span></div>
+                              <div> <img src={man} style={{height:"24px"}}/> <span style={{fontWeight:"500", textTransform:"uppercase"}}>{data.activityOwner} </span></div>
+                              <div> <span style={{fontStyle: "italic", fontWeight:"light"}} > {data.activityDescription} </span></div>
                             </div>
-                            <div className="activity-file"> {data.fileName} </div>
+                            <div className="activity-file"> {data.relatedData} </div>
                           </div>
                         </div>
                       </div>
