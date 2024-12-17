@@ -105,13 +105,11 @@ function TopicSettings() {
     const fetchProjectDetails = async () => {
       try {
         const response = await axiosInstance.get(`/project/${projectId}`);
-        const { project_name, user, files, updatedAt, createdAt } = response.data;
-        const parsedFiles = JSON.parse(response.data.project_file)
-
+        const { project_name, owner, files, updatedAt, createdAt, project_file } = response.data;
 
         setProjectName(project_name);
-        setOwnerName(`${user.first_name} ${user.last_name}`)
-        setExistingFiles(parsedFiles);
+        setOwnerName(`${owner.first_name} ${owner.last_name}`)
+        setExistingFiles(project_file);
 
         setCreatedAt(createdAt);
         setUpdatedAt(updatedAt);
@@ -119,7 +117,7 @@ function TopicSettings() {
         const formattedFiles = files.map((file) => ({
           fileName: file.fileName, // Assuming the file object has this key
           fileSize: `${(file.fileSize / (1024 * 1024)).toFixed(2)} MB`, // Convert bytes to KB
-          fileOwner: `${user.first_name} ${user.last_name}`,
+          fileOwner: `${owner.first_name} ${owner.last_name}`,
           lastModified: new Intl.DateTimeFormat('en-US', {
             month: 'short',
             day: '2-digit',

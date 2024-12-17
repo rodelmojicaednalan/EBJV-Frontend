@@ -18,6 +18,7 @@ import ProjectSidebar from '../../ProjectFolderSidebar';
 function EditProject() {
   const { projectId } = useParams();
   const [projectName, setProjectName] = useState("");
+  const [projectLocation, setProjectLocation] = useState("");
   const [ownerName, setOwnerName] = useState("")
   const [existingFiles, setExistingFiles] = useState([]); // Existing files
   const [fileName, setFileName] = useState([]);
@@ -59,21 +60,19 @@ function EditProject() {
     };
   }, []);
 
-
+const [totalFileSize, setTotalFileSize] = useState(0);
 
   useEffect(() => {
     // Fetch project details and populate fields
     const fetchProjectDetails = async () => {
       try {
         const response = await axiosInstance.get(`/project/${projectId}`);
-        const { project_name, user, files, updatedAt, createdAt } = response.data;
-        const parsedFiles = JSON.parse(response.data.project_file)
-
+        const { project_name, owner, files, updatedAt, createdAt, project_file, project_location } = response.data;
 
         setProjectName(project_name);
-        setOwnerName(`${user.first_name} ${user.last_name}`)
-        setExistingFiles(parsedFiles);
-
+        setProjectLocation(project_location);
+        setOwnerName(`${owner.first_name} ${owner.last_name}`)
+        setExistingFiles(project_file);
         setCreatedAt(new Intl.DateTimeFormat('en-US', {
           month: 'short',
           day: '2-digit',
@@ -91,8 +90,8 @@ function EditProject() {
 
         const formattedFiles = files.map((file) => ({
           fileName: file.fileName, // Assuming the file object has this key
-          fileSize: `${(file.fileSize / (1024 * 1024)).toFixed(2)} MB`, // Convert bytes to KB
-          fileOwner: `${user.first_name} ${user.last_name}`,
+          fileSize: `${(file.fileSize / (1024 * 1024)).toFixed(2)} MB`, // Convert bytes to MB
+          fileOwner: `${owner.first_name} ${owner.last_name}`,
           lastModified: new Intl.DateTimeFormat('en-US', {
             month: 'short',
             day: '2-digit',
@@ -102,8 +101,10 @@ function EditProject() {
           }).format(new Date(updatedAt)),  // Format updatedAt
         }));
 
+        const totalSize = files.reduce((sum, file) => sum + file.fileSize, 0); // Sum file sizes
+        setTotalFileSize((totalSize / (1024 * 1024)).toFixed(2)); // Convert to MB and set state
+  
         setExplorerTable(formattedFiles)
-        console.log(response.data)
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
@@ -190,11 +191,12 @@ function EditProject() {
                             <div className="row">
                               <div className="col-12">
                                 <div className="input-group">
-                                  <label for="projectName">
+                                  <label htmlFor="projectName">
                                     <span>Project Name</span>
                                   </label>
                                   <div className="input-focus-group">
-                                  <input id="projectName" class="" data-cy="projectName" type="text" autocomplete="off" maxlength="255" name="projectName"/>
+                                  <input id="projectName" data-cy="projectName" type="text" 
+                                  autoComplete="off" maxLength="255" name="projectName" placeholder={projectName}/>
                                   </div>
                                 </div>
                               </div>
@@ -225,7 +227,7 @@ function EditProject() {
                               <div className="col-12">
                                 <div className="label-group">
                                   <label> Project Location: </label>
-                                  <div className="value"> Asia </div>
+                                  <div className="value"> {projectLocation} </div>
                                 </div>
                               </div>
                               <div className="col-12">
@@ -244,7 +246,7 @@ function EditProject() {
                               <div className="col-6 col-sm-6 col-md-3">
                                 <div className="label-group">
                                   <label> Size: </label>
-                                  <div className="value"> 31.7 MB </div>
+                                  <div className="value">  {totalFileSize} MB </div>
                                 </div>
                               </div>
                               <div className="col-6 col-sm-6 col-md-3">
@@ -256,7 +258,7 @@ function EditProject() {
                               <div className="col-6 col-sm-6 col-md-3">
                                 <div className="label-group">
                                   <label> Files: </label>
-                                  <div className="value"> 7 </div>
+                                  <div className="value"> {explorerTable.length} </div>
                                 </div>
                               </div>
                               <div className="col-6 col-sm-6 col-md-3">
@@ -277,20 +279,20 @@ function EditProject() {
                             <div className="row">
                               <div className="col-6">
                                 <div className="input-group">
-                                  <label for="startDate"><span>Start date: </span></label>
-                                  <input id="startDate" className="datepicker" data-cy="startDate" type="datetime-local" autocomplete="off" maxlength="255" name="startDate"/>
+                                  <label htmlFor="startDate"><span>Start date: </span></label>
+                                  <input id="startDate" className="datepicker" data-cy="startDate" type="datetime-local" autoComplete="off" maxLength="255" name="startDate"/>
                                 </div>
                               </div>
                               <div className="col-6">
                                 <div className="input-group">
-                                  <label for="endDate"><span>End date: </span></label>
-                                  <input id="endDate" className="datepicker" data-cy="endDate" type="datetime-local" autocomplete="off" maxlength="255" name="endDate"/>
+                                  <label htmlFor="endDate"><span>End date: </span></label>
+                                  <input id="endDate" className="datepicker" data-cy="endDate" type="datetime-local" autoComplete="off" maxLength="255" name="endDate"/>
                                 </div>
                               </div>
                               <div className="col-12">
                                 <div className="input-group">
-                                  <label for="description"><span>Description: </span></label>
-                                  <input id="description" style={{height:"4rem"}} data-cy="description" type="textarea" autocomplete="off" maxlength="255" name="description"/>
+                                  <label htmlFor="description"><span>Description: </span></label>
+                                  <input id="description" style={{height:"4rem"}} data-cy="description" type="textarea" autoComplete="off" maxLength="255" name="description"/>
                                 </div>
                               </div>
                             </div>

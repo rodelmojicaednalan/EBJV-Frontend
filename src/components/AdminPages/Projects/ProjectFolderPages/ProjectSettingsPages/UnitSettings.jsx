@@ -27,12 +27,11 @@ function UnitSettings() {
     const fetchProjectDetails = async () => {
       try {
         const response = await axiosInstance.get(`/project/${projectId}`);
-        const { project_name, user } = response.data;
-        const parsedFiles = JSON.parse(response.data.project_file)
-
+        const { project_name, owner, project_file} = response.data;
+      
         setProjectName(project_name);
-        setOwnerName(`${user.first_name} ${user.last_name}`)
-        setExistingFiles(parsedFiles); 
+        setOwnerName(`${owner.first_name} ${owner.last_name}`)
+        setExistingFiles(project_file); 
         // Assuming `project_files` is an array of file objects
       } catch (error) {
         console.error("Error fetching project details:", error);

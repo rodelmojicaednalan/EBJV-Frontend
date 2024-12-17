@@ -27,6 +27,7 @@ function ProjectToDo() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const [toDoData, setToDoData] = useState([]);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -44,19 +45,36 @@ function ProjectToDo() {
     // Fetch project details and populate fields
     const fetchProjectDetails = async () => {
       try {
-        const response = await axiosInstance.get(`/project/${projectId}`);
-        const { project_name, user } = response.data;
-        const parsedFiles = JSON.parse(response.data.project_assignee)
+        const response = await axiosInstance.get(`/project-topics/${projectId}`);
+        const { project_name, owner, project_toDos } = response.data;
 
         setProjectName(project_name);
-        setOwnerName(`${user.first_name} ${user.last_name}`)
-        setExistingFiles(parsedFiles); 
-        // Assuming `project_assignees` is an array of assignee objects
+        setOwnerName(`${owner.first_name} ${owner.last_name}`)
+
+        const formattedToDos = project_toDos.map((toDo) => ({
+          id: toDo.id,
+          title: toDo.toDoTitle,
+          assignee: toDo.todoAssignee,
+          createdOn: new Intl.DateTimeFormat('en-US', {
+            month: 'short',
+            day: '2-digit',
+            year: 'numeric'
+          }).format(new Date(toDo.dateCreated)),
+          modifiedOn: new Intl.DateTimeFormat('en-US', {
+            month: 'short',
+            day: '2-digit',
+            year: 'numeric'
+          }).format(new Date(toDo.lastUpdated)),
+          priority: toDo.toDoPriority,
+          status: toDo.toDoStatus
+        }));
+
+        setToDoData(formattedToDos)
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
     };
-
+    
     fetchProjectDetails();
   }, [projectId]);
 
@@ -88,7 +106,6 @@ function ProjectToDo() {
   ];
 
   const handleDropdownToggle = (filterType) => {
-    // Toggle the dropdown visibility for the clicked filter
     setActiveDropdown((prev) => (prev === filterType ? null : filterType));
   };
 
@@ -108,76 +125,78 @@ function ProjectToDo() {
     );
   };
 
-  const sampleData = [
-    {
-      id: 1,
-      name: "Review Architecural Design",
-      assignee: "Earvin Johnson",
-      createdOn: "Dec 02, 2024",
-      modifiedOn: "Dec 08, 2024",
-      priority: "Critical",
-      status: "In Progress",
-      icons: {
-        priorityIcon: <FaBookmark style={{ color: "red" }} />,
-        statusIcon: <GrStatusGoodSmall style={{ color: "blue" }} />,
-      },
-    },
-    {
-      id: 2,
-      name: "Polish House Frame",
-      assignee: "Larry Bird",
-      createdOn: "Nov 05, 2024",
-      modifiedOn: "Dec 06, 2024",
-      priority: "Normal",
-      status: "Done",
-      icons: {
-        priorityIcon: <FaBookmark style={{ color: "royalBlue" }} />,
-        statusIcon: <GrStatusGoodSmall style={{ color: "green" }} />,
-      },
-    },
-    {
-      id: 3,
-      name: "Garage Design",
-      assignee: "Michael Jordan",
-      createdOn: "Dec 10, 2024",
-      modifiedOn: "Dec 11, 2024",
-      priority: "High",
-      status: "New",
-      icons: {
-        priorityIcon: <FaBookmark style={{ color: "gold" }} />,
-        statusIcon: <GrStatusGoodSmall style={{ color: "royalBlue" }} />,
-      },
-    },
-    {
-      id: 4,
-      name: "Review Barn Design",
-      assignee: "Hakeem Olajuwon",
-      createdOn: "Dec 06, 2024",
-      modifiedOn: "Dec 07, 2024",
-      priority: "Low",
-      status: "Waiting",
-      icons: {
-        priorityIcon: <FaBookmark style={{ color: "green" }} />,
-        statusIcon: <GrStatusGoodSmall style={{ color: "gold" }} />,
-      },
-    },
-    {
-      id: 5,
-      name: "Review Warehouse Structure",
-      assignee: "Charles Barkley",
-      createdOn: "Dec 05, 2024",
-      modifiedOn: "Dec 09, 2024",
-      priority: "Normal",
-      status: "Closed",
-      icons: {
-        priorityIcon: <FaBookmark style={{ color: "royalBlue" }} />,
-        statusIcon: <GrStatusGoodSmall style={{ color: "grey" }} />,
-      },
-    },
-  ];
+  // const sampleData = [
+  //   {
+  //     id: 1,
+  //     name: "Review Architecural Design",
+  //     assignee: "Earvin Johnson",
+  //     createdOn: "Dec 02, 2024",
+  //     modifiedOn: "Dec 08, 2024",
+  //     priority: "Critical",
+  //     status: "In Progress",
+  //     icons: {
+  //       priorityIcon: <FaBookmark style={{ color: "red" }} />,
+  //       statusIcon: <GrStatusGoodSmall style={{ color: "blue" }} />,
+  //     },
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Polish House Frame",
+  //     assignee: "Larry Bird",
+  //     createdOn: "Nov 05, 2024",
+  //     modifiedOn: "Dec 06, 2024",
+  //     priority: "Normal",
+  //     status: "Done",
+  //     icons: {
+  //       priorityIcon: <FaBookmark style={{ color: "royalBlue" }} />,
+  //       statusIcon: <GrStatusGoodSmall style={{ color: "green" }} />,
+  //     },
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "Garage Design",
+  //     assignee: "Michael Jordan",
+  //     createdOn: "Dec 10, 2024",
+  //     modifiedOn: "Dec 11, 2024",
+  //     priority: "High",
+  //     status: "New",
+  //     icons: {
+  //       priorityIcon: <FaBookmark style={{ color: "gold" }} />,
+  //       statusIcon: <GrStatusGoodSmall style={{ color: "royalBlue" }} />,
+  //     },
+  //   },
+  //   {
+  //     id: 4,
+  //     name: "Review Barn Design",
+  //     assignee: "Hakeem Olajuwon",
+  //     createdOn: "Dec 06, 2024",
+  //     modifiedOn: "Dec 07, 2024",
+  //     priority: "Low",
+  //     status: "Waiting",
+  //     icons: {
+  //       priorityIcon: <FaBookmark style={{ color: "green" }} />,
+  //       statusIcon: <GrStatusGoodSmall style={{ color: "gold" }} />,
+  //     },
+  //   },
+  //   {
+  //     id: 5,
+  //     name: "Review Warehouse Structure",
+  //     assignee: "Charles Barkley",
+  //     createdOn: "Dec 05, 2024",
+  //     modifiedOn: "Dec 09, 2024",
+  //     priority: "Normal",
+  //     status: "Closed",
+  //     icons: {
+  //       priorityIcon: <FaBookmark style={{ color: "royalBlue" }} />,
+  //       statusIcon: <GrStatusGoodSmall style={{ color: "grey" }} />,
+  //     },
+  //   },
+  // ];
+
+
 
   // Define columns for the table
-  const sampleColumns = [
+  const toDoTableColumns = [
     {
       name: "Title",
       width: "25%",
@@ -337,8 +356,8 @@ function ProjectToDo() {
                       </div> 
                       <DataTable
                         className="dataTables_wrapperz mt-3"
-                        columns={sampleColumns}
-                        data={sampleData}
+                        columns={toDoTableColumns}
+                        data={toDoData}
                         pagination
                         paginationPerPage={10}
                         paginationRowsPerPageOptions={[10, 20, 30]}
