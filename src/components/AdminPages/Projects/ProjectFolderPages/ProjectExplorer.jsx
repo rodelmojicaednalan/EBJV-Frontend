@@ -167,24 +167,39 @@ function ProjectExplorer() {
 
   const handleDeleteFiles = async () => {
     try {
-      const filesToDelete = selectedFiles.map(index => explorerTable[index]);
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won’t be able to revert this!.",
+      showCancelButton: true,
+      icon: 'warning',
+      confirmButtonColor: "#EC221F",
+      cancelButtonColor: "#00000000",
+      cancelTextColor: "#000000",
+      confirmButtonText: "Yes, delete it!",
+      customClass: {
+        container: "custom-container",
+        confirmButton: "custom-confirm-button",
+        cancelButton: "custom-cancel-button",
+        title: "custom-swal-title",
+      },
+    })
 
+    if (result.isConfirmed){
+    const filesToDelete = selectedFiles.map(index => explorerTable[index]);
     for (const file of filesToDelete) {
       await axiosInstance.delete(`/delete-file/${projectId}/${file.fileName}`);
     }
-
     setExplorerTable(prev =>
       prev.filter((_, index) => !selectedFiles.includes(index))
     );
       setSelectedFiles([]); // Clear selected files
-  
       Swal.fire({
         title: "Deleted!",
         text: "Selected files have been deleted.",
         icon: "success",
         confirmButtonText: "OK",
       });
-
+    }
     } catch (error) {
       Swal.fire({
         title: "Error!",
@@ -348,7 +363,7 @@ function ProjectExplorer() {
                   <h6>Selected Files:</h6>
                   <ul>
                     {newFiles.map((file, index) => (
-                      <li key={index}>{file.name}</li>
+                      <li style={{listStyle: "none"}}key={index}>{file.name}</li>
                     ))}
                   </ul>
                 </div>

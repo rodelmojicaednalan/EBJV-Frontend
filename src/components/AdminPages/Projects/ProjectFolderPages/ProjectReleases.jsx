@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axiosInstance from "../../../../../axiosInstance.js";
 import Swal from "sweetalert2";
 import { useNavigate, useParams, Link } from "react-router-dom";
@@ -30,7 +30,6 @@ function ProjectReleases() {
     setOpenDropdownId(openDropdownId === id ? null : id);
   };
 
-
   const [releasesTable ,setReleasesTable] = useState([])
 
   useEffect(() => {
@@ -46,11 +45,16 @@ function ProjectReleases() {
         setExistingFiles(project_file);
 
         const formattedViews = project_releases.map((release) => ({
+          id: release.id,
           releaseName: release.release_name, // Assuming the file object has this key
           releaseOwner: `${owner.first_name} ${owner.last_name}`,
-          totalFiles: release.total_files,
-          dueDate: release.due_date,
-          recipients: release.recipients,
+          totalFiles: release.total_files || 0,
+          dueDate: new Intl.DateTimeFormat('en-US', {
+            month: 'short',
+            day: '2-digit',
+            year: 'numeric'
+          }).format(new Date(release.due_date)), 
+          recipients: JSON.parse(release.recipients),
           releaseStatus: release.release_status,
           releaseNote: release.release_note,
           viewTags: release.assigned_tags,
@@ -58,11 +62,10 @@ function ProjectReleases() {
             month: 'short',
             day: '2-digit',
             year: 'numeric'
-          }).format(new Date(updatedAt)),  // Format updatedAt
+          }).format(new Date(release.createdAt)),  // Format updatedAt
         }));
 
         setReleasesTable(formattedViews)
-        console.log(releasesTable)
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
@@ -116,6 +119,21 @@ function ProjectReleases() {
     );
   };
 
+  const menuRef  = useRef(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        toggleDropdown(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
 
 
   // Define columns for the table
@@ -145,7 +163,7 @@ function ProjectReleases() {
       button: true,
       cell: (row) => (
         <button className="draft-btn">
-          <FiEdit size={18} color="#6A6976" /> row.releaseStatus
+          <FiEdit size={18} color="#6A6976" /> {row.releaseStatus}
         </button>
       ),
     },
@@ -167,11 +185,11 @@ function ProjectReleases() {
             <FiMoreVertical size={24} color="#6A6976" />
           </button>
           {openDropdownId === row.id && (
-            <div className="dropdown-menu">
+            <div className="dropdown-menu" style={{marginLeft: "-110px", top: '-30px'}}  ref={menuRef}>
               <button onClick={() => alert(`Send clicked for ${row.name}`)}>
                 Send
               </button>
-              <button onClick={() => alert(`Delete clicked for ${row.name}`)}>
+              <button onClick={() => handleDeleteRelease(row.id)}>
                 Delete
               </button>
             </div>
@@ -181,7 +199,8 @@ function ProjectReleases() {
     },
   ];
 
-  const handleAddNewRelease = () => {
+
+  const handleAddNewRelease = async () => {
     Swal.fire({
       title: 'Add New Release',
       html: `
@@ -195,7 +214,7 @@ function ProjectReleases() {
           <label for="recipients" style="display: block; margin-bottom: 5px;">Recipients</label>
           <input type="text" id="recipients" class="swal2-input" placeholder="Enter recipients (comma-separated)" style="width:100%;">
           
-          <div id="group-container">
+          <div id="group-container" style="margin-top: 10px;">
             <button id="add-releaseNote-btn" type="button" class="btn btn-primary" style="margin-bottom: 10px;">Add a note?</button>
           </div>
         </div>
@@ -212,34 +231,114 @@ function ProjectReleases() {
   
         // Replace button with a text input when clicked
         addNoteBtn.addEventListener('click', () => {
-          groupContainer.innerHTML = `
-            <label for="release-note" style="display: block;">Note: </label>
-            <textarea id="release-note" class="swal2-input" placeholder="Write a note..." 
-            style="margin-bottom: 10px; width: 100%;
-            white-space: pre-wrap; word-wrap: break-word;
-            background-color: #FFF; color: black;">
-          `;
+          if (!document.getElementById('release-note')) {
+            const textArea = document.createElement('textarea');
+            textArea.id = 'release-note';
+            textArea.className = 'swal2-input';
+            textArea.placeholder = 'Write a note...';
+            textArea.style = `
+              margin-bottom: 10px; width: 100%; 
+              white-space: pre-wrap; word-wrap: break-word;
+              background-color: #FFF; color: black;
+            `;
+            groupContainer.appendChild(textArea);
+            addNoteBtn.disabled = true; // Disable button after note addition
+          }
         });
       },
       preConfirm: () => {
-        const releaseName = document.getElementById('release-name').value;
-        const dueDate = document.getElementById('due-date').value;
-        const recipients = document.getElementById('recipients').value;
-  
+        const releaseName = document.getElementById('release-name').value.trim();
+        const dueDate = document.getElementById('due-date').value.trim();
+        const recipients = document.getElementById('recipients').value.trim();
+        const releaseNote = document.getElementById('release-note')
+          ? document.getElementById('release-note').value.trim()
+          : null;
+
         if (!releaseName || !dueDate || !recipients) {
-          Swal.showValidationMessage('Please fill in all fields.');
+          Swal.showValidationMessage('Please fill in all required fields.');
           return null;
         }
   
-        return { releaseName, dueDate, recipients };
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const { releaseName, dueDate, recipients } = result.value;
+        const recipientList = recipients.split(',').map((email) => email.trim());
+        const invalidEmails = recipientList.filter(
+          (email) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+        );
   
-        // Handle adding the new release (e.g., API call)
-        console.log('New Release:', { releaseName, dueDate, recipients });
+        if (invalidEmails.length > 0) {
+          Swal.showValidationMessage(
+            `Invalid email(s): ${invalidEmails.join(', ')}`
+          );
+          return null;
+        }
+  
+        return { releaseName, dueDate, recipients: recipientList, releaseNote };
+      },
+    }).then(async(result) => {
+      if (result.isConfirmed) {
+        const { releaseName, dueDate, recipients, releaseNote } = result.value;
+  
+        try {
+          await axiosInstance.post(`/create-release/${projectId}`, {
+            releaseName,
+            dueDate,
+            recipients,
+            releaseNote,
+          });
         Swal.fire('Success!', 'The new release has been added.', 'success');
+        } catch (error){
+          Swal.fire('Error!', 'Failed to add the release. Try again.', 'error');
+        console.error(error);
+        }
+      }
+    });
+  };
+
+  const handleDeleteRelease = async (id) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'You won’t be able to revert this!',
+      showCancelButton: true,
+      icon: 'warning',
+      confirmButtonColor: '#EC221F',
+      cancelButtonColor: '#00000000',
+      cancelTextColor: '#000000',
+      confirmButtonText: 'Yes, delete it!',
+      customClass: {
+        container: 'custom-container',
+        confirmButton: 'custom-confirm-button',
+        cancelButton: 'custom-cancel-button',
+        title: 'custom-swal-title',
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axiosInstance.delete(`/delete-release/${projectId}/${id}`);
+          Swal.fire({
+            title: 'Success!',
+            text: `Release has been deleted.`,
+            imageUrl: check,
+            imageWidth: 100,
+            imageHeight: 100,
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#0ABAA6',
+            customClass: {
+              confirmButton: 'custom-success-confirm-button',
+              title: 'custom-swal-title',
+            },
+          });
+        } catch (error) {
+          Swal.fire({
+            title: 'Error!',
+            text: 'There was an error deleting the project release.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#EC221F',
+            customClass: {
+              confirmButton: 'custom-error-confirm-button',
+              title: 'custom-swal-title',
+            },
+          });
+        }
       }
     });
   };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axiosInstance from "../../../../../axiosInstance.js";
 import Swal from "sweetalert2";
 import { useNavigate, useParams, Link } from "react-router-dom";
@@ -8,7 +8,7 @@ import { AuthContext } from "../../../Authentication/authContext";
 import upload_icon from "../../../../assets/images/uploading.png";
 
 import '../ProjectStyles.css'
-import { FiChevronLeft, FiClock } from 'react-icons/fi';
+import { FiMoreVertical } from 'react-icons/fi';
 import { FaBookmark, FaCircleInfo  } from "react-icons/fa6";
 import { FaRegCalendar, FaCaretDown, FaListAlt  } from "react-icons/fa";
 import { GrStatusGoodSmall, GrSort } from "react-icons/gr";
@@ -62,25 +62,40 @@ function ProjectTopics() {
         setOwnerName(`${owner.first_name} ${owner.last_name}`)
         setExistingFiles(project_file);
 
+        const capitalizeWords = (str) => {
+          if (!str) return ""; // Handle null or undefined values
+          return str
+            .toLowerCase() // Convert the entire string to lowercase
+            .split(" ") // Split the string into words
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
+            .join(" "); // Join the words back into a single string
+        };        
+
         const formattedTopics = project_topics.map((topic) => ({
           id: topic.id,
           name: topic.topicName,
           description: topic.topicDescription,
-          assignee: topic.assignee,
-          type: topic.topicType,
-          status: topic.topicStatus,
-          priority: topic.topicPriority,
+          assignee: JSON.parse(topic.assignee),
+          type: capitalizeWords(topic.topicType),
+          status: capitalizeWords(topic.topicStatus),
+          priority: capitalizeWords(topic.topicPriority),
           topicDue: new Intl.DateTimeFormat('en-US', {
             month: 'short',
             day: '2-digit',
             year: 'numeric'
-          }).format(new Date(topicDueDate)),
+          }).format(new Date(topic.topicDueDate)),
           tags: topic.topicTags,
-          createdAt: topic.dateCreated,
+          modifiedOn: new Intl.DateTimeFormat('en-US', {
+            month: 'short',
+            day: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: 'numeric',
+            second: 'numeric'
+          }).format(new Date(topic.lastUpdated)),
         }));
 
         setTopicData(formattedTopics)
-        console.log(topicData)
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
@@ -160,6 +175,57 @@ function ProjectTopics() {
     deadline: <FaRegCalendar style={{ color: "gray" }} />, // Default deadline icon
   };
   
+  const handleCreateTopic = async (e) => {
+    e.preventDefault(); // Prevent default form submission behavior
+    const formData = new FormData(e.target); // Automatically gathers form inputs
+    const topicData = Object.fromEntries(formData);
+    Swal.fire({
+      title: 'Confirm topic creation',
+      showCancelButton: true,
+      confirmButtonColor: '#eb6314',
+      cancelButtonColor: '#00000000',
+      cancelTextColor: '#000000',
+      confirmButtonText: 'Create Topic',
+      customClass: {
+        container: 'custom-container',
+        confirmButton: 'custom-confirm-button',
+        cancelButton: 'custom-cancel-button',
+        title: 'custom-swal-title',
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axiosInstance.post(`/create-topic/${projectId}`, topicData);
+          Swal.fire({
+            title: 'Success!',
+            text: `Topic has been created.`,
+            imageUrl: check,
+            imageWidth: 100,
+            imageHeight: 100,
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#0ABAA6',
+            customClass: {
+              confirmButton: 'custom-success-confirm-button',
+              title: 'custom-swal-title',
+            },
+          });
+        } catch (error) {
+          Swal.fire({
+            title: 'Error!',
+            text: 'There was an error creating the topic.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#EC221F',
+            customClass: {
+              confirmButton: 'custom-error-confirm-button',
+              title: 'custom-swal-title',
+            },
+          });
+        }
+      }
+    });
+  };
+
     return (
       <div className="container">
       <StickyHeader />
@@ -230,14 +296,16 @@ function ProjectTopics() {
                         </Offcanvas.Header>
                         <Offcanvas.Body className="offcanvas-body">
                           {/* Form Starts Here */}
-                          <form>
+                          <form onSubmit={handleCreateTopic}>
                             <div className="form-group mb-3">
-                              <label htmlFor="topicTitle">Topic Title <small>(Required)</small></label>
+                              <label htmlFor="topicName">Topic Name <small>(Required)</small></label>
                               <input
                                 type="text"
-                                id="topicTitle"
+                                id="topicName"
+                                name="topicName"
                                 className="form-control"
-                                placeholder="Enter topic title"
+                                placeholder="Enter topic name"
+                                required
                               />
                             </div>
                             <div className="form-group mb-3">
@@ -245,6 +313,7 @@ function ProjectTopics() {
                               <input
                                 type="textarea"
                                 id="topicDescription"
+                                name="topicDesc"
                                 className="form-control"
                                 placeholder="Enter topic description"
                               />
@@ -254,13 +323,14 @@ function ProjectTopics() {
                               <input
                                 type="text"
                                 id="assignedTo"
+                                name="assigneeList"
                                 className="form-control"
                                 placeholder="Enter assignee's name"
                               />
                             </div>
                             <div className="form-group mb-3">
                               <label htmlFor="priority">Priority</label>
-                              <select id="priority" className="form-control">
+                              <select id="priority" name="topicPrio" className="form-control" required>
                                 <option value="low">Low</option>
                                 <option value="normal">Normal</option>
                                 <option value="high">High</option>
@@ -269,7 +339,7 @@ function ProjectTopics() {
                             </div>
                             <div className="form-group mb-3">
                               <label htmlFor="status">Status</label>
-                              <select id="status" className="form-control">
+                              <select id="status" name="topicStatus" className="form-control" required>
                                 <option value="new">New</option>
                                 <option value="in-progress">In Progress</option>
                                 <option value="pending">Pending</option>
@@ -279,7 +349,7 @@ function ProjectTopics() {
                             </div>
                             <div className="form-group mb-3">
                               <label htmlFor="type">Type</label>
-                              <select id="type" className="form-control">
+                              <select id="type" name="topicType" className="form-control" required>
                                 <option value="undefined">Undefined</option>
                                 <option value="comment">Comment</option>
                                 <option value="issue">Issue</option>
@@ -296,7 +366,9 @@ function ProjectTopics() {
                               <input
                                 type="date"
                                 id="deadline"
+                                name="topicDue"
                                 className="form-control"
+                                required
                               />
                             </div>
                             <button type="submit" id="offcanvas-btn" className="btn btn-primary w-100">Save Topic</button>
@@ -325,10 +397,10 @@ function ProjectTopics() {
 
                     
                       <div className="activity-cards-box mt-2 d-flex">
-                        {topicData.map((topic) => (
+                        {topicData.sort((a, b) => new Date(b.modifiedOn) - new Date(a.modifiedOn)).map((topic) => (
                           <div key={topic.id} className="topic-card container-fluid">
                             <div className="topic-time d-none d-md-flex ">
-                              <span className="text-muted">{topic.createdAt}</span>
+                              <span className="text-muted">{topic.modifiedOn}</span>
                             </div>
                             <div className="flex-row">
                               <div className="activity flex-1">
@@ -349,24 +421,21 @@ function ProjectTopics() {
                                   <div className="topic-config">
                                     <ul className="flex-row">
                                       <li className="mr-2">
-                                        {iconMappings.priority[topic.priority.toLowerCase()] || iconMappings.priority.normal} 
-                                        {topic.priority}
+                                        {iconMappings.priority[topic.priority.toLowerCase()] || iconMappings.priority.normal} {topic.priority}  
                                       </li>
                                       <li className="mr-2">
-                                        {iconMappings.status[topic.status.toLowerCase()] || iconMappings.status.new} 
-                                        {topic.status}
+                                        {iconMappings.status[topic.status.toLowerCase()] || iconMappings.status.new} {topic.status}    
                                       </li>
                                       <li className="mr-2">
-                                        {iconMappings.type[topic.type.toLowerCase()] || iconMappings.type.undefined} 
-                                        {topic.type}
+                                        {iconMappings.type[topic.type.toLowerCase()] || iconMappings.type.undefined} {topic.type}    
                                       </li>
                                       <li className="mr-2">
-                                        {iconMappings.deadline} {topic.topicDue}
+                                        {iconMappings.deadline}  {topic.topicDue}  
                                       </li>
                                     </ul>
                                   </div>
                                 </div>
-                                <div className="topic-desc"></div>
+
                               </div>
                             </div>
                           </div>

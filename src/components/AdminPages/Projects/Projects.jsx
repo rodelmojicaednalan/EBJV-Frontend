@@ -63,13 +63,13 @@ function Projects() {
         }
 
         const formattedData = response.data.data.map((project) => {
-          //const parsedFiles = JSON.parse(project.project_file);
+          const parsedFiles = JSON.parse(project.project_file);
           return {
             id: project.id,
             project_name: project.project_name,
             project_owner: `${project.owner.first_name} ${project.owner.last_name}`,
             project_location: project.location,
-            project_file: project.project_file,
+            project_file: parsedFiles,
           };
         });
 
