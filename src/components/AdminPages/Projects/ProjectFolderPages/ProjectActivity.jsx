@@ -49,8 +49,10 @@ function ProjectActivity() {
           lastModified: new Intl.DateTimeFormat('en-US', {
             month: 'short',
             day: '2-digit',
-            year: 'numeric'
-          }).format(new Date(updatedAt)),  // Format updatedAt
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }).format(new Date(activity.lastModified)),  // Format updatedAt
         }));
 
         setActivityCardData(formattedActivities)
@@ -199,7 +201,7 @@ function ProjectActivity() {
                       </div> 
 
                 <div className="activity-cards-box mt-1 d-flex">
-                  {activityCardData.map((data) => (
+                  {activityCardData.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified)).map((data) => (
                     <div
                       key={data.id}
                       className="activity-card container-fluid mb-2"

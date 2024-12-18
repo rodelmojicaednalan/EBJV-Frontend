@@ -315,7 +315,7 @@ flex-direction: column;
 }
 
 .activity-file{
-  color:#eb6314;
+  color:#212a3183;
   cursor: pointer;
   font-weight: 500;
 }
@@ -842,7 +842,7 @@ padding-bottom: 5px;
 }
 
 #todo-title, #todo-desc, #todo-assignee, #release-name, #due-date, #recipients, 
-#project-group, #project-invite, #contrib-group-name{
+#project-group, #project-invite, #contrib-group-name, #release-note{
   margin: 0;
 }
 
@@ -924,6 +924,31 @@ padding-bottom: 5px;
   position: relative;
   width: 1.2rem;
   z-index: 1;
+}
+#add-releaseNote-btn{
+  background-color: transparent;
+  color: #212A31;
+}
+#add-releaseNote-btn:hover, #add-releaseNote-btn:focus{
+  box-shadow: none !important;
+  transform: none !important;
+  color: #eb6314;
+}
+
+#deleteUploadedfilesbtn{
+  box-shadow: none !important;
+  transform: none !important;
+  background-color: transparent;
+  font-size: 14px;
+  color: #212A31;
+}
+#deleteUploadedfilesbtn:hover{
+  color: rgb(168, 0, 34);
+  text-decoration: underline;
+}
+#deleteUploadedfilesbtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
   /* Media Queries for Responsiveness */

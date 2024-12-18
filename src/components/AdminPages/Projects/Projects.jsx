@@ -227,7 +227,7 @@ function Projects() {
               onClick={() =>
                 navigate(`/ifc-viewer/${row.id}`, {
                   state: {
-                    fileUrl: JSON.parse(row.project_file).filter(
+                    fileUrl: row.project_file.filter(
                       (item) => item !== ''
                     ),
                     fileName: row.project_name,

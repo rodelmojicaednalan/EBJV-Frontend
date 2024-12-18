@@ -4,8 +4,12 @@ import axios from 'axios';
 //import {AuthContext} from './src/components/Authentication/authContext';
 import {getCookie, setCookie} from './src/components/Authentication/getCookie'
 
+// const axiosInstance = axios.create({
+//     baseURL: 'https://ebjv-api.olongapobataanzambalesads.com/api',
+// });
+
 const axiosInstance = axios.create({
-    baseURL: 'https://ebjv-api.olongapobataanzambalesads.com/api',
+    baseURL: 'http://localhost:3000/api',
 });
 
 let isRefreshing = false;

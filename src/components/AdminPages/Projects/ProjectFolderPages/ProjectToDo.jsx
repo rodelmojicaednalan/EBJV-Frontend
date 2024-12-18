@@ -254,13 +254,31 @@ function ProjectToDo() {
           
           <label for="todo-assignee" style="display: block;">Assignee</label>
           <input type="text" id="todo-assignee" class="swal2-input" placeholder="Select people (comma-separated)" style="width: 100%;">
-        </div>
+          <div id="group-container">
+            <button id="add-releaseNote-btn" type="button" class="btn btn-primary" style="margin-bottom: 10px;">Add a note?</button>
+          </div>
+          </div>
       `,
       confirmButtonText: 'Add Release',
       showCancelButton: true,
       customClass: {
         confirmButton: "btn btn-success todo-btn-success",
         cancelButton: "btn btn-danger todo-btn-danger"
+      },
+      didOpen: () => {
+        const addMoreDetail = document.getElementById('add-releaseNote-btn');
+        const groupContainer = document.getElementById('group-container');
+  
+        // Replace button with a text input when clicked
+        addMoreDetail.addEventListener('click', () => {
+          groupContainer.innerHTML = `
+            <label for="release-note" style="display: block;">Note: </label>
+            <textarea id="release-note" class="swal2-input" placeholder="Write a note..." 
+            style="margin-bottom: 10px; width: 100%;
+            white-space: pre-wrap; word-wrap: break-word;
+            background-color: #FFF; color: black;">
+          `;
+        });
       },
       preConfirm: () => {
         const todoTitle = document.getElementById('todo-title').value;

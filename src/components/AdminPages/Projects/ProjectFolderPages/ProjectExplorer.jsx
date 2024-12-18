@@ -11,7 +11,7 @@ import { FiChevronLeft } from 'react-icons/fi';
 import { BiDotsVertical } from 'react-icons/bi';
 import { IoGrid } from 'react-icons/io5';
 import { FaThList } from 'react-icons/fa';
-
+import { Modal, Button } from 'react-bootstrap';
 import ProjectSidebar from '../ProjectFolderSidebar';
 
 function ProjectExplorer() {
@@ -19,14 +19,12 @@ function ProjectExplorer() {
   const [projectName, setProjectName] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [existingFiles, setExistingFiles] = useState([]); // Existing files
-  const [fileName, setFileName] = useState([]);
-  const [fileSize, setFileSize] = useState([]);
-  const [error, setError] = useState('');
 
   const [viewType, setViewType] = useState('list');
   const [menuOpen, setMenuOpen] = useState(false);
 
   const [explorerTable, setExplorerTable] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const navigate = useNavigate();
 
   const handleMenuToggle = () => {
@@ -71,6 +69,7 @@ function ProjectExplorer() {
         }));
 
         setExplorerTable(formattedFiles);
+        console.log(files)
       } catch (error) {
         console.error('Error fetching project details:', error);
       }
@@ -81,6 +80,27 @@ function ProjectExplorer() {
 
   // Define columns for the table
   const explorerColumn = [
+    {
+      name: " ",
+      cell: (row, index) => (
+        <label className="del-checkbox">
+          <input
+            type="checkbox"
+            onChange={(e) => {
+              const checked = e.target.checked;
+              setSelectedFiles((prev) =>
+                checked ? [...prev, index] : prev.filter((i) => i !== index)
+              );
+            }}
+            checked={selectedFiles.includes(index)}
+          />
+          <div className="del-checkmark" />
+        </label>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+    },
     {
       name: 'File Name',
       width: '30%',
@@ -110,6 +130,70 @@ function ProjectExplorer() {
       sortable: true,
     },
   ];
+  
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newFiles, setNewFiles] = useState([]);
+
+  const handleAddNewFile = async () => {
+    try {
+      const formData = new FormData();
+      newFiles.forEach((file) => {
+        formData.append('project_file', file); 
+      });
+      
+
+      await axiosInstance.post(`/upload-ifc-files/${projectId}`, formData,{
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      Swal.fire({
+        title: 'Success!',
+        text: 'File(s) has been added successfully.',
+        icon: 'success',
+        confirmButtonText: 'OK',
+      });
+
+      setShowAddModal(false);
+      setNewFiles({ file: null });
+    } catch (error) {
+      Swal.fire({
+        title: 'Error!',
+        text: 'Failed to add file(s) to the project. Please try again.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
+    }
+  };
+
+  const handleDeleteFiles = async () => {
+    try {
+      const filesToDelete = selectedFiles.map(index => explorerTable[index]);
+
+    for (const file of filesToDelete) {
+      await axiosInstance.delete(`/delete-file/${projectId}/${file.fileName}`);
+    }
+
+    setExplorerTable(prev =>
+      prev.filter((_, index) => !selectedFiles.includes(index))
+    );
+      setSelectedFiles([]); // Clear selected files
+  
+      Swal.fire({
+        title: "Deleted!",
+        text: "Selected files have been deleted.",
+        icon: "success",
+        confirmButtonText: "OK",
+      });
+
+    } catch (error) {
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to delete selected files.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
 
   return (
     <div className="container">
@@ -134,6 +218,7 @@ function ProjectExplorer() {
                     <h2>Explorer</h2>
                   </div>
                   <div className="button-group d-flex">
+                  
                     <button
                       className={`btn btn-icon grid-view-btn ${
                         viewType === 'grid' ? 'active' : ''
@@ -193,11 +278,21 @@ function ProjectExplorer() {
                       id="addbtn"
                       className="btn btn-primary add-btn"
                       title="Add"
+                      onClick={() => setShowAddModal(true)}
                     >
                       + Add
                     </button>
                   </div>
                 </div>
+        
+                <button
+                  onClick={() => handleDeleteFiles(projectId)}
+                  id="deleteUploadedfilesbtn"
+                  className="btn btn-danger"
+                  disabled={selectedFiles.length === 0} // Disable button when no files are selected
+                >
+                  Delete Files
+                </button>
 
                 <div className={`project-display ${viewType}`}>
                   {viewType === 'grid' ? (
@@ -226,6 +321,54 @@ function ProjectExplorer() {
           </div>
         </div>
       </div>
+      <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Upload New IFC Files</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form onSubmit={(e) => e.preventDefault()}>
+            <div className="mb-3">
+              <label htmlFor="projectFile" className="form-label">
+                You can select more than one file at a time.
+              </label>
+              <input
+                type="file"
+                name="projectFiles"
+                accept=".ifc"
+                multiple
+                className="form-control"
+                id="projectFile"
+                onChange={(e) => {
+                  const filesArray = Array.from(e.target.files);
+                  setNewFiles(filesArray);
+                }}
+              />
+              {newFiles && newFiles.length > 0 && (
+                <div className="mt-2">
+                  <h6>Selected Files:</h6>
+                  <ul>
+                    {newFiles.map((file, index) => (
+                      <li key={index}>{file.name}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            id="closeAdd"
+            variant="secondary"
+            onClick={() => setShowAddModal(false)}
+          >
+            Close
+          </Button>
+          <Button id="saveAdd" variant="primary" onClick={handleAddNewFile}>
+            Upload
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

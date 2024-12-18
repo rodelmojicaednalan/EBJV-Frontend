@@ -252,7 +252,7 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                               <div className="col-6 col-sm-6 col-md-3">
                                 <div className="label-group">
                                   <label> Folders: </label>
-                                  <div className="value"> 4 </div>
+                                  <div className="value"> 0 </div>
                                 </div>
                               </div>
                               <div className="col-6 col-sm-6 col-md-3">
@@ -264,7 +264,7 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                               <div className="col-6 col-sm-6 col-md-3">
                                 <div className="label-group">
                                   <label> Users: </label>
-                                  <div className="value"> 2 </div>
+                                  <div className="value"> 1 </div>
                                 </div>
                               </div>
                               </div>

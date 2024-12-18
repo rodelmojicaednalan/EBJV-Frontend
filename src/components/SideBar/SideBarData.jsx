@@ -153,7 +153,7 @@ export const AdminSidebarData = [
 ];
 
 export const StaffSidebarData = [
-  {/*
+  /*
   {
     title: "Dashboard",
     path: "/dashboard",
@@ -180,7 +180,7 @@ export const StaffSidebarData = [
       />
     ),
     cName: "nav-text",
-  }, */},
+  }, */
   // {
   //   title: 'Queue List',
   //   path: '/queue-list',

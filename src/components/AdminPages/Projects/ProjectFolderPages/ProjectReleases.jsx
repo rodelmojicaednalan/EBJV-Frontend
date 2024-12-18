@@ -194,6 +194,10 @@ function ProjectReleases() {
           
           <label for="recipients" style="display: block; margin-bottom: 5px;">Recipients</label>
           <input type="text" id="recipients" class="swal2-input" placeholder="Enter recipients (comma-separated)" style="width:100%;">
+          
+          <div id="group-container">
+            <button id="add-releaseNote-btn" type="button" class="btn btn-primary" style="margin-bottom: 10px;">Add a note?</button>
+          </div>
         </div>
       `,
       confirmButtonText: 'Add Release',
@@ -201,6 +205,21 @@ function ProjectReleases() {
       customClass: {
         confirmButton: "btn btn-success rel-btn-success",
         cancelButton: "btn btn-danger rel-btn-danger"
+      },
+      didOpen: () => {
+        const addNoteBtn = document.getElementById('add-releaseNote-btn');
+        const groupContainer = document.getElementById('group-container');
+  
+        // Replace button with a text input when clicked
+        addNoteBtn.addEventListener('click', () => {
+          groupContainer.innerHTML = `
+            <label for="release-note" style="display: block;">Note: </label>
+            <textarea id="release-note" class="swal2-input" placeholder="Write a note..." 
+            style="margin-bottom: 10px; width: 100%;
+            white-space: pre-wrap; word-wrap: break-word;
+            background-color: #FFF; color: black;">
+          `;
+        });
       },
       preConfirm: () => {
         const releaseName = document.getElementById('release-name').value;
