@@ -7,9 +7,13 @@ import StickyHeader from "../../../SideBar/StickyHeader";
 import DataTable from "react-data-table-component";
 
 import '../ProjectStyles.css'
-import {  FaCaretDown  } from "react-icons/fa";
-import { BiDotsVertical } from "react-icons/bi"
 
+import { FaBookmark, FaCircleInfo  } from "react-icons/fa6";
+import { FaRegCalendar, FaCaretDown, FaListAlt  } from "react-icons/fa";
+import { GrStatusGoodSmall } from "react-icons/gr";
+import { RiEdit2Fill } from "react-icons/ri";
+import { BiDotsVertical } from "react-icons/bi";
+import { GoAlertFill } from "react-icons/go";
 
 
 import ProjectSidebar from '../ProjectFolderSidebar';
@@ -37,16 +41,25 @@ function ProjectToDo() {
     // Fetch project details and populate fields
     const fetchProjectDetails = async () => {
       try {
-        const response = await axiosInstance.get(`/project-topics/${projectId}`);
+        const response = await axiosInstance.get(`/project-toDo/${projectId}`);
         const { project_name, owner, project_toDos } = response.data;
 
         setProjectName(project_name);
         setOwnerName(`${owner.first_name} ${owner.last_name}`)
 
+        const capitalizeWords = (str) => {
+          if (!str) return ""; // Handle null or undefined values
+          return str
+            .toLowerCase() // Convert the entire string to lowercase
+            .split(" ") // Split the string into words
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
+            .join(" "); // Join the words back into a single string
+        };  
+
         const formattedToDos = project_toDos.map((toDo) => ({
           id: toDo.id,
           title: toDo.toDoTitle,
-          assignee: toDo.todoAssignee,
+          assignee: toDo.toDoAssignee,
           createdOn: new Intl.DateTimeFormat('en-US', {
             month: 'short',
             day: '2-digit',
@@ -57,8 +70,8 @@ function ProjectToDo() {
             day: '2-digit',
             year: 'numeric'
           }).format(new Date(toDo.lastUpdated)),
-          priority: toDo.toDoPriority,
-          status: toDo.toDoStatus
+          priority: capitalizeWords(toDo.toDoPriority),
+          status: capitalizeWords(toDo.toDoStatus)
         }));
 
         setToDoData(formattedToDos)
@@ -118,12 +131,41 @@ function ProjectToDo() {
   };
 
 
+  const iconMappings = {
+    priority: {
+      low: <FaBookmark style={{ color: "green" }} />,
+      normal: <FaBookmark style={{ color: "royalBlue" }} />,
+      high: <FaBookmark style={{ color: "orange" }} />,
+      critical: <FaBookmark style={{ color: "red" }} />,
+    },
+    statusIcon: {
+      new: <GrStatusGoodSmall style={{ color: "green" }} />,
+      "in-progress": <GrStatusGoodSmall style={{ color: "orange" }} />,
+      pending: <GrStatusGoodSmall style={{ color: "royalBlue" }} />,
+      closed: <GrStatusGoodSmall style={{ color: "gray" }} />,
+      done: <GrStatusGoodSmall style={{ color: "blue" }} />,
+    },
+    type: {
+      undefined: <FaCircleInfo style={{ color: "gray" }} />,
+      comment: <RiEdit2Fill style={{ color: "royalBlue" }} />,
+      issue: <GoAlertFill style={{ color: "red" }} />,
+      request: <FaListAlt style={{ color: "teal" }} />,
+      fault: <GoAlertFill style={{ color: "orange" }} />,
+      inquiry: <FaCircleInfo style={{ color: "green" }} />,
+      solution: <RiEdit2Fill style={{ color: "green" }} />,
+      remark: <FaCircleInfo style={{ color: "gold" }} />,
+      clash: <GoAlertFill style={{ color: "darkred" }} />,
+    },
+    deadline: <FaRegCalendar style={{ color: "gray" }} />, // Default deadline icon
+  };
+
+
   // Define columns for the table
   const toDoTableColumns = [
     {
       name: "Title",
       width: "25%",
-      selector: (row) => row.name,
+      selector: (row) => row.title,
       sortable: true,
     },
     {
@@ -146,7 +188,9 @@ function ProjectToDo() {
       name: "Priority",
       selector: (row) => (
         <div className="d-flex align-items-center">
-          {row.icons.priorityIcon}
+          {iconMappings.priority[row.priority.toLowerCase()] || (
+            <FaBookmark style={{ color: "gray" }} />
+          )}
           <span className="ms-2">{row.priority}</span>
         </div>
       ),
@@ -156,7 +200,9 @@ function ProjectToDo() {
       name: "Status",
       selector: (row) => (
         <div className="d-flex align-items-center">
-          {row.icons.statusIcon}
+          {iconMappings.statusIcon[row.status.toLowerCase()] || (
+            <GrStatusGoodSmall style={{ color: "gray" }} />
+          )}
           <span className="ms-2">{row.status}</span>
         </div>
       ),
