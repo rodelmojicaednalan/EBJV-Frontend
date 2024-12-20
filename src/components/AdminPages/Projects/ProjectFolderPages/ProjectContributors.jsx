@@ -2,14 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import axiosInstance from "../../../../../axiosInstance.js";
 import DataTable from "react-data-table-component";
 import Swal from "sweetalert2";
-import { useNavigate, useParams, Link } from "react-router-dom";
-import check from "../../../../assets/images/check.png";
+import {useParams } from "react-router-dom";
+
 import StickyHeader from "../../../SideBar/StickyHeader";
-import { AuthContext } from "../../../Authentication/authContext";
-import upload_icon from "../../../../assets/images/uploading.png";
 
 import '../ProjectStyles.css'
-import { FiChevronLeft, FiChevronDown } from 'react-icons/fi';
+
 import { IoSearchSharp } from "react-icons/io5";
 import { BiDotsVertical } from "react-icons/bi";
 import { FaCaretDown } from "react-icons/fa";
@@ -20,14 +18,11 @@ function ProjectContributors() {
   const { projectId } = useParams();
   const [projectName, setProjectName] = useState("");
   const [ownerName, setOwnerName] = useState("")
-  const [existingFiles, setExistingFiles] = useState([]); // Existing files
-  const [fileName, setFileName] = useState([]);
-  const [fileSize, setFileSize] = useState([])
-  const [error, setError] = useState("");
+
 
   const [contributors , setContributors] = useState([])
   const [contributorCount, setContributorCount] = useState(0);
-  const navigate = useNavigate();
+
 
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -277,7 +272,7 @@ function ProjectContributors() {
       <div className="container">
       <StickyHeader />
       <h3 className="title-page" id="projectFolder-title">
-        {ownerName}'s {projectName} 
+        {ownerName}&apos;s {projectName} 
       </h3>
       <div className="container-content" id="project-folder-container">
       <div className="projectFolder-sidebar-container">

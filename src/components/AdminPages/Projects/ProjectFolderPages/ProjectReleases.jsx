@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import axiosInstance from "../../../../../axiosInstance.js";
 import Swal from "sweetalert2";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import check from "../../../../assets/images/check.png";
 import StickyHeader from "../../../SideBar/StickyHeader";
-import { AuthContext } from "../../../Authentication/authContext";
-import upload_icon from "../../../../assets/images/uploading.png";
+
 import DataTable from "react-data-table-component";
 
 import '../ProjectStyles.css'
-import { FiChevronLeft, FiEdit, FiMoreVertical } from "react-icons/fi";
+import {  FiEdit, FiMoreVertical } from "react-icons/fi";
 import { FaCaretDown } from "react-icons/fa";
 
 import ProjectSidebar from '../ProjectFolderSidebar';
@@ -18,9 +17,7 @@ function ProjectReleases() {
   const { projectId } = useParams();
   const [projectName, setProjectName] = useState("");
   const [ownerName, setOwnerName] = useState("")
-  const [existingFiles, setExistingFiles] = useState([]); // Existing files
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
+
   
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [openDropdownId, setOpenDropdownId] = useState(null);
@@ -37,12 +34,11 @@ function ProjectReleases() {
     const fetchProjectDetails = async () => {
       try {
         const response = await axiosInstance.get(`/project/${projectId}`);
-        const { project_name, owner, project_releases, project_file } = response.data;
+        const { project_name, owner, project_releases,} = response.data;
   
 
         setProjectName(project_name);
         setOwnerName(`${owner.first_name} ${owner.last_name}`)
-        setExistingFiles(project_file);
 
         const formattedViews = project_releases.map((release) => ({
           id: release.id,

@@ -842,7 +842,7 @@ padding-bottom: 5px;
 }
 
 #todo-title, #todo-desc, #todo-assignee, #release-name, #due-date, #recipients, 
-#project-group, #project-invite, #contrib-group-name, #release-note{
+#project-group, #project-invite, #contrib-group-name, #release-note, #todo-due-date, #todo-tags{
   margin: 0;
 }
 
@@ -925,11 +925,12 @@ padding-bottom: 5px;
   width: 1.2rem;
   z-index: 1;
 }
-#add-releaseNote-btn{
+#add-releaseNote-btn, #add-details-btn{
   background-color: transparent;
   color: #212A31;
 }
-#add-releaseNote-btn:hover, #add-releaseNote-btn:focus{
+#add-releaseNote-btn:hover, #add-releaseNote-btn:focus, 
+#add-details-btn:hover, #add-details-btn:focus{
   box-shadow: none !important;
   transform: none !important;
   color: #eb6314;

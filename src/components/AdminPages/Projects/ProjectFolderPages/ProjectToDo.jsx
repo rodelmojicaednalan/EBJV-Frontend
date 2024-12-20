@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../../../../../axiosInstance.js";
 import Swal from "sweetalert2";
-import { useNavigate, useParams, Link } from "react-router-dom";
-import check from "../../../../assets/images/check.png";
+import { useParams } from "react-router-dom";
 import StickyHeader from "../../../SideBar/StickyHeader";
-import { AuthContext } from "../../../Authentication/authContext";
-import upload_icon from "../../../../assets/images/uploading.png";
+
 import DataTable from "react-data-table-component";
 
 import '../ProjectStyles.css'
-import { FiChevronLeft, FiEdit, FiMoreVertical } from "react-icons/fi";
-import { FaRegCalendar, FaCaretDown, FaListAlt  } from "react-icons/fa";
+import {  FaCaretDown  } from "react-icons/fa";
 import { BiDotsVertical } from "react-icons/bi"
-import { FaBookmark, FaCircleInfo  } from "react-icons/fa6";
-import { GrStatusGoodSmall, GrSort } from "react-icons/gr";
-import { GoAlertFill } from "react-icons/go";
+
 
 
 import ProjectSidebar from '../ProjectFolderSidebar';
@@ -23,9 +18,6 @@ function ProjectToDo() {
   const { projectId } = useParams();
   const [projectName, setProjectName] = useState("");
   const [ownerName, setOwnerName] = useState("")
-  const [existingFiles, setExistingFiles] = useState([]); // Existing assignees
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
 
   const [toDoData, setToDoData] = useState([]);
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -125,75 +117,6 @@ function ProjectToDo() {
     );
   };
 
-  // const sampleData = [
-  //   {
-  //     id: 1,
-  //     name: "Review Architecural Design",
-  //     assignee: "Earvin Johnson",
-  //     createdOn: "Dec 02, 2024",
-  //     modifiedOn: "Dec 08, 2024",
-  //     priority: "Critical",
-  //     status: "In Progress",
-  //     icons: {
-  //       priorityIcon: <FaBookmark style={{ color: "red" }} />,
-  //       statusIcon: <GrStatusGoodSmall style={{ color: "blue" }} />,
-  //     },
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "Polish House Frame",
-  //     assignee: "Larry Bird",
-  //     createdOn: "Nov 05, 2024",
-  //     modifiedOn: "Dec 06, 2024",
-  //     priority: "Normal",
-  //     status: "Done",
-  //     icons: {
-  //       priorityIcon: <FaBookmark style={{ color: "royalBlue" }} />,
-  //       statusIcon: <GrStatusGoodSmall style={{ color: "green" }} />,
-  //     },
-  //   },
-  //   {
-  //     id: 3,
-  //     name: "Garage Design",
-  //     assignee: "Michael Jordan",
-  //     createdOn: "Dec 10, 2024",
-  //     modifiedOn: "Dec 11, 2024",
-  //     priority: "High",
-  //     status: "New",
-  //     icons: {
-  //       priorityIcon: <FaBookmark style={{ color: "gold" }} />,
-  //       statusIcon: <GrStatusGoodSmall style={{ color: "royalBlue" }} />,
-  //     },
-  //   },
-  //   {
-  //     id: 4,
-  //     name: "Review Barn Design",
-  //     assignee: "Hakeem Olajuwon",
-  //     createdOn: "Dec 06, 2024",
-  //     modifiedOn: "Dec 07, 2024",
-  //     priority: "Low",
-  //     status: "Waiting",
-  //     icons: {
-  //       priorityIcon: <FaBookmark style={{ color: "green" }} />,
-  //       statusIcon: <GrStatusGoodSmall style={{ color: "gold" }} />,
-  //     },
-  //   },
-  //   {
-  //     id: 5,
-  //     name: "Review Warehouse Structure",
-  //     assignee: "Charles Barkley",
-  //     createdOn: "Dec 05, 2024",
-  //     modifiedOn: "Dec 09, 2024",
-  //     priority: "Normal",
-  //     status: "Closed",
-  //     icons: {
-  //       priorityIcon: <FaBookmark style={{ color: "royalBlue" }} />,
-  //       statusIcon: <GrStatusGoodSmall style={{ color: "grey" }} />,
-  //     },
-  //   },
-  // ];
-
-
 
   // Define columns for the table
   const toDoTableColumns = [
@@ -243,72 +166,153 @@ function ProjectToDo() {
 
   const handleAddNewToDo = () => {
     Swal.fire({
-      title: 'Add New To Do',
-      html: `
-        <div style="text-align: left;">
-          <label for="todo-title" style="display: block;">Title: </label>
-          <input type="text" id="todo-title" class="swal2-input" placeholder="Enter title" style="margin-bottom: 10px; width: 100%; ">
-          
-          <label for="todo-desc" style="display: flex;">Description</label>
-          <input type="text" id="todo-desc" class="swal2-input" placeholder="Enter description" style="margin-bottom: 10px; width: 100%;">
-          
-          <label for="todo-assignee" style="display: block;">Assignee</label>
-          <input type="text" id="todo-assignee" class="swal2-input" placeholder="Select people (comma-separated)" style="width: 100%;">
-          <div id="group-container">
-            <button id="add-releaseNote-btn" type="button" class="btn btn-primary" style="margin-bottom: 10px;">Add a note?</button>
-          </div>
-          </div>
-      `,
-      confirmButtonText: 'Add Release',
-      showCancelButton: true,
-      customClass: {
-        confirmButton: "btn btn-success todo-btn-success",
-        cancelButton: "btn btn-danger todo-btn-danger"
-      },
-      didOpen: () => {
-        const addMoreDetail = document.getElementById('add-releaseNote-btn');
-        const groupContainer = document.getElementById('group-container');
-  
-        // Replace button with a text input when clicked
-        addMoreDetail.addEventListener('click', () => {
-          groupContainer.innerHTML = `
-            <label for="release-note" style="display: block;">Note: </label>
-            <textarea id="release-note" class="swal2-input" placeholder="Write a note..." 
-            style="margin-bottom: 10px; width: 100%;
-            white-space: pre-wrap; word-wrap: break-word;
-            background-color: #FFF; color: black;">
-          `;
-        });
-      },
-      preConfirm: () => {
-        const todoTitle = document.getElementById('todo-title').value;
-        const todoDesc = document.getElementById('todo-desc').value;
-        const todoAssignee = document.getElementById('todo-assignee').value;
-  
-        if (!todoTitle || !todoDesc || !todoAssignee) {
-          Swal.showValidationMessage('Please fill in all fields.');
-          return null;
+        title: 'Add New To Do',
+        html: `
+            <div style="text-align: left; max-height: 550px; overflow-y: auto;">
+                <label for="todo-title" style="display: block;">Title:</label>
+                <input type="text" id="todo-title" class="swal2-input" placeholder="Enter title" style="margin-bottom: 10px; width: 100%;">
+
+                <label for="todo-desc" style="display: block;">Description:</label>
+                <input type="text" id="todo-desc" class="swal2-input" placeholder="Enter description" style="margin-bottom: 10px; width: 100%;">
+
+                <label for="todo-assignee" style="display: block;">Assignee:</label>
+                <input type="text" id="todo-assignee" class="swal2-input" placeholder="Select people (comma-separated)" style="margin-bottom: 10px; width: 100%;">
+
+                <div id="details-container" style="margin-top: 10px;">
+                    <button id="add-details-btn" type="button" class="btn btn-primary" style="margin-bottom: 10px;">Add Additional Details</button>
+                </div>
+            </div>
+        `,
+        confirmButtonText: 'Add To Do',
+        showCancelButton: true,
+        customClass: {
+            confirmButton: "btn btn-success todo-btn-success",
+            cancelButton: "btn btn-danger todo-btn-danger"
+        },
+        didOpen: () => {
+            const addDetailsBtn = document.getElementById('add-details-btn');
+            const detailsContainer = document.getElementById('details-container');
+
+            addDetailsBtn.addEventListener('click', () => {
+                if (!document.getElementById('todo-priority')) {
+                    // Priority Field
+                    const priorityLabel = document.createElement('label');
+                    priorityLabel.setAttribute('for', 'todo-priority');
+                    priorityLabel.style.display = 'block';
+                    priorityLabel.textContent = 'Priority:';
+
+                    const prioritySelect = document.createElement('select');
+                    prioritySelect.id = 'todo-priority';
+                    prioritySelect.className = 'swal2-input';
+                    ['Critical', 'High', 'Normal', 'Low'].forEach(priority => {
+                        const option = document.createElement('option');
+                        option.value = priority.toLowerCase();
+                        option.textContent = priority;
+                        prioritySelect.appendChild(option);
+                    });
+
+                    // Due Date Field
+                    const dueDateLabel = document.createElement('label');
+                    dueDateLabel.setAttribute('for', 'todo-due-date');
+                    dueDateLabel.style.display = 'block';
+                    dueDateLabel.textContent = 'Due Date:';
+
+                    const dueDateInput = document.createElement('input');
+                    dueDateInput.type = 'date';
+                    dueDateInput.id = 'todo-due-date';
+                    dueDateInput.className = 'swal2-input';
+
+                    // To-Do Type Field
+                    const typeLabel = document.createElement('label');
+                    typeLabel.setAttribute('for', 'todo-type');
+                    typeLabel.style.display = 'block';
+                    typeLabel.textContent = 'To-Do Type:';
+
+                    const typeSelect = document.createElement('select');
+                    typeSelect.id = 'todo-type';
+                    typeSelect.className = 'swal2-input';
+                    ["Undefined", "Comment", "Issue", "Request", "Fault", 
+                      "Inquiry", "Solution", "Remark", "Clash"].forEach(type => {
+                        const option = document.createElement('option');
+                        option.value = type.toLowerCase();
+                        option.textContent = type;
+                        typeSelect.appendChild(option);
+                    });
+                    typeSelect.style.width = "96%";
+
+                    // Wrapper Div for Priority and Due Date
+                    const wrapperDiv = document.createElement('div');
+                    wrapperDiv.style.display = 'flex';
+                    wrapperDiv.style.justifyContent = 'space-between';
+                    wrapperDiv.style.gap = '10px';
+                    wrapperDiv.style.marginBottom = '10px';
+
+                    const priorityWrapper = document.createElement('div');
+                    priorityWrapper.style.flex = '1';
+                    priorityWrapper.appendChild(priorityLabel);
+                    priorityWrapper.appendChild(prioritySelect);
+
+                    const dueDateWrapper = document.createElement('div');
+                    dueDateWrapper.style.flex = '1';
+                    dueDateWrapper.appendChild(dueDateLabel);
+                    dueDateWrapper.appendChild(dueDateInput);
+
+                    wrapperDiv.appendChild(priorityWrapper);
+                    wrapperDiv.appendChild(dueDateWrapper);
+
+                    // Append Fields to Details Container
+                    detailsContainer.appendChild(wrapperDiv);
+                    detailsContainer.appendChild(typeLabel);
+                    detailsContainer.appendChild(typeSelect);
+
+                    addDetailsBtn.disabled = true; // Disable button after fields are added
+                }
+            });
+        },
+        preConfirm: () => {
+            const todoTitle = document.getElementById('todo-title').value.trim();
+            const todoDesc = document.getElementById('todo-desc').value.trim();
+            const todoAssignee = document.getElementById('todo-assignee').value.trim();
+            const todoPriority = document.getElementById('todo-priority')?.value || null;
+            const todoDueDate = document.getElementById('todo-due-date')?.value || null;
+            const todoType = document.getElementById('todo-type')?.value || null;
+
+            if (!todoTitle || !todoDesc || !todoAssignee) {
+                Swal.showValidationMessage('Please fill in all required fields.');
+                return null;
+            }
+
+            return { todoTitle, todoDesc, todoAssignee, todoPriority, todoDueDate, todoType };
+        },
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            const { todoTitle, todoDesc, todoAssignee, todoPriority, todoDueDate, todoType } = result.value;
+
+            try {
+                await axiosInstance.post(`/create-todo/${projectId}`, {
+                    todoTitle,
+                    todoDesc,
+                    todoAssignee,
+                    todoPriority,
+                    todoDueDate,
+                    todoType,
+                });
+                Swal.fire('Success!', 'The to-do has been added.', 'success');
+            } catch (error) {
+                Swal.fire('Error!', 'Failed to add to-do. Try again.', 'error');
+                console.error(error);
+            }
         }
-  
-        return { todoTitle, todoDesc, todoAssignee };
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const { todoTitle, todoDesc, todoAssignee } = result.value;
-  
-        // Handle adding the new release (e.g., API call)
-        console.log('New To Do:', { todoTitle, todoDesc, todoAssignee });
-        Swal.fire('Success!', 'The new to do has been added.', 'success');
-      }
     });
-  };
+};
+
 
 
     return (
     <div className="container">
       <StickyHeader />
       <h3 className="title-page" id="projectFolder-title">
-        {ownerName}'s {projectName} 
+        {ownerName}&apos;s {projectName} 
       </h3>
       <div className="container-content" id="project-folder-container">
       <div className="projectFolder-sidebar-container">
