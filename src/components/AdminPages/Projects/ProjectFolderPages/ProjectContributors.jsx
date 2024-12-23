@@ -5,13 +5,11 @@ import Swal from "sweetalert2";
 import {useParams } from "react-router-dom";
 
 import StickyHeader from "../../../SideBar/StickyHeader";
-
 import '../ProjectStyles.css'
 
 import { IoSearchSharp } from "react-icons/io5";
 import { BiDotsVertical } from "react-icons/bi";
 import { FaCaretDown } from "react-icons/fa";
-
 
 import ProjectSidebar from '../ProjectFolderSidebar';
 function ProjectContributors() {
@@ -19,10 +17,11 @@ function ProjectContributors() {
   const [projectName, setProjectName] = useState("");
   const [ownerName, setOwnerName] = useState("")
 
-
   const [contributors , setContributors] = useState([])
   const [contributorCount, setContributorCount] = useState(0);
 
+  const [groups, setGroups] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState(null);
 
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -67,7 +66,7 @@ function ProjectContributors() {
     const fetchProjectDetails = async () => {
       try {
         const response = await axiosInstance.get(`/project-contributors/${projectId}`);
-        const { project_name, owner, contributors } = response.data;
+        const { project_name, owner, contributors, groups } = response.data;
 
         setProjectName(project_name);
         setOwnerName(owner)
@@ -86,14 +85,21 @@ function ProjectContributors() {
           }).format(new Date(contributor.last_login)),  // Format updatedAt
         }));
 
+        const formattedGroups = groups.map((group) => ({
+          groupId: group.id,
+          groupName: group.group_name,
+          members: group.members || [],
+        }));
+
         setContributors(formattedContributors)
         setContributorCount(contributors.length);
+        setGroups(formattedGroups)
+        console.log(groups)
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
     };
     
-
     fetchProjectDetails();
   }, [projectId]);
 
@@ -146,25 +152,79 @@ function ProjectContributors() {
         cancelButton: "btn btn-danger contrib-btn-danger"
       },
       preConfirm: () => {
-        const projectGroup = document.getElementById('project-group').value;
+        const groupName = document.getElementById('project-group').value.trim();
   
-        if (!projectGroup) {
+        if (!groupName) {
           Swal.showValidationMessage('Please fill in all fields.');
           return null;
         }
-  
-        return { projectGroup };
+
+        return { groupName };
       },
-    }).then((result) => {
+    }).then(async(result) => {
       if (result.isConfirmed) {
-        const { projectGroup} = result.value;
-  
-        console.log('New group:', { projectGroup });
-        Swal.fire('Success!', 'A new group has been added.', 'success');
+        const { groupName} = result.value;
+       
+        try {
+          await axiosInstance.post(`/create-group/${projectId}`, {groupName});
+        Swal.fire('Success!', `${groupName} has been added.`, 'success');
+        } catch (error){
+          Swal.fire('Error!', 'Failed to create group. Try again.', 'error');
+        console.error(error);
+        }
       }
     });
   };
 
+  const handleDeleteGroup = async (id) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'You won’t be able to revert this!',
+      showCancelButton: true,
+      icon: 'warning',
+      confirmButtonColor: '#EC221F',
+      cancelButtonColor: '#00000000',
+      cancelTextColor: '#000000',
+      confirmButtonText: 'Yes, delete it!',
+      customClass: {
+        container: 'custom-container',
+        confirmButton: 'custom-confirm-button',
+        cancelButton: 'custom-cancel-button',
+        title: 'custom-swal-title',
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axiosInstance.delete(`/delete-group/${projectId}/${id}`);
+          Swal.fire({
+            title: 'Success!',
+            text: `Group has been deleted.`,
+            imageUrl: check,
+            imageWidth: 100,
+            imageHeight: 100,
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#0ABAA6',
+            customClass: {
+              confirmButton: 'custom-success-confirm-button',
+              title: 'custom-swal-title',
+            },
+          });
+        } catch (error) {
+          Swal.fire({
+            title: 'Error!',
+            text: 'There was an error deleting the group.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#EC221F',
+            customClass: {
+              confirmButton: 'custom-error-confirm-button',
+              title: 'custom-swal-title',
+            },
+          });
+        }
+      }
+    });
+  };
 
   const handleInviteToProject = () => {
     Swal.fire({
@@ -213,14 +273,19 @@ function ProjectContributors() {
         const projectInvite = document.getElementById('project-invite').value;
         const groupNameInput = document.getElementById('group-name');
         const selectedRole = document.querySelector('input[name="role"]:checked').value;
-  
         const groupName = groupNameInput ? groupNameInput.value : null;
   
         if (!projectInvite) {
           Swal.showValidationMessage('Please fill in the People field.');
           return null;
         }
-  
+        if (groupName) {
+          setGroups((prevGroups) =>
+            prevGroups.map((group) =>
+              group.name === groupName ? { ...group, members: [...group.members, projectInvite] } : group
+            )
+          );
+        }
         return { projectInvite, groupName, selectedRole };
       },
     }).then((result) => {
@@ -233,7 +298,6 @@ function ProjectContributors() {
     });
   };
   
-
   const sampleFilters = [
     {
       type: "Role",
@@ -243,14 +307,12 @@ function ProjectContributors() {
       type: "Status",
       options: ["Active", "Activation Pending", "Removed"],
     },
-  
   ];
 
   const handleDropdownToggle = (filterType) => {
     // Toggle the dropdown visibility for the clicked filter
     setActiveDropdown((prev) => (prev === filterType ? null : filterType));
   };
-
   const renderDropdown = (filter) => {
     return (
       <div className="filter-dropdown" id="contrib-filter-dropdown">
@@ -267,7 +329,41 @@ function ProjectContributors() {
     );
   };
 
+  const fetchContributorsByGroup = async (groupId) => {
+    try {
+      const response = await axiosInstance.get(`/group-contributors/${projectId}/${groupId}`);
+      const contributors = response.data.map((contributor) => ({
+        contName: contributor.name,
+        contEmployer: contributor.employer,
+        contRole: contributor.role,
+        contStatus: contributor.status,
+        lastAccessed: new Intl.DateTimeFormat("en-US", {
+          month: "short",
+          day: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        }).format(new Date(contributor.last_login)),
+      }));
+      setContributors(contributors);
+    } catch (error) {
+      console.error("Error fetching contributors for group:", error);
+    }
+  };
 
+  const handleGroupClick = (groupName) => {
+    const group = groups.find((g) => g.groupName === groupName);
+    if (group) {
+      setSelectedGroup(groupName);
+      fetchContributorsByGroup(group.groupId);
+    }
+  };
+  
+  const handleAllContributorsClick = () => {
+    setSelectedGroup(null);
+    fetchProjectDetails(); // Fetch all contributors again
+  };
+  
     return (
       <div className="container">
       <StickyHeader />
@@ -288,7 +384,7 @@ function ProjectContributors() {
                         </div>
                         <div className="button-group d-flex">
                             <button id="addbtn" className="btn btn-primary add-btn" title="Add" onClick={handleInviteToProject}>
-                              Invite People to Project
+                              Invite to Project
                             </button>
                           </div>
                       </div>
@@ -305,7 +401,10 @@ function ProjectContributors() {
                               <div className="listWrapper">
                                 <div className="sub-section py-2">
                                   <ul className="list">
-                                    <li className="list-item item-btn px-2 selectable active">
+                                  <li
+                                    className={`list-item item-btn px-2 selectable ${!selectedGroup ? 'active' : ''}`}
+                                    onClick={handleAllContributorsClick}
+                                  >
                                       <div className="label-group">
                                         <div className="value">All contributors</div>
                                         <label>{contributorCount} {contributorCount === 1 ? 'User' : 'Users'}</label>
@@ -315,7 +414,24 @@ function ProjectContributors() {
                                 </div>
                                 <h6  id="customgroup" className="text-muted px-2"> Custom Groups </h6>
                                 <div className="sub-section py-2">
-                                  <p className="text-muted px-2"> No group found</p>
+                                  {groups.length === 0 ? (
+                                    <p className="text-muted px-2">No group found</p>
+                                  ) : (
+                                    <ul className="list">
+                                      {groups.map((group) => (
+                                        <li
+                                          key={group.groupName}
+                                          className={`list-item item-btn px-2 selectable ${selectedGroup === group.groupName ? 'active' : ''}`}
+                                          onClick={() => handleGroupClick(group.groupName)}
+                                        >
+                                          <div className="label-group" >
+                                            <div className="value">{group.groupName}</div>
+                                            <label>{(group.members?.length || 0)} {(group.members?.length || 0) === 1 ? 'User' : 'Users'}</label>
+                                          </div>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -417,7 +533,6 @@ function ProjectContributors() {
                                     </div>
                                     </div>
                                   </div>
-
                               </div>
                               <div className="tableWrapper">
                                 <div className="tableList">
