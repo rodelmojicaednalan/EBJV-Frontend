@@ -2,12 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import DataTable from 'react-data-table-component';
 import axiosInstance from '../../../../../axiosInstance.js';
 import Swal from 'sweetalert2';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import check from '../../../../assets/images/check.png';
+import { useNavigate, useParams } from 'react-router-dom';
 import StickyHeader from '../../../SideBar/StickyHeader';
 
 import '../ProjectStyles.css';
-import { FiChevronLeft } from 'react-icons/fi';
 import { BiDotsVertical, BiSolidEditAlt } from 'react-icons/bi';
 import { LiaTimesSolid } from "react-icons/lia";
 import { IoMdDownload, IoMdPersonAdd  } from "react-icons/io";
@@ -25,6 +23,7 @@ function ProjectExplorer() {
 
   const [viewType, setViewType] = useState('list');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0); 
   const [offcanvasMenuOpen, setOffcanvasMenuOpen] = useState(false);
 
   const handleOCMenuToggle = () => {
@@ -107,7 +106,7 @@ function ProjectExplorer() {
     };
 
     fetchProjectDetails();
-  }, [projectId]);
+  }, [projectId, refreshKey]);
 
   // Define columns for the table
   const explorerColumn = [
@@ -186,10 +185,11 @@ function ProjectExplorer() {
 
       setShowAddModal(false);
       setNewFiles({ file: null });
+      setRefreshKey((prevKey) => prevKey + 1);
     } catch (error) {
       Swal.fire({
         title: 'Error!',
-        text: 'Failed to add file(s) to the project. Please try again.',
+        text: error,
         icon: 'error',
         confirmButtonText: 'OK',
       });
@@ -230,11 +230,12 @@ function ProjectExplorer() {
         icon: "success",
         confirmButtonText: "OK",
       });
+      setRefreshKey((prevKey) => prevKey + 1);
     }
     } catch (error) {
       Swal.fire({
         title: "Error!",
-        text: "Failed to delete selected files.",
+        text: error,
         icon: "error",
         confirmButtonText: "OK",
       });
@@ -300,6 +301,7 @@ function ProjectExplorer() {
         document.querySelector(".offcanvas").removeAttribute("inert");
         const { shareWith, recipients, releaseNote } = result.value;
         return console.log("success", shareWith, recipients, releaseNote)
+        
         // try {
         //   await axiosInstance.post(`/share-data/${projectId}`, {
         //     shareWith,
@@ -311,6 +313,7 @@ function ProjectExplorer() {
         //   Swal.fire('Error!', 'Failed to add the release. Try again.', 'error');
         //   console.error(error);
         // }
+        
       } else if (result.dismiss === Swal.DismissReason.cancel) {
         // If the user cancels, restore focus and remove inert attributes
         document.querySelector(".offcanvas").removeAttribute("aria-hidden");

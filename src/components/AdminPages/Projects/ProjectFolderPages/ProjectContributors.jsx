@@ -3,6 +3,7 @@ import axiosInstance from "../../../../../axiosInstance.js";
 import DataTable from "react-data-table-component";
 import Swal from "sweetalert2";
 import {useParams } from "react-router-dom";
+import check from "../../../../assets/images/check.png";
 
 import StickyHeader from "../../../SideBar/StickyHeader";
 import '../ProjectStyles.css'
@@ -22,6 +23,9 @@ function ProjectContributors() {
 
   const [groups, setGroups] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
+
+  const [refreshKey, setRefreshKey] = useState(0); 
+  const [availableEmails, setAvailableEmails] = useState([]); 
 
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -61,47 +65,56 @@ function ProjectContributors() {
     };
   }, [showSearchBox]);
 
-  useEffect(() => {
+
     // Fetch project details and populate fields
     const fetchProjectDetails = async () => {
       try {
         const response = await axiosInstance.get(`/project-contributors/${projectId}`);
         const { project_name, owner, contributors, groups } = response.data;
-
+    
         setProjectName(project_name);
-        setOwnerName(owner)
-
+        setOwnerName(owner);
+    
         const formattedContributors = contributors.map((contributor) => ({
           contName: contributor.name,
           contEmployer: contributor.employer,
           contRole: contributor.role,
           contStatus: contributor.status,
-          lastAccessed: new Intl.DateTimeFormat('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          }).format(new Date(contributor.last_login)),  // Format updatedAt
+          contEmail: contributor.email,
+          lastAccessed: contributor.last_login
+            ? new Intl.DateTimeFormat('en-US', {
+                month: 'short',
+                day: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              }).format(new Date(contributor.last_login))
+            : null,
         }));
-
+    
         const formattedGroups = groups.map((group) => ({
           groupId: group.id,
           groupName: group.group_name,
           members: group.members || [],
         }));
-
-        setContributors(formattedContributors)
+    
+        // Extract email addresses
+        const emailOptions = formattedContributors.map((contributor) => contributor.contEmail);
+    
+        setContributors(formattedContributors);
         setContributorCount(contributors.length);
-        setGroups(formattedGroups)
-        console.log(groups)
+        setGroups(formattedGroups);
+        setAvailableEmails(emailOptions); // Store the emails for dropdown usage
+        console.log(availableEmails)
       } catch (error) {
-        console.error("Error fetching project details:", error);
+        console.error('Error fetching project details:', error);
       }
     };
     
-    fetchProjectDetails();
-  }, [projectId]);
+    useEffect(() => {
+      fetchProjectDetails();
+    }, [projectId, refreshKey]);
+    
 
   const contTableColumn = [
     {
@@ -168,6 +181,7 @@ function ProjectContributors() {
         try {
           await axiosInstance.post(`/create-group/${projectId}`, {groupName});
         Swal.fire('Success!', `${groupName} has been added.`, 'success');
+        setRefreshKey((prevKey) => prevKey + 1);
         } catch (error){
           Swal.fire('Error!', 'Failed to create group. Try again.', 'error');
         console.error(error);
@@ -231,72 +245,82 @@ function ProjectContributors() {
       title: 'Invite Contributors',
       html: `
         <div style="text-align: left;">
-          <label for="project-invite" style="display: block;">People: </label>
-          <input type="text" id="project-invite" class="swal2-input" placeholder="Add people by email address..." style="margin-bottom: 10px; width: 100%; ">
-  
+          <label for="email-select" style="display: block;">Select People: </label>
+          <select id="email-select" class="swal2-input" multiple style="margin-bottom: 10px; width: 100%; height: 100px;">
+            ${availableEmails.map((email) => `<option value="${email}">${email}</option>`).join('')}
+          </select>
+    
           <div id="group-container">
             <button id="add-to-group-btn" type="button" class="btn btn-primary" style="margin-bottom: 10px;">Add to Group</button>
-          </div>
-  
-          <div id="role-section" style="margin-top: 10px;">
-            <label style="display: block; font-weight: bold;">Select Role:</label>
-            <div>
-              <input type="radio" id="role-admin" name="role" value="Admin">
-              <label for="role-admin">Admin</label>
-            </div>
-            <div>
-              <input type="radio" id="role-user" name="role" value="User" checked>
-              <label for="role-user">User/Client</label>
-            </div>
           </div>
         </div>
       `,
       confirmButtonText: 'Invite',
       showCancelButton: true,
       customClass: {
-        confirmButton: "btn btn-success contrib-btn-success",
-        cancelButton: "btn btn-danger contrib-btn-danger"
+        confirmButton: 'btn btn-success contrib-btn-success',
+        cancelButton: 'btn btn-danger contrib-btn-danger',
       },
       didOpen: () => {
         const addGroupBtn = document.getElementById('add-to-group-btn');
         const groupContainer = document.getElementById('group-container');
-  
-        // Replace button with a text input when clicked
+    
+        // Add group selection dropdown when the button is clicked
         addGroupBtn.addEventListener('click', () => {
+          const groupOptions = groups
+            .map((group) => `<option value="${group.groupId}">${group.groupName}</option>`)
+            .join('');
           groupContainer.innerHTML = `
-            <label for="contrib-group-name" style="display: block;">Group Name: </label>
-            <input type="text" id="contrib-group-name" class="swal2-input" placeholder="Enter group name..." style="margin-bottom: 10px; width: 100%;">
+            <label for="contrib-group-id" style="display: block;">Select Group: </label>
+            <select id="contrib-group-id" class="swal2-input" style="margin-bottom: 10px; width: 100%;">
+              <option value="" disabled selected>Select a group...</option>
+              ${groupOptions}
+            </select>
           `;
         });
       },
       preConfirm: () => {
-        const projectInvite = document.getElementById('project-invite').value;
-        const groupNameInput = document.getElementById('group-name');
-        const selectedRole = document.querySelector('input[name="role"]:checked').value;
-        const groupName = groupNameInput ? groupNameInput.value : null;
-  
-        if (!projectInvite) {
-          Swal.showValidationMessage('Please fill in the People field.');
+        const emailSelect = document.getElementById('email-select');
+        const selectedEmails = Array.from(emailSelect.selectedOptions).map((option) => option.value);
+        const groupIdInput = document.getElementById('contrib-group-id');
+        const groupId = groupIdInput ? groupIdInput.value : null;
+    
+        if (selectedEmails.length === 0) {
+          Swal.showValidationMessage('Please select at least one email.');
           return null;
         }
-        if (groupName) {
-          setGroups((prevGroups) =>
-            prevGroups.map((group) =>
-              group.name === groupName ? { ...group, members: [...group.members, projectInvite] } : group
-            )
-          );
-        }
-        return { projectInvite, groupName, selectedRole };
+    
+        return { emails: selectedEmails, groupId };
       },
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        const { projectInvite, groupName, selectedRole } = result.value;
-  
-        console.log('New contributor details:', { projectInvite, groupName, selectedRole });
-        Swal.fire('Success!', 'New contributors have been added.', 'success');
+        const { emails, groupId } = result.value;
+    
+        try {
+          const endpoint = groupId
+            ? `/invite-to-project/${projectId}/${groupId}`
+            : `/invite-to-project/${projectId}`;
+    
+          const payload = { emails, groupId: groupId || undefined };
+    
+          await axiosInstance.post(endpoint, payload);
+    
+          Swal.fire('Success!', 'Contributors invited successfully.', 'success');
+        } catch (error) {
+          Swal.fire('Error!', 'Failed to invite contributors. Try again.', 'error');
+          console.error(error);
+        }
       }
     });
   };
+  
+  
+  
+  
+  const handleInviteClick = () => {
+    handleInviteToProject(projectId, groups, availableEmails);
+  };
+  
   
   const sampleFilters = [
     {
@@ -332,9 +356,10 @@ function ProjectContributors() {
   const fetchContributorsByGroup = async (groupId) => {
     try {
       const response = await axiosInstance.get(`/group-contributors/${projectId}/${groupId}`);
-      const contributors = response.data.map((contributor) => ({
+      const groupcontributors = response.data.contributors.map((contributor) => ({
         contName: contributor.name,
         contEmployer: contributor.employer,
+        contEmail: contributor.email,
         contRole: contributor.role,
         contStatus: contributor.status,
         lastAccessed: new Intl.DateTimeFormat("en-US", {
@@ -345,7 +370,8 @@ function ProjectContributors() {
           minute: "2-digit",
         }).format(new Date(contributor.last_login)),
       }));
-      setContributors(contributors);
+      setContributors(groupcontributors);
+      console.log(groupcontributors)
     } catch (error) {
       console.error("Error fetching contributors for group:", error);
     }

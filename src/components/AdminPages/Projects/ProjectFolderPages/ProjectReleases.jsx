@@ -17,6 +17,7 @@ function ProjectReleases() {
   const { projectId } = useParams();
   const [projectName, setProjectName] = useState("");
   const [ownerName, setOwnerName] = useState("")
+  const [refreshKey, setRefreshKey] = useState(0); 
 
   
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -62,6 +63,7 @@ function ProjectReleases() {
         }));
 
         setReleasesTable(formattedViews)
+
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
@@ -69,7 +71,7 @@ function ProjectReleases() {
     
 
     fetchProjectDetails();
-  }, [projectId]);
+  }, [projectId, refreshKey]);
 
   const sampleFilters = [
     {
@@ -281,6 +283,7 @@ function ProjectReleases() {
             releaseNote,
           });
         Swal.fire('Success!', 'The new release has been added.', 'success');
+        setRefreshKey((prevKey) => prevKey + 1);
         } catch (error){
           Swal.fire('Error!', 'Failed to add the release. Try again.', 'error');
         console.error(error);
@@ -322,6 +325,7 @@ function ProjectReleases() {
               title: 'custom-swal-title',
             },
           });
+          setRefreshKey((prevKey) => prevKey + 1);
         } catch (error) {
           Swal.fire({
             title: 'Error!',

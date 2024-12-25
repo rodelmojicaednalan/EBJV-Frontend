@@ -26,6 +26,7 @@ function ProjectToDo() {
   const [toDoData, setToDoData] = useState([]);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0); 
 
   const handleMenuToggle = () => {
     setMenuOpen(!menuOpen);
@@ -80,8 +81,8 @@ function ProjectToDo() {
       }
     };
     
-    fetchProjectDetails();
-  }, [projectId]);
+      fetchProjectDetails();
+    }, [projectId, refreshKey]);
 
   const sampleFilters = [
     {
@@ -344,6 +345,7 @@ function ProjectToDo() {
                     todoType,
                 });
                 Swal.fire('Success!', 'The to-do has been added.', 'success');
+                setRefreshKey((prevKey) => prevKey + 1);
             } catch (error) {
                 Swal.fire('Error!', 'Failed to add to-do. Try again.', 'error');
                 console.error(error);

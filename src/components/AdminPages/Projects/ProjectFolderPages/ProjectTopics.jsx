@@ -36,6 +36,7 @@ function ProjectTopics() {
   const [activeDropdown, setActiveDropdown] = useState(null);
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0); 
 
   const [showCanvas, setShowCanvas] = useState(false);
 
@@ -103,7 +104,7 @@ function ProjectTopics() {
     
 
     fetchProjectDetails();
-  }, [projectId]);
+  }, [projectId, refreshKey]);
 
 
 
@@ -209,6 +210,7 @@ function ProjectTopics() {
               title: 'custom-swal-title',
             },
           });
+          setRefreshKey((prevKey) => prevKey + 1);
         } catch (error) {
           Swal.fire({
             title: 'Error!',
