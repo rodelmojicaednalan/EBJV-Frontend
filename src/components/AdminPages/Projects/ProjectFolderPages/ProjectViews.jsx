@@ -57,7 +57,7 @@ function ProjectViews() {
         }));
 
         setViewsTable(formattedViews)
-        console.log(viewsTable)
+        //console.log(viewsTable)
       } catch (error) {
         console.error("Error fetching project details:", error);
       }

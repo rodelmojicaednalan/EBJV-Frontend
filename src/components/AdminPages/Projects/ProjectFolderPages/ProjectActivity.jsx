@@ -45,7 +45,7 @@ function ProjectActivity() {
           activityType: activity.activityType, // Assuming the file object has this key
           activityDescription: activity.activityDescription,
           relatedData: JSON.parse(activity.relatedData),
-          activityOwner: `${owner.first_name} ${owner.last_name}`,
+          activityOwner: activity.activator,
           lastModified: new Intl.DateTimeFormat('en-US', {
             month: 'short',
             day: '2-digit',
@@ -57,7 +57,7 @@ function ProjectActivity() {
         }));
 
         setActivityCardData(formattedActivities)
-        console.log(project_activities)
+        //console.log(project_activities)
       } catch (error) {
         console.error("Error fetching project details:", error);
       }

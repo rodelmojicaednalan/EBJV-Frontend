@@ -26,6 +26,8 @@ function Projects() {
   const [filteredData, setFilteredData] = useState([]);
   const { setLoading } = useLoader();
   const [projectOwner, setProjectOwner] = useState('');
+  
+  const [refreshKey, setRefreshKey] = useState(0); 
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [newProject, setNewProject] = useState({
@@ -83,7 +85,7 @@ function Projects() {
     };
 
     fetchProjects();
-  }, [navigate]);
+  }, [navigate, refreshKey]);
 
   //filter Projects
   useEffect(() => {
@@ -126,6 +128,7 @@ function Projects() {
 
       setShowAddModal(false);
       setNewProject({ title: '', location: '', file: null });
+      setRefreshKey((prevKey) => prevKey + 1);
     } catch (error) {
       Swal.fire({
         title: 'Error!',
@@ -171,6 +174,7 @@ function Projects() {
               title: 'custom-swal-title',
             },
           });
+          setRefreshKey((prevKey) => prevKey + 1);
         } catch (error) {
           Swal.fire({
             title: 'Error!',

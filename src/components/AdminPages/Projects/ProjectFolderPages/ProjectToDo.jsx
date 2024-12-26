@@ -60,7 +60,7 @@ function ProjectToDo() {
         const formattedToDos = project_toDos.map((toDo) => ({
           id: toDo.id,
           title: toDo.toDoTitle,
-          assignee: toDo.toDoAssignee,
+          assignee: toDo.toDoAssignee.replace(/"/g, " "),
           createdOn: new Intl.DateTimeFormat('en-US', {
             month: 'short',
             day: '2-digit',

@@ -99,7 +99,7 @@ function ProjectExplorer() {
         }));
 
         setExplorerTable(formattedFiles);
-        console.log(files)
+        //console.log(files)
       } catch (error) {
         console.error('Error fetching project details:', error);
       }

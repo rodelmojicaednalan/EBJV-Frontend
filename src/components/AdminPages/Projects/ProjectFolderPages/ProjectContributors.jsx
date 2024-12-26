@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import Select from 'react-select'
 import axiosInstance from "../../../../../axiosInstance.js";
 import DataTable from "react-data-table-component";
 import Swal from "sweetalert2";
@@ -15,6 +16,7 @@ import { FaCaretDown } from "react-icons/fa";
 import ProjectSidebar from '../ProjectFolderSidebar';
 function ProjectContributors() {
   const { projectId } = useParams();
+  const [refreshKey, setRefreshKey] = useState(0); 
   const [projectName, setProjectName] = useState("");
   const [ownerName, setOwnerName] = useState("")
 
@@ -24,7 +26,6 @@ function ProjectContributors() {
   const [groups, setGroups] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
 
-  const [refreshKey, setRefreshKey] = useState(0); 
   const [availableEmails, setAvailableEmails] = useState([]); 
 
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -33,24 +34,20 @@ function ProjectContributors() {
   const [showSearchBox, setShowSearchBox] = useState(false);
   const searchBoxRef = useRef(null);
 
+  const [availableUsers, setAvailableUsers] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [showInviteBox, setShowInviteBox] = useState(false);
+  const inviteBoxRef = useRef(null);  
+
+  // search people hide function
   const handleSearchClick = () => {
     setShowSearchBox(true);
   };
 
   const handleBlur = (event) => {
-    // Check if the click is outside of the search box
     if (!searchBoxRef.current.contains(event.target)) {
       setShowSearchBox(false);
-    }
-  };
-
-  const handleMenuToggle = () => {
-    setMenuOpen(!menuOpen);
-  };
-
-  const handleMenuOptionClick = (option) => {
-    setMenuOpen(false);
-    Swal.fire(`Function to: ${option}`);
+    } 
   };
 
   useEffect(() => {
@@ -63,8 +60,39 @@ function ProjectContributors() {
     return () => {
       document.removeEventListener("mousedown", handleBlur);
     };
+
   }, [showSearchBox]);
 
+
+  // dropdown menu toggle
+  const handleMenuToggle = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const handleMenuOptionClick = (option) => {
+    setMenuOpen(false);
+    Swal.fire(`Function to: ${option}`);
+  };
+
+// Hiding invite box 
+  const handleInviteBlur = (event) => {
+    if (!inviteBoxRef.current.contains(event.target)) {
+      setShowInviteBox(false);
+    } 
+  };
+
+  useEffect(() => {
+    if (showInviteBox) {
+      document.addEventListener("mousedown", handleInviteBlur);
+    } else {
+      document.removeEventListener("mousedown", handleInviteBlur);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleInviteBlur);
+    };
+
+  }, [showInviteBox]);
 
     // Fetch project details and populate fields
     const fetchProjectDetails = async () => {
@@ -81,7 +109,7 @@ function ProjectContributors() {
           contRole: contributor.role,
           contStatus: contributor.status,
           contEmail: contributor.email,
-          lastAccessed: contributor.last_login
+          lastAccessed: contributor.last_login && contributor.last_login !== "No login record"
             ? new Intl.DateTimeFormat('en-US', {
                 month: 'short',
                 day: '2-digit',
@@ -89,7 +117,7 @@ function ProjectContributors() {
                 hour: '2-digit',
                 minute: '2-digit',
               }).format(new Date(contributor.last_login))
-            : null,
+            : "No login record", // Fallback when there's no valid date or the login record is "No login record"
         }));
     
         const formattedGroups = groups.map((group) => ({
@@ -99,20 +127,68 @@ function ProjectContributors() {
         }));
     
         // Extract email addresses
-        const emailOptions = formattedContributors.map((contributor) => contributor.contEmail);
+        //const emailOptions = formattedContributors.map((contributor) => contributor.contEmail);
     
         setContributors(formattedContributors);
         setContributorCount(contributors.length);
         setGroups(formattedGroups);
-        setAvailableEmails(emailOptions); // Store the emails for dropdown usage
-        console.log(availableEmails)
+        //setAvailableEmails(emailOptions); // Store the emails for dropdown usage
+        //console.table(formattedContributors)
       } catch (error) {
         console.error('Error fetching project details:', error);
+      }
+    };
+
+    // fetches all available users not in the project and/or not in a group
+    const fetchAvailableUsers = async () => {
+      try {
+        const [currentUserResponse, projectResponse, usersResponse] = await Promise.all([
+          axiosInstance.get(`/user`),
+          axiosInstance.get(`/project-contributors/${projectId}`),
+          axiosInstance.get(`/users`),
+        ]);
+    
+        const currentUser = currentUserResponse.data;
+        const { contributors } = projectResponse.data; // Get contributors from project details
+        const users = usersResponse.data;
+    
+        // Extract emails of contributors
+        const contributorEmails = contributors.map((contributor) => contributor.email);
+    
+        const formattedUsers = users
+          .filter((user) => 
+            user.email !== currentUser.email && // Exclude current user
+            !contributorEmails.includes(user.email) // Exclude contributor emails
+          )
+          .map((user) => ({
+            userName: `${user.first_name} ${user.last_name}`,
+            userEmail: user.email,
+          }));
+    
+        const emailOptions = formattedUsers.map((user) => user.userEmail);
+
+
+        const formattedToAdd = users
+        .filter((user) => 
+          contributorEmails.includes(user.email) 
+        )
+        .map((user) => ({
+          label: `${user.first_name} ${user.last_name} (${user.email})`, // Label for dropdown
+          value: user.email, // Value for dropdown
+        }));
+
+        setAvailableUsers(formattedToAdd);
+        setAvailableEmails(emailOptions);
+        //console.log(formattedUsers)
+        console.log(formattedToAdd)
+      } catch (error) {
+        console.error('Error fetching users:', error);
       }
     };
     
     useEffect(() => {
       fetchProjectDetails();
+      fetchAvailableUsers();
     }, [projectId, refreshKey]);
     
 
@@ -190,7 +266,82 @@ function ProjectContributors() {
     });
   };
 
+  const handleInviteToGroup = async (id) => {
+    console.log(selectedGroup);
+    // Validate that selected users are not already in the group
+    const usersToInvite = selectedUsers.filter(
+      (user) => !contributors.some((contributor) => contributor.contEmail === user.value)
+    );
+  
+    if (usersToInvite.length === 0) {
+      Swal.fire({
+        title: 'No Valid Users',
+        text: 'The selected users are already part of the group.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#EC221F',
+      });
+      return;
+    }
+  
+    Swal.fire({
+      title: 'Add users to the group?',
+      showCancelButton: true,
+      icon: 'question',
+      confirmButtonColor: '#eb6314',
+      cancelButtonColor: '#00000000',
+      cancelTextColor: '#000000',
+      confirmButtonText: 'Confirm',
+      customClass: {
+        container: 'custom-container',
+        confirmButton: 'custom-confirm-button',
+        cancelButton: 'custom-cancel-button',
+        title: 'custom-swal-title',
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await axiosInstance.post(`/group-invite/${projectId}/${id}`, {
+            emails: usersToInvite.map((user) => user.value),
+          });
+  
+          Swal.fire({
+            title: 'Success!',
+            text: `User(s) have been added to the group.`,
+            imageUrl: check,
+            imageWidth: 100,
+            imageHeight: 100,
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#0ABAA6',
+            customClass: {
+              confirmButton: 'custom-success-confirm-button',
+              title: 'custom-swal-title',
+            },
+          });
+          setRefreshKey((prevKey) => prevKey + 1);
+          console.log("Invite response:", response.data);
+          setSelectedUsers([]); // Clear selections after submitting
+        } catch (error) {
+          Swal.fire({
+            title: 'Error!',
+            text: 'There was an error adding user(s) to the group.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#EC221F',
+            customClass: {
+              confirmButton: 'custom-error-confirm-button',
+              title: 'custom-swal-title',
+            },
+          });
+        }
+      }
+    });
+  };
+  
+
   const handleDeleteGroup = async (id) => {
+    console.log(id)
+    console.log(selectedGroup)
     Swal.fire({
       title: 'Are you sure?',
       text: 'You won’t be able to revert this!',
@@ -223,6 +374,7 @@ function ProjectContributors() {
               title: 'custom-swal-title',
             },
           });
+          setRefreshKey((prevKey) => prevKey + 1);
         } catch (error) {
           Swal.fire({
             title: 'Error!',
@@ -306,6 +458,7 @@ function ProjectContributors() {
           await axiosInstance.post(endpoint, payload);
     
           Swal.fire('Success!', 'Contributors invited successfully.', 'success');
+          setRefreshKey((prevKey) => prevKey + 1);
         } catch (error) {
           Swal.fire('Error!', 'Failed to invite contributors. Try again.', 'error');
           console.error(error);
@@ -314,13 +467,9 @@ function ProjectContributors() {
     });
   };
   
-  
-  
-  
-  const handleInviteClick = () => {
-    handleInviteToProject(projectId, groups, availableEmails);
-  };
-  
+  // const handleInviteClick = () => {
+  //   handleInviteToProject(projectId, groups, availableEmails);
+  // };
   
   const sampleFilters = [
     {
@@ -362,16 +511,18 @@ function ProjectContributors() {
         contEmail: contributor.email,
         contRole: contributor.role,
         contStatus: contributor.status,
-        lastAccessed: new Intl.DateTimeFormat("en-US", {
-          month: "short",
-          day: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }).format(new Date(contributor.last_login)),
+        lastAccessed: contributor.last_login && contributor.last_login !== "No login record"
+          ? new Intl.DateTimeFormat('en-US', {
+              month: 'short',
+              day: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            }).format(new Date(contributor.last_login))
+          : "No login record", // Fallback when there's no valid date or the login record is "No login record"
       }));
       setContributors(groupcontributors);
-      console.log(groupcontributors)
+      //console.log(groupcontributors)
     } catch (error) {
       console.error("Error fetching contributors for group:", error);
     }
@@ -380,8 +531,9 @@ function ProjectContributors() {
   const handleGroupClick = (groupName) => {
     const group = groups.find((g) => g.groupName === groupName);
     if (group) {
-      setSelectedGroup(groupName);
+      setSelectedGroup(group);
       fetchContributorsByGroup(group.groupId);
+      //console.table(selectedGroup)
     }
   };
   
@@ -410,7 +562,7 @@ function ProjectContributors() {
                         </div>
                         <div className="button-group d-flex">
                             <button id="addbtn" className="btn btn-primary add-btn" title="Add" onClick={handleInviteToProject}>
-                              Invite to Project
+                              Add People to Project
                             </button>
                           </div>
                       </div>
@@ -447,7 +599,7 @@ function ProjectContributors() {
                                       {groups.map((group) => (
                                         <li
                                           key={group.groupName}
-                                          className={`list-item item-btn px-2 selectable ${selectedGroup === group.groupName ? 'active' : ''}`}
+                                          className={`list-item item-btn px-2 selectable ${selectedGroup === group ? 'active' : ''}`}
                                           onClick={() => handleGroupClick(group.groupName)}
                                         >
                                           <div className="label-group" >
@@ -491,6 +643,59 @@ function ProjectContributors() {
                                       </div>
 
                                     </div>
+                                    {selectedGroup && (
+                                      <div className="group-action-buttons d-flex">
+                                        <div style={{ position: "relative" }}>
+                                          <button
+                                            className="btn"
+                                            onClick={() => setShowInviteBox((prev) => !prev)} // Toggle the invite dropdown visibility
+                                          >
+                                            Invite to Group
+                                          </button>
+
+                                          {showInviteBox && (
+                                            <div
+                                              ref={inviteBoxRef}
+                                              style={{
+                                                position: "absolute",
+                                                left: 0,
+                                                top: "40px",
+                                                backgroundColor: "white",
+                                                border: "1px solid #ccc",
+                                                padding: "10px",
+                                                borderRadius: "4px",
+                                                zIndex: 1,
+                                                width: "300px",
+                                              }}
+                                            >
+                                              <Select
+                                                options={availableUsers.filter(
+                                                (user) => !contributors.some((contributor) => contributor.contEmail === user.value)
+                                                )} // Exclude contributors
+                                                isMulti
+                                                placeholder="Select users to invite..."
+                                                onChange={(selectedOptions) => setSelectedUsers(selectedOptions)} // Update selected users
+                                                onBlur={handleInviteBlur}
+                                              />
+                                              <button
+                                                className="btn btn-primary"
+                                                id="addbtn"
+                                                onClick={() => handleInviteToGroup(selectedGroup.groupId)}
+                                                style={{ marginTop: "10px", width: "100%" }}
+                                              >
+                                                Send Invite
+                                              </button>
+                                            </div>
+                                          )}
+                                        </div>
+                                        <button
+                                          className="btn"
+                                          onClick={() => handleDeleteGroup(selectedGroup.groupId)}
+                                        >
+                                          Delete Group
+                                        </button>
+                                      </div>
+                                    )}
                                     <div style={{ position: "relative" }}>
                                       <button
                                         className="search-button"
