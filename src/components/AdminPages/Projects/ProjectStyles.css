@@ -160,6 +160,14 @@
 }
 
   /* Project Explorer*/
+  .exportToCSV, .exportToCSV:hover {
+    color: #212A31;
+    text-decoration: none;
+  }
+  .exportToCSV-white, .exportToCSV-white:hover {
+    color: #FFF;
+    text-decoration: none;
+  }
 
   .project-display.grid .grid-view {
     display: flex;
@@ -175,7 +183,10 @@
     width: calc(33.333% - 20px); /* Adjust width for 3 items per row */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
-  
+  .grid-item > h5, p {
+    display: flex;
+    justify-content: center;
+  }
   .project-display.list {
     display: block;
   }
@@ -426,6 +437,32 @@ flex-direction: column;
   margin-right: 4px;
 }
 
+
+
+/* Project To Do */
+.jNIkof{
+background-color: transparent !important;
+}
+.cTsUPQ{
+  background-color: transparent !important;
+}
+.noData{
+  background-color: transparent;
+}
+.circle{
+  background-color: #e6e6e6;
+  padding: 3.575rem;
+  border-radius: 50%;
+}
+.no-display-text{
+  display: flex;
+  color: #aaa7a7;
+  font-weight: 500;
+  font-size: small;
+  justify-content: center;
+}
+
+/* End of To Do Style */
 
 /* Contributor Page Style*/
 .contributor-wrapper {

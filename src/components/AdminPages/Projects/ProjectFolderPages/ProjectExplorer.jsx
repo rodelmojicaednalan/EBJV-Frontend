@@ -4,6 +4,8 @@ import axiosInstance from '../../../../../axiosInstance.js';
 import Swal from 'sweetalert2';
 import { useNavigate, useParams } from 'react-router-dom';
 import StickyHeader from '../../../SideBar/StickyHeader';
+import { saveAs } from 'file-saver'
+import { CSVLink } from 'react-csv'
 
 import '../ProjectStyles.css';
 import { BiDotsVertical, BiSolidEditAlt } from 'react-icons/bi';
@@ -11,6 +13,8 @@ import { LiaTimesSolid } from "react-icons/lia";
 import { IoMdDownload, IoMdPersonAdd  } from "react-icons/io";
 import { IoGrid } from 'react-icons/io5';
 import { FaThList } from 'react-icons/fa';
+import { MdFolderOff } from "react-icons/md";
+
 import { Modal, Button } from 'react-bootstrap';
 import ProjectSidebar from '../ProjectFolderSidebar';
 import Offcanvas from 'react-bootstrap/Offcanvas';
@@ -85,7 +89,7 @@ function ProjectExplorer() {
           fileSize: `${(file.fileSize / (1024 * 1024)).toFixed(
             2
           )} MB`, // Convert bytes to KB
-          fileOwner: `${owner.first_name} ${owner.last_name}`,
+          fileOwner: file.fileOwner,
           created: new Intl.DateTimeFormat('en-US', {
             month: 'short',
             day: '2-digit',
@@ -99,6 +103,7 @@ function ProjectExplorer() {
         }));
 
         setExplorerTable(formattedFiles);
+        //console.log(explorerTable)
         //console.log(files)
       } catch (error) {
         console.error('Error fetching project details:', error);
@@ -133,33 +138,49 @@ function ProjectExplorer() {
     },
     {
       name: 'File Name',
+      key: 'fileName',
       width: '30%',
       selector: (row) => row.fileName,
       sortable: true,
     },
     {
       name: 'File Owner',
+      key: 'fileOwner',
       width: '20%',
       selector: (row) => row.fileOwner,
       sortable: true,
     },
     {
       name: 'Last Modified',
+      key: 'lastModified',
       width: '20%',
       selector: (row) => row.lastModified,
       sortable: true,
     },
     {
       name: 'File Size',
+      key: 'fileSize',
       selector: (row) => row.fileSize,
       sortable: true,
     },
-    {
-      name: 'Tags',
-      selector: (row) => '',
-      sortable: true,
-    },
   ];
+
+
+  const handleExportToCSV = () => {
+    // Filter out the checkbox column (no selector property)
+    const filteredColumns = explorerColumn.filter((col) => col.selector);
+    // Extract headers
+    const headers = filteredColumns.map((col) => ({ label: col.name, key: col.key }));
+    // Map data rows based on filtered columns
+    const data = explorerTable.map((row) =>
+    Object.fromEntries(
+      filteredColumns.map((col) => [col.key, col.selector(row)]) // Extract values dynamically
+    )
+  );
+    console.log(headers)
+    return { headers, data };
+  };
+
   
   const [showAddModal, setShowAddModal] = useState(false);
   const [newFiles, setNewFiles] = useState([]);
@@ -324,7 +345,6 @@ function ProjectExplorer() {
   };
 
   const menuRef  = useRef(null);
-
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -340,6 +360,33 @@ function ProjectExplorer() {
     };
   }, []);
 
+  const downloadFile = async (fileName) => {
+    console.log(fileName);
+  
+    Swal.fire({
+      title: 'Fetching file...',
+      text: 'Please wait.',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+  
+    try {
+      const response = await axiosInstance.get(`/download-file/${projectId}/${fileName}`, {
+        responseType: 'blob', 
+      });
+      const blob = new Blob([response.data]);
+      saveAs(blob, fileName); 
+      Swal.fire('Success!', `${fileName} has been downloaded`, 'success');
+    } catch (error) {
+      Swal.fire('Error!', `Failed to download ${fileName}. Try again.`, 'error');
+      console.error(error);
+    } finally {
+      Swal.close();
+    }
+  };
+  
 
   return (
     <div className="container">
@@ -354,7 +401,6 @@ function ProjectExplorer() {
         <div className="projectFolder-sidebar-container">
           <ProjectSidebar projectId={projectId} />
         </div>
-
         <div className="projectFolder-display">
           <div className="main">
             <div className="container-fluid moduleFluid">
@@ -393,13 +439,15 @@ function ProjectExplorer() {
                       </button>
                       {menuOpen && (
                         <div className="dropdown-menu" ref={menuRef}>
-                          <div
-                            className="dropdown-item"
-                            onClick={() =>
-                              handleMenuOptionClick('Export to Excel')
-                            }
-                          >
-                            Export to Excel
+                          <div className="dropdown-item">
+                              <CSVLink
+                                {...handleExportToCSV()}
+                                filename={`${ownerName}'s ${projectName}_IFC-Files.csv`}
+                                className="exportToCSV"
+                                target="_blank"
+                              >
+                                Export to CSV
+                            </CSVLink>
                           </div>
                           <div
                             className="dropdown-item"
@@ -460,6 +508,16 @@ function ProjectExplorer() {
                       data={explorerTable}
                       onRowClicked={handleRowClick}
                       responsive
+                      noDataComponent={
+                        <div className="noData mt-4">
+                          <div className="circle">
+                          <MdFolderOff size={65} color="#9a9a9c"/>
+                          </div>
+                          <div className="no-display-text mt-2">
+                            No IFC files found.
+                          </div>
+                        </div>
+                        }
                     />
                   )}
                 </div>
@@ -562,17 +620,13 @@ function ProjectExplorer() {
                 View 
               </button>
               <button className="btn mr-1" onClick={handleShare}><IoMdPersonAdd size={20}/></button>
-              <button className="btn mr-1"><IoMdDownload size={20}/></button>
+              <button className="btn mr-1" onClick={() => downloadFile(selectedRow.fileName)} ><IoMdDownload size={20}/></button>
               <button className="btn " onClick={handleOCMenuToggle}><BiDotsVertical size={20}/></button>  
               {offcanvasMenuOpen && (
                         <div className="dropdown-menu" id="offcanvas-dropdown" ref={menuRef}>
                            <div className="dropdown-item"
                                 onClick={() => handleOCMenuOptionClick('Add Tags')}>
                             Add Tags
-                          </div>
-                          <div className="dropdown-item"
-                                onClick={() => handleOCMenuOptionClick('Generate QR Code')}>
-                           Generate QR Code
                           </div>
                            <div className="dropdown-item"
                                 onClick={() => handleOCMenuOptionClick('Checkin')}>
@@ -589,7 +643,6 @@ function ProjectExplorer() {
                         </div>
                       )}            
           </div>
-
         {selectedRow && (
           <div style={{fontSize: "12px"}}>
             <p><strong>Details: </strong></p>

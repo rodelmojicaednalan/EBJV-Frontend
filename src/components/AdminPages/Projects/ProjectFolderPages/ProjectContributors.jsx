@@ -5,6 +5,7 @@ import DataTable from "react-data-table-component";
 import Swal from "sweetalert2";
 import {useParams } from "react-router-dom";
 import check from "../../../../assets/images/check.png";
+import { CSVLink } from 'react-csv'
 
 import StickyHeader from "../../../SideBar/StickyHeader";
 import '../ProjectStyles.css'
@@ -12,6 +13,7 @@ import '../ProjectStyles.css'
 import { IoSearchSharp } from "react-icons/io5";
 import { BiDotsVertical } from "react-icons/bi";
 import { FaCaretDown } from "react-icons/fa";
+import { MdGroupOff } from "react-icons/md";
 
 import ProjectSidebar from '../ProjectFolderSidebar';
 function ProjectContributors() {
@@ -192,34 +194,50 @@ function ProjectContributors() {
     }, [projectId, refreshKey]);
     
 
+    
+  const handleExportToCSV = () => {
+    // Filter out the checkbox column (no selector property)
+    const filteredColumns = contTableColumn.filter((col) => col.selector);
+    // Extract headers
+    const headers = filteredColumns.map((col) => ({ label: col.name, key: col.key }));
+    // Map data rows based on filtered columns
+    const data = contributors.map((row) =>
+    Object.fromEntries(
+      filteredColumns.map((col) => [col.key, col.selector(row)]) // Extract values dynamically
+    )
+  );
+    console.log(headers)
+    return { headers, data };
+  };
+
   const contTableColumn = [
     {
       name: "Name",
-
+      key: 'contName',
       selector: (row) => row.contName,
       sortable: true,
     },
     {
       name: "Employer",
-
+      key: 'contEmployer',
       selector: (row) => row.contEmployer,
       sortable: true,
     },
     {
       name: "Role",
-
+      key: 'contRole',
       selector: (row) => row.contRole,
       sortable: true,
     },
     {
       name: "Status",
-
+      key: 'contStatus',
       selector: (row) => row.contStatus,
-      sortable: true,
+      sortable: false,
     },
     {
       name: "Last Accessed",
-
+      key: 'lastAccessed',
       selector: (row) => row.lastAccessed,
       sortable: true,
     },
@@ -747,17 +765,21 @@ function ProjectContributors() {
                                       </button>
                                       {menuOpen && (
                                         <div className="dropdown-menu" id="contrib-dropdown">
-                                          <div
-                                            className="dropdown-item"
-                                            onClick={() => handleMenuOptionClick("Export To Do")}
-                                          >
-                                            Export to Excel
+                                          <div className="dropdown-item">
+                                              <CSVLink
+                                                {...handleExportToCSV()}
+                                                filename={`${ownerName}'s ${projectName}_Contributors.csv`}
+                                                className="exportToCSV"
+                                                target="_blank"
+                                              >
+                                                Export to CSV
+                                            </CSVLink>
                                           </div>
                                           <div
                                             className="dropdown-item"
                                             onClick={() => handleMenuOptionClick("Import To Do")}
                                           >
-                                            Import from Excel 
+                                            Import from CSV
                                           </div>
                                         </div>
                                       )}
@@ -773,6 +795,16 @@ function ProjectContributors() {
                                   columns={contTableColumn}
                                   data={contributors}
                                   responsive
+                                  noDataComponent={
+                                    <div className="noData mt-4">
+                                      <div className="circle">
+                                      <MdGroupOff size={65} color="#9a9a9c"/>
+                                      </div>
+                                      <div className="no-display-text mt-2">
+                                        No contributors found.
+                                      </div>
+                                    </div>
+                                    }
                                 />
                                 </div>
                               </div> 

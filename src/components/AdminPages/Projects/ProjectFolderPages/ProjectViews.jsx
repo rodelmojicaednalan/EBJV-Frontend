@@ -10,7 +10,7 @@ import upload_icon from "../../../../assets/images/uploading.png";
 
 import '../ProjectStyles.css'
 import { FiChevronLeft, FiChevronDown } from 'react-icons/fi';
-import { FaCaretDown } from "react-icons/fa";
+import { FaCaretDown, FaEyeSlash } from "react-icons/fa";
 import { BiDotsVertical } from "react-icons/bi";
 import { IoGrid } from "react-icons/io5";
 import { FaThList } from "react-icons/fa";
@@ -190,6 +190,16 @@ function ProjectViews() {
                           noRowsPerPage: true, // Hide the rows per page dropdown
                         }}
                         responsive
+                        noDataComponent={
+                          <div className="noData mt-4">
+                            <div className="circle">
+                            <FaEyeSlash size={65} color="#9a9a9c"/>
+                            </div>
+                            <div className="no-display-text mt-2">
+                              No project views found.
+                            </div>
+                          </div>
+                          }
                       />
 
                       </div>

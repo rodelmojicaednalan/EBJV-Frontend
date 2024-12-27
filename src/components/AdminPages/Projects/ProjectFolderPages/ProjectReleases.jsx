@@ -4,13 +4,12 @@ import Swal from "sweetalert2";
 import { useParams } from "react-router-dom";
 import check from "../../../../assets/images/check.png";
 import StickyHeader from "../../../SideBar/StickyHeader";
-
 import DataTable from "react-data-table-component";
-
 import '../ProjectStyles.css'
 import {  FiEdit, FiMoreVertical } from "react-icons/fi";
 import { FaCaretDown } from "react-icons/fa";
-
+import { IoIosPaper } from "react-icons/io";
+import { TbBoxOff } from "react-icons/tb";
 import ProjectSidebar from '../ProjectFolderSidebar';
 
 function ProjectReleases() {
@@ -19,9 +18,13 @@ function ProjectReleases() {
   const [ownerName, setOwnerName] = useState("")
   const [refreshKey, setRefreshKey] = useState(0); 
 
-  
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [openDropdownId, setOpenDropdownId] = useState(null);
+
+  const [availableEmails, setAvailableEmails] = useState([]); 
+  const [availableUsers, setAvailableUsers] = useState([]);
+  const [projectGroups, setProjectGroups] = useState([]);
+  const [filters, setFilters] = useState([]);
 
   const toggleDropdown = (id) => {
     console.log("Toggling dropdown for ID:", id);
@@ -37,7 +40,6 @@ function ProjectReleases() {
         const response = await axiosInstance.get(`/project/${projectId}`);
         const { project_name, owner, project_releases,} = response.data;
   
-
         setProjectName(project_name);
         setOwnerName(`${owner.first_name} ${owner.last_name}`)
 
@@ -55,6 +57,7 @@ function ProjectReleases() {
           releaseStatus: release.release_status,
           releaseNote: release.release_note,
           viewTags: release.assigned_tags,
+          ownership: release.is_owner,
           lastModified: new Intl.DateTimeFormat('en-US', {
             month: 'short',
             day: '2-digit',
@@ -63,41 +66,88 @@ function ProjectReleases() {
         }));
 
         setReleasesTable(formattedViews)
-
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
     };
     
+    const fetchAvailableUsers = async () => {
+      try {
+        const [currentUserResponse, projectResponse, usersResponse] = await Promise.all([
+          axiosInstance.get(`/user`),
+          axiosInstance.get(`/project-contributors/${projectId}`),
+          axiosInstance.get(`/users`),
+        ]);
+    
+        const currentUser = currentUserResponse.data;
+        const { contributors, groups } = projectResponse.data; // Get contributors from project details
+        const users = usersResponse.data;
+    
+        // Extract emails of contributors
+        const contributorEmails = contributors.map((contributor) => contributor.email);
+        const projectGroups = groups.map((group) => group.group_name)
 
+        const formattedToAdd = users
+        .filter((user) => 
+          contributorEmails.includes(user.email) 
+        )
+        .map((user) => ({
+          label: `${user.first_name} ${user.last_name} (${user.email})`, // Label for dropdown
+          value: user.email, // Value for dropdown
+        }));
+
+        setProjectGroups(projectGroups);
+        setAvailableUsers(formattedToAdd);
+        //console.log(formattedUsers)
+        console.log(projectGroups)
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+
+    fetchAvailableUsers();
     fetchProjectDetails();
   }, [projectId, refreshKey]);
 
-  const sampleFilters = [
-    {
-      type: "Owner",
-      options: ["Created by Me", "Shared with Me",],
-    },
-    {
-      type: "Users",
-      options: ["UserName1", "UserName2", "UserName3"],
-    },
-    {
-      type: "Groups",
-      options: ["Group1", "Group2", "GroupABC"],
-    },
-    {
-      type: "Status",
-      options: ["Draft", "Sent"],
-    },
-    {
-      type: "Due Date",
-      options: ["Today", "Last Week", "Last Month"],
-    },
-  ];
+  useEffect(() => {
+    const generateFilters = () => {
+      const ownershipOptions = ["Created by Me", "Shared with Me"]; // Static mapping for ownership
+      const userOptions = availableUsers.map(user => user.label); // Use availableUsers
+      const groupOptions = projectGroups; // Already formatted in `fetchAvailableUsers`
+      const statusOptions = Array.from(new Set(releasesTable.map(release => release.releaseStatus))); // Unique statuses
+      const dueDateOptions = ["Today", "Last Week", "Last Month"]; // Due date can remain static or dynamically computed
+      
+      const filters = [
+        {
+          type: "Owner",
+          options: ownershipOptions,
+        },
+        {
+          type: "Users",
+          options: userOptions,
+        },
+        {
+          type: "Groups",
+          options: groupOptions,
+        },
+        {
+          type: "Status",
+          options: statusOptions,
+        },
+        {
+          type: "Due Date",
+          options: dueDateOptions,
+        },
+      ];
+      
+      setFilters(filters); // Store the dynamic filters in state
+    };
+  
+    generateFilters();
+  }, [releasesTable, availableUsers, projectGroups]);
+  
 
   const handleDropdownToggle = (filterType) => {
-    // Toggle the dropdown visibility for the clicked filter
     setActiveDropdown((prev) => (prev === filterType ? null : filterType));
   };
 
@@ -371,18 +421,18 @@ function ProjectReleases() {
                       </div>
                       <div className="release-filters">
                         <div className="filter-container">
-                          <div className="filters d-flex">
-                            {sampleFilters.map((filter) => (
-                              <div
-                                key={filter.type}
-                                className="filter-type mr-n1"
-                                onClick={() => handleDropdownToggle(filter.type)}
-                              >
-                                {filter.type} <FaCaretDown />
-                                {activeDropdown === filter.type && renderDropdown(filter)}
-                              </div>
-                            ))}
-                          </div>
+                        <div className="filters d-flex">
+                          {filters.map((filter) => (
+                            <div
+                              key={filter.type}
+                              className="filter-type mr-n1"
+                              onClick={() => handleDropdownToggle(filter.type)}
+                            >
+                              {filter.type} <FaCaretDown />
+                              {activeDropdown === filter.type && renderDropdown(filter)}
+                            </div>
+                          ))}
+                        </div>
                         </div>
                       </div>  
                       <DataTable
@@ -398,6 +448,16 @@ function ProjectReleases() {
                           noRowsPerPage: true, // Hide the rows per page dropdown
                         }}
                         responsive
+                        noDataComponent={
+                          <div className="noData mt-4">
+                            <div className="circle">
+                            <TbBoxOff size={65} color="#9a9a9c"/>
+                            </div>
+                            <div className="no-display-text mt-2">
+                              No releases found.
+                            </div>
+                          </div>
+                          }
                       />
 
                       </div>

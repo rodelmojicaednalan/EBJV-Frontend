@@ -34,6 +34,7 @@ function ProjectTopics() {
   const navigate = useNavigate();
 
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [filters, setFilters] = useState([]);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0); 
@@ -107,26 +108,37 @@ function ProjectTopics() {
   }, [projectId, refreshKey]);
 
 
+  useEffect(() => {
+  const generateFilters = () => {
+    const typeOptions = ["Undefined", "Comment", "Issue", "Request", "Fault", "Inquiry", "Solution", "Remark", "Clash"]; // Static mapping for ownership
+    const prioOptions = ["Low", "Normal", "High", "Critical"]; // Use availableUsers
+    const statusOptions = ["New", "In Progress", "Pending", "Closed", "Done"]; // Already formatted in `fetchAvailableUsers`
+    const tagOptions = [""]; // Due date can remain static or dynamically computed
+    
+    const filters = [
+      {
+        type: "Type",
+        options: typeOptions,
+      },
+      {
+        type: "Priority",
+        options: prioOptions,
+      },
+      {
+        type: "Status",
+        options: statusOptions,
+      },
+      {
+        type: "Tags",
+        options: tagOptions,
+      },
+    ];
+    
+    setFilters(filters); // Store the dynamic filters in state
+  };
 
-  const sampleFilters = [
-    {
-      type: "Type",
-      options: ["Undefined", "Comment", "Issue", "Request", "Fault", "Inquiry", "Solution", "Remark", "Clash"],
-    },
-    {
-      type: "Priority",
-      options: ["Low", "Normal", "High", "Critical"],
-    },
-    {
-      type: "Status",
-      options: ["New", "In Progress", "Pending", "Closed", "Done"],
-    },
-    {
-      type: "Tags",
-      options: [""],
-    },
-  ];
-
+  generateFilters();
+}, [ ]);
   const handleDropdownToggle = (filterType) => {
     // Toggle the dropdown visibility for the clicked filter
     setActiveDropdown((prev) => (prev === filterType ? null : filterType));
@@ -383,7 +395,7 @@ function ProjectTopics() {
                       <div className="view-filters mb-2">
                           <div className="filter-container null">
                             <div className="filters d-flex">
-                                {sampleFilters.map((filter) => (
+                                {filters.map((filter) => (
                               <div
                                 key={filter.type}
                                 className="filter-type mr-n1"
@@ -411,12 +423,12 @@ function ProjectTopics() {
                                   <div className="topic-users flex-row">
                                     <div className="assignee">
                                       <p>
-                                        <strong>Assigned to:</strong> {topic.assignee}
+                                        <strong>Assigned to: </strong> {topic.assignee}
                                       </p>
                                     </div>
                                     <div className="creator">
                                       <p>
-                                        <strong>Created by:</strong> {ownerName}
+                                        <strong>Created by: </strong> {ownerName}
                                       </p>
                                     </div>
                                   </div>

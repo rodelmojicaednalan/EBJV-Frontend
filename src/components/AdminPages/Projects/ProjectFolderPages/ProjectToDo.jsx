@@ -14,6 +14,8 @@ import { GrStatusGoodSmall } from "react-icons/gr";
 import { RiEdit2Fill } from "react-icons/ri";
 import { BiDotsVertical } from "react-icons/bi";
 import { GoAlertFill } from "react-icons/go";
+import { FaClipboardQuestion } from "react-icons/fa6";
+
 
 
 import ProjectSidebar from '../ProjectFolderSidebar';
@@ -437,6 +439,16 @@ function ProjectToDo() {
                           noRowsPerPage: true, // Hide the rows per page dropdown
                         }}
                         responsive
+                        noDataComponent={
+                        <div className="noData mt-4">
+                          <div className="circle">
+                            <FaClipboardQuestion size={65} color="#9a9a9c"/>
+                          </div>
+                          <div className="no-display-text mt-2">
+                            No to do's found.
+                          </div>
+                        </div>
+                        }
                       />
 
                       </div>

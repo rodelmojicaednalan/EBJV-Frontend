@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaFolderTree } from "react-icons/fa6";
 import { FaHistory, FaEye, FaCommentAlt, FaClipboardCheck, FaArrowLeft } from "react-icons/fa";
-import { TbBrandDatabricks } from "react-icons/tb";
+import { TbBrandDatabricks, TbBox } from "react-icons/tb";
 import { IoIosPaper } from "react-icons/io";
 import { IoPeopleSharp } from "react-icons/io5";
 import { MdSettings } from "react-icons/md";
@@ -75,7 +75,7 @@ const Sidebar = ({ projectId }) => {
                   className="subgroup-items"
                   onClick={() => navigate(`/project-folder/${projectId}/data/project-releases`)}
                 >
-                  <IoIosPaper id="nav-icons" />
+                  <TbBox id="nav-icons" />
                   <span id="nav-label">Releases</span>
                 </div>
               </li>

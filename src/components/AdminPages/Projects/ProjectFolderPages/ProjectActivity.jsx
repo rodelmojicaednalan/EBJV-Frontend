@@ -8,10 +8,10 @@ import { AuthContext } from "../../../Authentication/authContext";
 import upload_icon from "../../../../assets/images/uploading.png";
 import view_model from "../../../../assets/images/view-model.png";
 import man from '../../../../assets/images/man.png'
+import { CSVLink } from 'react-csv'
 
 import '../ProjectStyles.css'
 import { FiChevronLeft, FiUser } from 'react-icons/fi';
-
 
 import ProjectSidebar from '../ProjectFolderSidebar';
 import { FaChevronLeft } from "react-icons/fa6";
@@ -27,6 +27,10 @@ function ProjectActivity() {
   const [activityCardData ,setActivityCardData] = useState([])
   const navigate = useNavigate();
   const [activeDropdown, setActiveDropdown] = useState(null);
+  
+  const [availableUsers, setAvailableUsers] = useState([]);
+  const [projectGroups, setProjectGroups] = useState([]);
+  const [filters, setFilters] = useState([]);
 
   useEffect(() => {
     // Fetch project details and populate fields
@@ -41,7 +45,7 @@ function ProjectActivity() {
 
 
         const formattedActivities = project_activities.map((activity) => ({
-          id: id,
+          id: activity.activityId,
           activityType: activity.activityType, // Assuming the file object has this key
           activityDescription: activity.activityDescription,
           relatedData: JSON.parse(activity.relatedData),
@@ -63,28 +67,100 @@ function ProjectActivity() {
       }
     };
     
+    const fetchAvailableUsers = async () => {
+      try {
+        const [currentUserResponse, projectResponse, usersResponse] = await Promise.all([
+          axiosInstance.get(`/user`),
+          axiosInstance.get(`/project-contributors/${projectId}`),
+          axiosInstance.get(`/users`),
+        ]);
+    
+        const currentUser = currentUserResponse.data;
+        const { contributors, groups } = projectResponse.data; // Get contributors from project details
+        const users = usersResponse.data;
+    
+        // Extract emails of contributors
+        const contributorEmails = contributors.map((contributor) => contributor.email);
+        const projectGroups = groups.map((group) => group.group_name)
 
+        const formattedToAdd = users
+        .filter((user) => 
+          contributorEmails.includes(user.email) 
+        )
+        .map((user) => ({
+          label: `${user.first_name} ${user.last_name} (${user.email})`, // Label for dropdown
+          value: user.email, // Value for dropdown
+        }));
+
+        setProjectGroups(projectGroups);
+        setAvailableUsers(formattedToAdd);
+        //console.log(formattedUsers)
+        console.log(projectGroups)
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+
+    fetchAvailableUsers();
     fetchProjectDetails();
   }, [projectId]);
 
-  const sampleFilters = [
-    {
-      type: "Activity Type",
-      options: ["Files", "Folders", "Users", "Views", "Clashsets", "Releases", "ToDo", "Topics", "Comments", "Share", "Other"],
-    },
-    {
-      type: "Users",
-      options: ["UserName1", "UserName2", "UserName3"],
-    },
-    {
-      type: "Groups",
-      options: ["Group1", "Group2", "GroupABC"],
-    },
-    {
-      type: "Date Modified",
-      options: ["Today", "Last Week", "Last Month"],
-    },
-  ];
+  const handleExportToCSV = () => {
+    // Define headers based on activity card data keys
+    const headers = [
+        { label: "Activity Type", key: "activityType" },
+        { label: "Activity Description", key: "activityDescription" },
+        { label: "Related Data", key: "relatedData" },
+        { label: "Activity Owner", key: "activityOwner" },
+        { label: "Last Modified", key: "lastModified" },
+    ];
+
+    // Map activity card data to match the keys
+    const data = activityCardData.map((activity) => ({
+        activityType: activity.activityType,
+        activityDescription: activity.activityDescription,
+        relatedData: activity.relatedData, // Convert relatedData array to a string
+        activityOwner: activity.activityOwner, // Assuming activator has first_name & last_name
+        lastModified: activity.lastModified,
+    }));
+
+    // Return headers and data for the CSV export
+    return { headers, data };
+};
+
+
+useEffect(() => {
+  const generateFilters = () => {
+    const typeOptions = ["Files", "Folders", "Users", "Views", "Clashsets", "Releases", "ToDo", "Topics", "Comments", "Share", "Other"]; // Static mapping for ownership
+    const userOptions = availableUsers.map(user => user.label); // Use availableUsers
+    const groupOptions = projectGroups; // Already formatted in `fetchAvailableUsers`
+    const dueDateOptions = ["Today", "Last Week", "Last Month"]; // Due date can remain static or dynamically computed
+    
+    const filters = [
+      {
+        type: "Type",
+        options: typeOptions,
+      },
+      {
+        type: "Users",
+        options: userOptions,
+      },
+      {
+        type: "Groups",
+        options: groupOptions,
+      },
+      {
+        type: "Due Date",
+        options: dueDateOptions,
+      },
+    ];
+    
+    setFilters(filters); // Store the dynamic filters in state
+  };
+
+  generateFilters();
+}, [activityCardData, availableUsers, projectGroups]);
+
 
   const handleDropdownToggle = (filterType) => {
     // Toggle the dropdown visibility for the clicked filter
@@ -93,7 +169,7 @@ function ProjectActivity() {
 
   const renderDropdown = (filter) => {
     return (
-      <div className="filter-dropdown" id="activity-filter">
+      <div className="filter-dropdown" id="activity-filter" >
         {filter.options.map((option, index) => (
           <div
             key={index}
@@ -130,7 +206,14 @@ function ProjectActivity() {
                         </div>
                         <div className="button-group d-flex">
                           <button id="excelExport"className="btn btn-primary add-btn" title="Export to Excel">
-                            <FaFileExcel/>
+                            <CSVLink
+                                {...handleExportToCSV()}
+                                filename={`${ownerName}'s ${projectName}_Activity.csv`}
+                                className="exportToCSV-white"
+                                target="_blank"
+                              >
+                                <FaFileExcel/>
+                            </CSVLink>
                           </button>
                         </div>
                       </div>
@@ -138,7 +221,7 @@ function ProjectActivity() {
                       <div className="view-filters">
                           <div className="filter-container">
                             <div className="filters d-flex">
-                            {sampleFilters.map((filter) => (
+                            {filters.map((filter) => (
                               <div
                                 key={filter.type}
                                 className="filter-type mr-n1"
