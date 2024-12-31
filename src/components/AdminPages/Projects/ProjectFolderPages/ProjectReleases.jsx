@@ -8,7 +8,6 @@ import DataTable from "react-data-table-component";
 import '../ProjectStyles.css'
 import {  FiEdit, FiMoreVertical } from "react-icons/fi";
 import { FaCaretDown } from "react-icons/fa";
-import { IoIosPaper } from "react-icons/io";
 import { TbBoxOff } from "react-icons/tb";
 import ProjectSidebar from '../ProjectFolderSidebar';
 
@@ -21,10 +20,13 @@ function ProjectReleases() {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [openDropdownId, setOpenDropdownId] = useState(null);
 
-  const [availableEmails, setAvailableEmails] = useState([]); 
   const [availableUsers, setAvailableUsers] = useState([]);
   const [projectGroups, setProjectGroups] = useState([]);
   const [filters, setFilters] = useState([]);
+  const [selectedFilters, setSelectedFilters] = useState({});
+  
+  const [filteredReleases, setFilteredReleases] = useState([]);
+  const dropdownRef = useRef(null);
 
   const toggleDropdown = (id) => {
     console.log("Toggling dropdown for ID:", id);
@@ -34,141 +36,189 @@ function ProjectReleases() {
   const [releasesTable ,setReleasesTable] = useState([])
 
   useEffect(() => {
-    // Fetch project details and populate fields
     const fetchProjectDetails = async () => {
       try {
         const response = await axiosInstance.get(`/project/${projectId}`);
-        const { project_name, owner, project_releases,} = response.data;
-  
+        const { project_name, owner, project_releases } = response.data;
         setProjectName(project_name);
-        setOwnerName(`${owner.first_name} ${owner.last_name}`)
+        setOwnerName(`${owner.first_name} ${owner.last_name}`);
 
-        const formattedViews = project_releases.map((release) => ({
+        const formattedReleases = project_releases.map((release) => ({
           id: release.id,
-          releaseName: release.release_name, // Assuming the file object has this key
+          releaseName: release.release_name,
           releaseOwner: `${owner.first_name} ${owner.last_name}`,
           totalFiles: release.total_files || 0,
-          dueDate: new Intl.DateTimeFormat('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric'
-          }).format(new Date(release.due_date)), 
+          dueDate: new Intl.DateTimeFormat("en-US", {
+            month: "short",
+            day: "2-digit",
+            year: "numeric",
+          }).format(new Date(release.due_date)),
           recipients: JSON.parse(release.recipients),
           releaseStatus: release.release_status,
           releaseNote: release.release_note,
-          viewTags: release.assigned_tags,
           ownership: release.is_owner,
-          lastModified: new Intl.DateTimeFormat('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric'
-          }).format(new Date(release.createdAt)),  // Format updatedAt
+          lastModified: new Intl.DateTimeFormat("en-US", {
+            month: "short",
+            day: "2-digit",
+            year: "numeric",
+          }).format(new Date(release.createdAt)),
         }));
 
-        setReleasesTable(formattedViews)
+        setReleasesTable(formattedReleases);
+        setFilteredReleases(formattedReleases);
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
     };
-    
+
     const fetchAvailableUsers = async () => {
       try {
-        const [currentUserResponse, projectResponse, usersResponse] = await Promise.all([
-          axiosInstance.get(`/user`),
+        const [projectResponse, usersResponse] = await Promise.all([
           axiosInstance.get(`/project-contributors/${projectId}`),
           axiosInstance.get(`/users`),
         ]);
-    
-        const currentUser = currentUserResponse.data;
-        const { contributors, groups } = projectResponse.data; // Get contributors from project details
-        const users = usersResponse.data;
-    
-        // Extract emails of contributors
-        const contributorEmails = contributors.map((contributor) => contributor.email);
-        const projectGroups = groups.map((group) => group.group_name)
 
-        const formattedToAdd = users
-        .filter((user) => 
-          contributorEmails.includes(user.email) 
-        )
-        .map((user) => ({
-          label: `${user.first_name} ${user.last_name} (${user.email})`, // Label for dropdown
-          value: user.email, // Value for dropdown
-        }));
+        const { contributors, groups } = projectResponse.data;
+        const users = usersResponse.data;
+
+        const contributorEmails = contributors.map((contributor) => contributor.email);
+        const projectGroups = groups.map((group) => group.group_name);
+
+        const formattedUsers = users
+          .filter((user) => contributorEmails.includes(user.email))
+          .map((user) => ({
+            label: `${user.first_name} ${user.last_name} (${user.email})`,
+            value: user.email,
+          }));
 
         setProjectGroups(projectGroups);
-        setAvailableUsers(formattedToAdd);
-        //console.log(formattedUsers)
-        console.log(projectGroups)
+        setAvailableUsers(formattedUsers);
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error("Error fetching users:", error);
       }
     };
 
-    fetchAvailableUsers();
     fetchProjectDetails();
+    fetchAvailableUsers();
   }, [projectId, refreshKey]);
 
   useEffect(() => {
     const generateFilters = () => {
-      const ownershipOptions = ["Created by Me", "Shared with Me"]; // Static mapping for ownership
-      const userOptions = availableUsers.map(user => user.label); // Use availableUsers
-      const groupOptions = projectGroups; // Already formatted in `fetchAvailableUsers`
-      const statusOptions = Array.from(new Set(releasesTable.map(release => release.releaseStatus))); // Unique statuses
-      const dueDateOptions = ["Today", "Last Week", "Last Month"]; // Due date can remain static or dynamically computed
-      
+      const ownershipOptions = ["Created by Me", "Shared with Me"];
+      const userOptions = availableUsers.map((user) => user.label);
+      const groupOptions = projectGroups;
+      const statusOptions = Array.from(new Set(releasesTable.map((release) => release.releaseStatus)));
+      const dueDateOptions = ["Today", "This Week", "Last Month"];
+
       const filters = [
-        {
-          type: "Owner",
-          options: ownershipOptions,
-        },
-        {
-          type: "Users",
-          options: userOptions,
-        },
-        {
-          type: "Groups",
-          options: groupOptions,
-        },
-        {
-          type: "Status",
-          options: statusOptions,
-        },
-        {
-          type: "Due Date",
-          options: dueDateOptions,
-        },
+        { type: "Owner", options: ownershipOptions },
+        { type: "Users", options: userOptions },
+        { type: "Groups", options: groupOptions },
+        { type: "Status", options: statusOptions },
+        { type: "Due Date", options: dueDateOptions },
       ];
-      
-      setFilters(filters); // Store the dynamic filters in state
+
+      setFilters(filters);
     };
-  
+
     generateFilters();
   }, [releasesTable, availableUsers, projectGroups]);
   
 
-  const handleDropdownToggle = (filterType) => {
-    setActiveDropdown((prev) => (prev === filterType ? null : filterType));
+  useEffect(() => {
+    let filteredData = [...releasesTable];
+  
+    Object.keys(selectedFilters).forEach((filterType) => {
+      const selectedOptions = selectedFilters[filterType];
+      if (selectedOptions.length > 0) {
+        filteredData = filteredData.filter((release) => {
+          switch (filterType) {
+            case "Owner":
+              return selectedOptions.includes(release.ownership ? "Created by Me" : "Shared with Me");
+            case "Users":
+              return selectedOptions.some((option) => release.recipients.includes(option));
+            case "Groups":
+              return selectedOptions.includes(release.group);
+            case "Status":
+              return selectedOptions.includes(release.releaseStatus);
+            case "Due Date":
+              { const dueDate = new Date(release.dueDate);
+              const today = new Date();
+              if (selectedOptions.includes("Today")) {
+                return (
+                  dueDate.getFullYear() === today.getFullYear() &&
+                  dueDate.getMonth() === today.getMonth() &&
+                  dueDate.getDate() === today.getDate()
+                );
+              }
+              if (selectedOptions.includes("This Week")) {
+                const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+                const endOfWeek = new Date(startOfWeek);
+                endOfWeek.setDate(startOfWeek.getDate() + 6);
+                return dueDate >= startOfWeek && dueDate <= endOfWeek;
+              }
+              if (selectedOptions.includes("Last Month")) {
+                const lastMonth = new Date();
+                lastMonth.setMonth(today.getMonth() - 1);
+                return (
+                  dueDate.getFullYear() === lastMonth.getFullYear() &&
+                  dueDate.getMonth() === lastMonth.getMonth()
+                );
+              }
+              return true; }
+            default:
+              return true;
+          }
+        });
+      }
+    });
+  
+    setFilteredReleases(filteredData);
+  }, [selectedFilters, releasesTable]);
+  
+
+  const handleCheckboxChange = (filterType, option) => {
+    setSelectedFilters((prevFilters) => ({
+      ...prevFilters,
+      [filterType]: prevFilters[filterType]?.includes(option)
+        ? prevFilters[filterType].filter((item) => item !== option)
+        : [...(prevFilters[filterType] || []), option],
+    }));
   };
 
-  const renderDropdown = (filter) => {
-    return (
-      <div className="filter-dropdown">
-        {filter.options.map((option, index) => (
-          <div
-            key={index}
-            className="dropdown-item"
-            onClick={() => console.log(`${filter.type} selected: ${option}`)}
-          >
-            {option}
-          </div>
-        ))}
-      </div>
-    );
-  };
+  // Render dropdown options
+  const renderDropdown = (filter) => (
+    <div className="filter-dropdown" ref={dropdownRef}>
+      {filter.options.map((option, index) => (
+        <div key={index} className="dropdown-item">
+          <input
+            type="checkbox"
+            id={`${filter.type}-${index}`}
+            checked={selectedFilters[filter.type]?.includes(option) || false}
+            onChange={() => handleCheckboxChange(filter.type, option)}
+          />
+          <label className="filter-label" htmlFor={`${filter.type}-${index}`}>{option}</label>
+        </div>
+      ))}
+    </div>
+  );
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setActiveDropdown(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
+
 
   const menuRef  = useRef(null);
-
   useEffect(() => {
     const handleOutsideClick = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -379,7 +429,7 @@ function ProjectReleases() {
         } catch (error) {
           Swal.fire({
             title: 'Error!',
-            text: 'There was an error deleting the project release.',
+            text: error,
             icon: 'error',
             confirmButtonText: 'OK',
             confirmButtonColor: '#EC221F',
@@ -397,7 +447,7 @@ function ProjectReleases() {
     <div className="container">
       <StickyHeader />
       <h3 className="title-page" id="projectFolder-title">
-        {ownerName}'s {projectName} 
+        {ownerName}&apos;s {projectName} 
       </h3>
       <div className="container-content" id="project-folder-container">
       <div className="projectFolder-sidebar-container">
@@ -422,23 +472,19 @@ function ProjectReleases() {
                       <div className="release-filters">
                         <div className="filter-container">
                         <div className="filters d-flex">
-                          {filters.map((filter) => (
-                            <div
-                              key={filter.type}
-                              className="filter-type mr-n1"
-                              onClick={() => handleDropdownToggle(filter.type)}
-                            >
-                              {filter.type} <FaCaretDown />
-                              {activeDropdown === filter.type && renderDropdown(filter)}
-                            </div>
-                          ))}
+                        {filters.map((filter) => (
+                          <div key={filter.type} className="filter-type mr-3" onClick={() => setActiveDropdown(filter.type)}>
+                            {filter.type} <FaCaretDown />
+                            {activeDropdown === filter.type && renderDropdown(filter)}
+                          </div>
+                        ))}
                         </div>
                         </div>
                       </div>  
                       <DataTable
                         className="dataTables_wrapperz mt-3"
                         columns={sampleColumns}
-                        data={releasesTable}
+                        data={filteredReleases}
                         pagination
                         paginationPerPage={10}
                         paginationRowsPerPageOptions={[10, 20, 30]}

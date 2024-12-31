@@ -1,48 +1,40 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axiosInstance from "../../../../../axiosInstance.js";
-import Swal from "sweetalert2";
-import { useNavigate, useParams, Link } from "react-router-dom";
-import check from "../../../../assets/images/check.png";
+import { useParams } from "react-router-dom";
 import StickyHeader from "../../../SideBar/StickyHeader";
-import { AuthContext } from "../../../Authentication/authContext";
-import upload_icon from "../../../../assets/images/uploading.png";
-import view_model from "../../../../assets/images/view-model.png";
 import man from '../../../../assets/images/man.png'
 import { CSVLink } from 'react-csv'
-
 import '../ProjectStyles.css'
-import { FiChevronLeft, FiUser } from 'react-icons/fi';
-
 import ProjectSidebar from '../ProjectFolderSidebar';
-import { FaChevronLeft } from "react-icons/fa6";
 import { FaCaretDown, FaFileExcel, FaHistory } from "react-icons/fa";
 
 function ProjectActivity() {
   const { projectId } = useParams();
   const [projectName, setProjectName] = useState("");
   const [ownerName, setOwnerName] = useState("")
-  const [existingFiles, setExistingFiles] = useState([]); // Existing files
-  const [error, setError] = useState("");
-
   const [activityCardData ,setActivityCardData] = useState([])
-  const navigate = useNavigate();
   const [activeDropdown, setActiveDropdown] = useState(null);
-  
-  const [availableUsers, setAvailableUsers] = useState([]);
-  const [projectGroups, setProjectGroups] = useState([]);
-  const [filters, setFilters] = useState([]);
+   const [openDropdownId, setOpenDropdownId] = useState(null);
 
+  const [filters, setFilters] = useState([]);
+  const [projectGroups, setProjectGroups] = useState([]);
+  const [selectedFilters, setSelectedFilters] = useState({});
+  const [filteredActivities, setFilteredActivities] = useState([]);
+  const dropdownRef = useRef(null);
+
+  const toggleDropdown = (id) => {
+    console.log("Toggling dropdown for ID:", id);
+    setOpenDropdownId(openDropdownId === id ? null : id);
+  };
   useEffect(() => {
     // Fetch project details and populate fields
     const fetchProjectDetails = async () => {
       try {
         const response = await axiosInstance.get(`/project-activities/${projectId}`);
-        const { id, project_name, owner, project_activities, } = response.data;
-
+        const { project_name, owner, project_activities, } = response.data;
 
         setProjectName(project_name);
         setOwnerName(`${owner.first_name} ${owner.last_name}`)
-
 
         const formattedActivities = project_activities.map((activity) => ({
           id: activity.activityId,
@@ -66,44 +58,27 @@ function ProjectActivity() {
         console.error("Error fetching project details:", error);
       }
     };
-    
-    const fetchAvailableUsers = async () => {
-      try {
-        const [currentUserResponse, projectResponse, usersResponse] = await Promise.all([
-          axiosInstance.get(`/user`),
-          axiosInstance.get(`/project-contributors/${projectId}`),
-          axiosInstance.get(`/users`),
-        ]);
-    
-        const currentUser = currentUserResponse.data;
-        const { contributors, groups } = projectResponse.data; // Get contributors from project details
-        const users = usersResponse.data;
-    
-        // Extract emails of contributors
-        const contributorEmails = contributors.map((contributor) => contributor.email);
-        const projectGroups = groups.map((group) => group.group_name)
 
-        const formattedToAdd = users
-        .filter((user) => 
-          contributorEmails.includes(user.email) 
-        )
-        .map((user) => ({
-          label: `${user.first_name} ${user.last_name} (${user.email})`, // Label for dropdown
-          value: user.email, // Value for dropdown
-        }));
+    
+    const fetchGroups = async () => {
+      try {
+        const [projectResponse] = await Promise.all([
+          axiosInstance.get(`/project-contributors/${projectId}`),
+        ]);
+
+        const { groups } = projectResponse.data;
+        const projectGroups = groups.map((group) => group.group_name);
 
         setProjectGroups(projectGroups);
-        setAvailableUsers(formattedToAdd);
-        //console.log(formattedUsers)
-        console.log(projectGroups)
+
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error("Error fetching users:", error);
       }
     };
 
-    fetchAvailableUsers();
     fetchProjectDetails();
-  }, [projectId]);
+    fetchGroups();
+  }, [projectId], projectGroups);
 
   const handleExportToCSV = () => {
     // Define headers based on activity card data keys
@@ -131,57 +106,131 @@ function ProjectActivity() {
 
 useEffect(() => {
   const generateFilters = () => {
-    const typeOptions = ["Files", "Folders", "Users", "Views", "Clashsets", "Releases", "ToDo", "Topics", "Comments", "Share", "Other"]; // Static mapping for ownership
-    const userOptions = availableUsers.map(user => user.label); // Use availableUsers
+    const typeOptions = ["Files", "Folders", "Users", "Views", "Clashsets", "activitys", "ToDo", "Topics", "Comments", "Share", "Other"]; // Static mapping for ownership
+    const userOptions = Array.from(
+      new Set(activityCardData.map((owner) => owner.activityOwner))
+    );    
     const groupOptions = projectGroups; // Already formatted in `fetchAvailableUsers`
-    const dueDateOptions = ["Today", "Last Week", "Last Month"]; // Due date can remain static or dynamically computed
+    const dateModifiedOptions = ["Today", "This Week", "Last Month"];
     
     const filters = [
-      {
-        type: "Type",
-        options: typeOptions,
-      },
-      {
-        type: "Users",
-        options: userOptions,
-      },
-      {
-        type: "Groups",
-        options: groupOptions,
-      },
-      {
-        type: "Due Date",
-        options: dueDateOptions,
-      },
+      { type: "Type", options: typeOptions},
+      { type: "Users", options: userOptions},
+      { type: "Groups", options: groupOptions},
+      { type: "Date Modified", options: dateModifiedOptions},
     ];
     
     setFilters(filters); // Store the dynamic filters in state
   };
 
   generateFilters();
-}, [activityCardData, availableUsers, projectGroups]);
+}, [activityCardData, projectGroups]);
 
 
-  const handleDropdownToggle = (filterType) => {
-    // Toggle the dropdown visibility for the clicked filter
-    setActiveDropdown((prev) => (prev === filterType ? null : filterType));
+useEffect(() => {
+    let filteredData = [...activityCardData];
+  
+    Object.keys(selectedFilters).forEach((filterType) => {
+      const selectedOptions = selectedFilters[filterType];
+      if (selectedOptions.length > 0) {
+        filteredData = filteredData.filter((activity) => {
+          switch (filterType) {
+            case "Type":
+              return selectedOptions.includes(activity.activityType);
+            case "Users":
+              return selectedOptions.includes(activity.activityOwner);
+            case "Groups":
+              return selectedOptions.includes(activity.group);
+            case "Date Modified":
+              { const dueDate = new Date(activity.lastModified);
+              const today = new Date();
+              if (selectedOptions.includes("Today")) {
+                return (
+                  dueDate.getFullYear() === today.getFullYear() &&
+                  dueDate.getMonth() === today.getMonth() &&
+                  dueDate.getDate() === today.getDate()
+                );
+              }
+              if (selectedOptions.includes("This Week")) {
+                const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+                const endOfWeek = new Date(startOfWeek);
+                endOfWeek.setDate(startOfWeek.getDate() + 6);
+                return dueDate >= startOfWeek && dueDate <= endOfWeek;
+              }
+              if (selectedOptions.includes("Last Month")) {
+                const lastMonth = new Date();
+                lastMonth.setMonth(today.getMonth() - 1);
+                return (
+                  dueDate.getFullYear() === lastMonth.getFullYear() &&
+                  dueDate.getMonth() === lastMonth.getMonth()
+                );
+              }
+              return true; }
+            default:
+              return true;
+          }
+        });
+      }
+    });
+  
+    setFilteredActivities(filteredData);
+  }, [selectedFilters, activityCardData]);
+
+
+  const handleCheckboxChange = (filterType, option) => {
+    setSelectedFilters((prevFilters) => ({
+      ...prevFilters,
+      [filterType]: prevFilters[filterType]?.includes(option)
+        ? prevFilters[filterType].filter((item) => item !== option)
+        : [...(prevFilters[filterType] || []), option],
+    }));
   };
 
-  const renderDropdown = (filter) => {
-    return (
-      <div className="filter-dropdown" id="activity-filter" >
+  const renderDropdown = (filter) => (
+      <div className="filter-dropdown" ref={dropdownRef}>
         {filter.options.map((option, index) => (
-          <div
-            key={index}
-            className="dropdown-item"
-            onClick={() => console.log(`${filter.type} selected: ${option}`)}
-          >
-            {option}
+          <div key={index} className="dropdown-item">
+            <input
+              type="checkbox"
+              id={`${filter.type}-${index}`}
+              checked={selectedFilters[filter.type]?.includes(option) || false}
+              onChange={() => handleCheckboxChange(filter.type, option)}
+            />
+            <label className="filter-label" htmlFor={`${filter.type}-${index}`}>{option}</label>
           </div>
         ))}
       </div>
     );
-  };
+  
+    // Close dropdown when clicking outside
+    useEffect(() => {
+      const handleOutsideClick = (event) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+          setActiveDropdown(null);
+        }
+      };
+  
+      document.addEventListener("mousedown", handleOutsideClick);
+      return () => {
+        document.removeEventListener("mousedown", handleOutsideClick);
+      };
+    }, []);
+  
+  
+    const menuRef  = useRef(null);
+    useEffect(() => {
+      const handleOutsideClick = (event) => {
+        if (menuRef.current && !menuRef.current.contains(event.target)) {
+          toggleDropdown(null);
+        }
+      };
+  
+      document.addEventListener("mousedown", handleOutsideClick);
+  
+      return () => {
+        document.removeEventListener("mousedown", handleOutsideClick);
+      };
+    }, []);
 
 
   return (
@@ -222,11 +271,7 @@ useEffect(() => {
                           <div className="filter-container">
                             <div className="filters d-flex">
                             {filters.map((filter) => (
-                              <div
-                                key={filter.type}
-                                className="filter-type mr-n1"
-                                onClick={() => handleDropdownToggle(filter.type)}
-                              >
+                              <div key={filter.type} className="filter-type mr-3 d-flex" onClick={() => setActiveDropdown(filter.type)}>
                                 {filter.type} <FaCaretDown />
                                 {activeDropdown === filter.type && renderDropdown(filter)}
                               </div>
@@ -236,7 +281,7 @@ useEffect(() => {
                       </div> 
 
                 <div className="activity-cards-box mt-1 d-flex">
-                  {activityCardData.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified)).map((data) => (
+                  {filteredActivities.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified)).map((data) => (
                     <div
                       key={data.id}
                       className="activity-card container-fluid mb-2"

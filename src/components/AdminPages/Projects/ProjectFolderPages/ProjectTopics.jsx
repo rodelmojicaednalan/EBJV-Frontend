@@ -1,14 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import axiosInstance from "../../../../../axiosInstance.js";
 import Swal from "sweetalert2";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import check from "../../../../assets/images/check.png";
 import StickyHeader from "../../../SideBar/StickyHeader";
-import { AuthContext } from "../../../Authentication/authContext";
-import upload_icon from "../../../../assets/images/uploading.png";
-
 import '../ProjectStyles.css'
-import { FiMoreVertical } from 'react-icons/fi';
 import { FaBookmark, FaCircleInfo  } from "react-icons/fa6";
 import { FaRegCalendar, FaCaretDown, FaListAlt  } from "react-icons/fa";
 import { GrStatusGoodSmall, GrSort } from "react-icons/gr";
@@ -17,24 +13,22 @@ import { BiDotsVertical } from "react-icons/bi";
 import { MdCompress } from "react-icons/md";
 import { GoAlertFill } from "react-icons/go";
 
-
 import ProjectSidebar from '../ProjectFolderSidebar';
-
 import Offcanvas from 'react-bootstrap/Offcanvas';
+
 function ProjectTopics() {
   const { projectId } = useParams();
   const [projectName, setProjectName] = useState("");
   const [ownerName, setOwnerName] = useState("")
-  const [existingFiles, setExistingFiles] = useState([]); // Existing files
-  const [fileName, setFileName] = useState([]);
-  const [fileSize, setFileSize] = useState([])
-  const [error, setError] = useState("");
 
   const [topicData ,setTopicData] = useState([])
-  const navigate = useNavigate();
 
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [filters, setFilters] = useState([]);
+  const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [selectedFilters, setSelectedFilters] = useState({});
+  const [filteredTopics, setFilteredTopics] = useState([]);  
+  const dropdownRef = useRef(null);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0); 
@@ -58,11 +52,10 @@ function ProjectTopics() {
     const fetchProjectDetails = async () => {
       try {
         const response = await axiosInstance.get(`/project-topics/${projectId}`);
-        const { project_name, owner, project_topics, project_file } = response.data;
+        const { project_name, owner, project_topics } = response.data;
 
         setProjectName(project_name);
         setOwnerName(`${owner.first_name} ${owner.last_name}`)
-        setExistingFiles(project_file);
 
         const capitalizeWords = (str) => {
           if (!str) return ""; // Handle null or undefined values
@@ -103,10 +96,13 @@ function ProjectTopics() {
       }
     };
     
-
     fetchProjectDetails();
   }, [projectId, refreshKey]);
 
+  const toggleDropdown = (id) => {
+    console.log("Toggling dropdown for ID:", id);
+    setOpenDropdownId(openDropdownId === id ? null : id);
+  };
 
   useEffect(() => {
   const generateFilters = () => {
@@ -116,49 +112,98 @@ function ProjectTopics() {
     const tagOptions = [""]; // Due date can remain static or dynamically computed
     
     const filters = [
-      {
-        type: "Type",
-        options: typeOptions,
-      },
-      {
-        type: "Priority",
-        options: prioOptions,
-      },
-      {
-        type: "Status",
-        options: statusOptions,
-      },
-      {
-        type: "Tags",
-        options: tagOptions,
-      },
+      { type: "Type", options: typeOptions },
+      { type: "Priority", options: prioOptions },
+      { type: "Status", options: statusOptions },
+      { type: "Tags", options: tagOptions },
     ];
     
     setFilters(filters); // Store the dynamic filters in state
   };
-
   generateFilters();
 }, [ ]);
-  const handleDropdownToggle = (filterType) => {
-    // Toggle the dropdown visibility for the clicked filter
-    setActiveDropdown((prev) => (prev === filterType ? null : filterType));
-  };
 
-  const renderDropdown = (filter) => {
-    return (
-      <div className="filter-dropdown">
-        {filter.options.map((option, index) => (
-          <div
-            key={index}
-            className="dropdown-item"
-            onClick={() => console.log(`${filter.type} selected: ${option}`)}
-          >
-            {option}
-          </div>
-        ))}
-      </div>
-    );
-  };
+
+useEffect(() => {
+    let filteredData = [...topicData];
+  
+    Object.keys(selectedFilters).forEach((filterType) => {
+      const selectedOptions = selectedFilters[filterType];
+      if (selectedOptions.length > 0) {
+        filteredData = filteredData.filter((topic) => {
+          switch (filterType) {
+            case "Type":
+              return selectedOptions.includes(topic.type);
+            case "Priority":
+              return selectedOptions.includes(topic.priority);
+            case "Status":
+              return selectedOptions.includes(topic.status);
+            case "Tags":
+              return selectedOptions.includes(topic.tags);
+            default:
+              return true;
+          }
+        });
+      }
+    });
+  
+    setFilteredTopics(filteredData);
+  }, [selectedFilters, topicData]);
+  
+  const handleCheckboxChange = (filterType, option) => {
+      setSelectedFilters((prevFilters) => ({
+        ...prevFilters,
+        [filterType]: prevFilters[filterType]?.includes(option)
+          ? prevFilters[filterType].filter((item) => item !== option)
+          : [...(prevFilters[filterType] || []), option],
+      }));
+    };
+  
+    const renderDropdown = (filter) => (
+        <div className="filter-dropdown" ref={dropdownRef}>
+          {filter.options.map((option, index) => (
+            <div key={index} className="dropdown-item">
+              <input
+                type="checkbox"
+                id={`${filter.type}-${index}`}
+                checked={selectedFilters[filter.type]?.includes(option) || false}
+                onChange={() => handleCheckboxChange(filter.type, option)}
+              />
+              <label className="filter-label" htmlFor={`${filter.type}-${index}`}>{option}</label>
+            </div>
+          ))}
+        </div>
+      );
+    
+      // Close dropdown when clicking outside
+      useEffect(() => {
+        const handleOutsideClick = (event) => {
+          if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            setActiveDropdown(null);
+          }
+        };
+    
+        document.addEventListener("mousedown", handleOutsideClick);
+        return () => {
+          document.removeEventListener("mousedown", handleOutsideClick);
+        };
+      }, []);
+    
+    
+      const menuRef  = useRef(null);
+      useEffect(() => {
+        const handleOutsideClick = (event) => {
+          if (menuRef.current && !menuRef.current.contains(event.target)) {
+            toggleDropdown(null);
+          }
+        };
+    
+        document.addEventListener("mousedown", handleOutsideClick);
+    
+        return () => {
+          document.removeEventListener("mousedown", handleOutsideClick);
+        };
+      }, []);
 
   const iconMappings = {
     priority: {
@@ -226,7 +271,7 @@ function ProjectTopics() {
         } catch (error) {
           Swal.fire({
             title: 'Error!',
-            text: 'There was an error creating the topic.',
+            text: error,
             icon: 'error',
             confirmButtonText: 'OK',
             confirmButtonColor: '#EC221F',
@@ -244,7 +289,7 @@ function ProjectTopics() {
       <div className="container">
       <StickyHeader />
       <h3 className="title-page" id="projectFolder-title">
-        {ownerName}'s {projectName} 
+        {ownerName}&apos;s {projectName} 
       </h3>
       <div className="container-content" id="project-folder-container">
       <div className="projectFolder-sidebar-container">
@@ -395,29 +440,24 @@ function ProjectTopics() {
                       <div className="view-filters mb-2">
                           <div className="filter-container null">
                             <div className="filters d-flex">
-                                {filters.map((filter) => (
-                              <div
-                                key={filter.type}
-                                className="filter-type mr-n1"
-                                onClick={() => handleDropdownToggle(filter.type)}
-                              >
-                                {filter.type} <FaCaretDown />
-                                {activeDropdown === filter.type && renderDropdown(filter)}
-                              </div>
-                            ))}
+                               {filters.map((filter) => (
+                                  <div key={filter.type} className="filter-type mr-3 d-flex" onClick={() => setActiveDropdown(filter.type)}>
+                                    {filter.type} <FaCaretDown />
+                                    {activeDropdown === filter.type && renderDropdown(filter)}
+                                  </div>
+                                ))}
                             </div>
                           </div>
                       </div> 
 
-                    
-                      <div className="activity-cards-box mt-2 d-flex">
-                        {topicData.sort((a, b) => new Date(b.modifiedOn) - new Date(a.modifiedOn)).map((topic) => (
+                      <div className="topic-cards-box mt-2 d-flex">
+                        {filteredTopics.sort((a, b) => new Date(b.modifiedOn) - new Date(a.modifiedOn)).map((topic) => (
                           <div key={topic.id} className="topic-card container-fluid">
                             <div className="topic-time d-none d-md-flex ">
                               <span className="text-muted">{topic.modifiedOn}</span>
                             </div>
                             <div className="flex-row">
-                              <div className="activity flex-1">
+                              <div className="topic flex-1">
                                 <div className="topic-title">{topic.name}</div>
                                 <div className="row-distribute">
                                   <div className="topic-users flex-row">
@@ -456,7 +496,6 @@ function ProjectTopics() {
                         ))}
                       </div>
 
-                    
                       </div>
                     </div>
                 </div>
