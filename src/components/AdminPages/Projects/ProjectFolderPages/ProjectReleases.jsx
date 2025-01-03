@@ -44,16 +44,16 @@ function ProjectReleases() {
         setOwnerName(`${owner.first_name} ${owner.last_name}`);
 
         const formattedReleases = project_releases.map((release) => ({
-          id: release.id,
+          id: release.releaseId,
           releaseName: release.release_name,
-          releaseOwner: `${owner.first_name} ${owner.last_name}`,
+          releaseOwner: release.release_owner,
           totalFiles: release.total_files || 0,
           dueDate: new Intl.DateTimeFormat("en-US", {
             month: "short",
             day: "2-digit",
             year: "numeric",
           }).format(new Date(release.due_date)),
-          recipients: JSON.parse(release.recipients),
+          recipients: JSON.parse(release.recipients).join(", "),
           releaseStatus: release.release_status,
           releaseNote: release.release_note,
           ownership: release.is_owner,
@@ -66,6 +66,7 @@ function ProjectReleases() {
 
         setReleasesTable(formattedReleases);
         setFilteredReleases(formattedReleases);
+        console.log(formattedReleases)
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
@@ -87,12 +88,13 @@ function ProjectReleases() {
         const formattedUsers = users
           .filter((user) => contributorEmails.includes(user.email))
           .map((user) => ({
-            label: `${user.first_name} ${user.last_name} (${user.email})`,
+            label: `${user.first_name} ${user.last_name}`,
             value: user.email,
           }));
 
         setProjectGroups(projectGroups);
         setAvailableUsers(formattedUsers);
+
       } catch (error) {
         console.error("Error fetching users:", error);
       }
@@ -106,6 +108,7 @@ function ProjectReleases() {
     const generateFilters = () => {
       const ownershipOptions = ["Created by Me", "Shared with Me"];
       const userOptions = availableUsers.map((user) => user.label);
+      console.log(userOptions);
       const groupOptions = projectGroups;
       const statusOptions = Array.from(new Set(releasesTable.map((release) => release.releaseStatus)));
       const dueDateOptions = ["Today", "This Week", "Last Month"];
@@ -134,9 +137,9 @@ function ProjectReleases() {
         filteredData = filteredData.filter((release) => {
           switch (filterType) {
             case "Owner":
-              return selectedOptions.includes(release.ownership ? "Created by Me" : "Shared with Me");
+              return selectedOptions.includes(release.ownership ? "Shared with Me" : "Created by Me");
             case "Users":
-              return selectedOptions.some((option) => release.recipients.includes(option));
+              return selectedOptions.includes(release.releaseOwner);
             case "Groups":
               return selectedOptions.includes(release.group);
             case "Status":

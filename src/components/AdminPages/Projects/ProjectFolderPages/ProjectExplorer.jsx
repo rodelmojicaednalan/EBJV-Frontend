@@ -392,7 +392,7 @@ function ProjectExplorer() {
     <div className="container">
       <StickyHeader />
       <h3 className="title-page" id="projectFolder-title">
-        {ownerName}'s {projectName}
+        {ownerName}&apos;s {projectName}
       </h3>
       <div
         className="container-content"

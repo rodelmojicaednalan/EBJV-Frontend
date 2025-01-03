@@ -34,6 +34,7 @@ function ProjectContributors() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const [showSearchBox, setShowSearchBox] = useState(false);
+  const [searchContributor, setSearchContributor] = useState('');
   const searchBoxRef = useRef(null);
 
   const [availableUsers, setAvailableUsers] = useState([]);
@@ -41,7 +42,29 @@ function ProjectContributors() {
   const [showInviteBox, setShowInviteBox] = useState(false);
   const inviteBoxRef = useRef(null);  
 
+  const [filters, setFilters] = useState([]);
+  const [selectedFilters, setSelectedFilters] = useState({});
+      
+  const [filteredContributors, setFilteredContributors] = useState([]);
+  const filterRef = useRef(null);
+
   // search people hide function
+  const handleSearch = (event) => {
+    const value = event.target.value.toLowerCase();
+    setSearchContributor(value);
+  
+    const filtered = contributors.filter((contributor) =>
+      contributor.contName.toLowerCase().includes(value) ||
+      contributor.contEmail.toLowerCase().includes(value) ||
+      (contributor.contRole && contributor.contRole.some((role) =>
+        role.toLowerCase().includes(value)
+      )) ||
+      contributor.contStatus.toLowerCase().includes(value)
+    );
+  
+    setFilteredContributors(filtered);
+  };
+
   const handleSearchClick = () => {
     setShowSearchBox(true);
   };
@@ -136,6 +159,7 @@ function ProjectContributors() {
         setGroups(formattedGroups);
         //setAvailableEmails(emailOptions); // Store the emails for dropdown usage
         //console.table(formattedContributors)
+        //console.log(formattedContributors)
       } catch (error) {
         console.error('Error fetching project details:', error);
       }
@@ -182,7 +206,7 @@ function ProjectContributors() {
         setAvailableUsers(formattedToAdd);
         setAvailableEmails(emailOptions);
         //console.log(formattedUsers)
-        console.log(formattedToAdd)
+        //console.log(formattedToAdd)
       } catch (error) {
         console.error('Error fetching users:', error);
       }
@@ -489,36 +513,93 @@ function ProjectContributors() {
   //   handleInviteToProject(projectId, groups, availableEmails);
   // };
   
-  const sampleFilters = [
-    {
-      type: "Role",
-      options: ["Admin", "User",],
-    },
-    {
-      type: "Status",
-      options: ["Active", "Activation Pending", "Removed"],
-    },
-  ];
 
-  const handleDropdownToggle = (filterType) => {
-    // Toggle the dropdown visibility for the clicked filter
-    setActiveDropdown((prev) => (prev === filterType ? null : filterType));
+useEffect(() => {
+  const generateFilters = () => {
+    const roleOptions = Array.from(
+      new Set(
+        contributors.map((role) => JSON.stringify(role.contRole)) // Convert inner arrays to strings
+      )
+    ).map((role) => JSON.parse(role)); // Convert strings back to arrays    
+    //console.log(roleOptions)
+    const statusOptions = Array.from(
+      new Set(contributors.map((status) => status.contStatus))
+    );    
+      const filters = [
+        { type: "Role", options: roleOptions },
+        { type: "Status", options: statusOptions },
+      ];
+      setFilters(filters);
   };
-  const renderDropdown = (filter) => {
-    return (
-      <div className="filter-dropdown" id="contrib-filter-dropdown">
-        {filter.options.map((option, index) => (
-          <div
-            key={index}
-            className="dropdown-item"
-            onClick={() => console.log(`${filter.type} selected: ${option}`)}
-          >
-            {option}
-          </div>
-        ))}
-      </div>
-    );
-  };
+  generateFilters();
+}, [contributors]);
+
+useEffect(() => {
+  let filteredData = [...contributors];
+    Object.keys(selectedFilters).forEach((filterType) => {
+      const selectedOptions = selectedFilters[filterType];
+      //console.log(selectedOptions)
+      if (selectedOptions.length > 0) {
+        filteredData = filteredData.filter((contributor) => {
+          switch (filterType) {
+            case "Role":
+              return selectedOptions.some(
+                (option) =>
+                  Array.isArray(option) &&
+                  Array.isArray(contributor.contRole) &&
+                  option.length === contributor.contRole.length &&
+                  option.every((val, index) => val === contributor.contRole[index])
+              );
+            case "Status":
+              return selectedOptions.includes(contributor.contStatus);
+            default:
+              return true;
+          }
+        });
+      }
+    });
+    setFilteredContributors(filteredData);
+}, [selectedFilters, contributors]);
+
+  const handleCheckboxChange = (filterType, option) => {
+        setSelectedFilters((prevFilters) => ({
+          ...prevFilters,
+          [filterType]: prevFilters[filterType]?.includes(option)
+            ? prevFilters[filterType].filter((item) => item !== option)
+            : [...(prevFilters[filterType] || []), option],
+        }));
+      };
+    
+      // Render dropdown options
+      const renderDropdown = (filter) => (
+        <div className="filter-dropdown pt-0 mt-2" ref={filterRef}>
+          {filter.options.map((option, index) => (
+            <div key={index} className="dropdown-item m-0 p-1" id="contrib-filter-dropdown">
+              <input
+                type="checkbox"
+                id={`${filter.type}-${index}`}
+                checked={selectedFilters[filter.type]?.includes(option) || false}
+                onChange={() => handleCheckboxChange(filter.type, option)}
+              />
+              <label className="filter-label" htmlFor={`${filter.type}-${index}`}>{option}</label>
+            </div>
+          ))}
+        </div>
+      );
+    
+      // Close dropdown when clicking outside
+      useEffect(() => {
+        const handleOutsideClick = (event) => {
+          if (filterRef.current && !filterRef.current.contains(event.target)) {
+            setActiveDropdown(null);
+          }
+        };
+    
+        document.addEventListener("mousedown", handleOutsideClick);
+        return () => {
+          document.removeEventListener("mousedown", handleOutsideClick);
+        };
+      }, []);
 
   const fetchContributorsByGroup = async (groupId) => {
     try {
@@ -645,14 +726,10 @@ function ProjectContributors() {
                                       <div className="view-filters">
                                         <div className="filter-container null">
                                           <div className="filters d-flex">
-                                            {sampleFilters.map((filter) => (
-                                              <div
-                                                key={filter.type}
-                                                className="filter-type mr-n1"
-                                                onClick={() => handleDropdownToggle(filter.type)}
-                                              >
-                                                {filter.type} <FaCaretDown />
-                                                {activeDropdown === filter.type && renderDropdown(filter)}
+                                          {filters.map((filter) => (
+                                              <div key={filter.type} className="filter-type mr-n1" onClick={() => setActiveDropdown(filter.type)}>
+                                                  {filter.type} <FaCaretDown />
+                                                  {activeDropdown === filter.type && renderDropdown(filter)}
                                               </div>
                                             ))}
                                           </div>
@@ -665,7 +742,7 @@ function ProjectContributors() {
                                       <div className="group-action-buttons d-flex">
                                         <div style={{ position: "relative" }}>
                                           <button
-                                            className="btn"
+                                            className="btn custom-group-btn"
                                             onClick={() => setShowInviteBox((prev) => !prev)} // Toggle the invite dropdown visibility
                                           >
                                             Invite to Group
@@ -707,7 +784,7 @@ function ProjectContributors() {
                                           )}
                                         </div>
                                         <button
-                                          className="btn"
+                                          className="btn custom-group-btn"
                                           onClick={() => handleDeleteGroup(selectedGroup.groupId)}
                                         >
                                           Delete Group
@@ -742,6 +819,8 @@ function ProjectContributors() {
                                             className="search-textbox"
                                             placeholder="Find people..."
                                             autoFocus
+                                            value={searchContributor}
+                                            onChange={handleSearch}
                                             onBlur={handleBlur}
                                             style={{
                                               backgroundColor: "white",
@@ -793,7 +872,7 @@ function ProjectContributors() {
                                   className="dataTables_wrapperx"
                                   id="explorer-table"
                                   columns={contTableColumn}
-                                  data={contributors}
+                                  data={filteredContributors}
                                   responsive
                                   noDataComponent={
                                     <div className="noData mt-4">

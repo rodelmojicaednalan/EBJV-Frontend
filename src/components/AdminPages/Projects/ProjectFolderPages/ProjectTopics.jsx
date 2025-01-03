@@ -108,7 +108,7 @@ function ProjectTopics() {
   const generateFilters = () => {
     const typeOptions = ["Undefined", "Comment", "Issue", "Request", "Fault", "Inquiry", "Solution", "Remark", "Clash"]; // Static mapping for ownership
     const prioOptions = ["Low", "Normal", "High", "Critical"]; // Use availableUsers
-    const statusOptions = ["New", "In Progress", "Pending", "Closed", "Done"]; // Already formatted in `fetchAvailableUsers`
+    const statusOptions = ["New", "In-progress", "Pending", "Closed", "Done"]; // Already formatted in `fetchAvailableUsers`
     const tagOptions = [""]; // Due date can remain static or dynamically computed
     
     const filters = [

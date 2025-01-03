@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axiosInstance from "../../../../../axiosInstance.js";
 import Swal from "sweetalert2";
 import { useParams } from "react-router-dom";
 import StickyHeader from "../../../SideBar/StickyHeader";
-
 import DataTable from "react-data-table-component";
 
 import '../ProjectStyles.css'
-
 import { FaBookmark, FaCircleInfo  } from "react-icons/fa6";
 import { FaRegCalendar, FaCaretDown, FaListAlt  } from "react-icons/fa";
 import { GrStatusGoodSmall } from "react-icons/gr";
@@ -15,8 +13,6 @@ import { RiEdit2Fill } from "react-icons/ri";
 import { BiDotsVertical } from "react-icons/bi";
 import { GoAlertFill } from "react-icons/go";
 import { FaClipboardQuestion } from "react-icons/fa6";
-
-
 
 import ProjectSidebar from '../ProjectFolderSidebar';
 
@@ -30,6 +26,15 @@ function ProjectToDo() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0); 
 
+  const [availableUsers, setAvailableUsers] = useState([]);
+  const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [projectGroups, setProjectGroups] = useState([]);
+  const [filters, setFilters] = useState([]);
+  const [selectedFilters, setSelectedFilters] = useState({});
+    
+  const [filteredToDoData, setFilteredToDoData] = useState([]);
+  const filterRef = useRef(null);
+
   const handleMenuToggle = () => {
     setMenuOpen(!menuOpen);
   };
@@ -39,6 +44,10 @@ function ProjectToDo() {
     Swal.fire(`Function to: ${option}`);
   };
 
+  const toggleDropdown = (id) => {
+    console.log("Toggling dropdown for ID:", id);
+    setOpenDropdownId(openDropdownId === id ? null : id);
+  };
  
   useEffect(() => {
     // Fetch project details and populate fields
@@ -62,6 +71,8 @@ function ProjectToDo() {
         const formattedToDos = project_toDos.map((toDo) => ({
           id: toDo.id,
           title: toDo.toDoTitle,
+          ownership: toDo.is_owner,
+          ownerUserName: toDo.owner,
           assignee: toDo.toDoAssignee.replace(/"/g, " "),
           createdOn: new Intl.DateTimeFormat('en-US', {
             month: 'short',
@@ -78,60 +89,162 @@ function ProjectToDo() {
         }));
 
         setToDoData(formattedToDos)
+        setFilteredToDoData(formattedToDos);
+        console.log(toDoData);
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
     };
-    
-      fetchProjectDetails();
+
+    const fetchGroupsandUsers = async () => {
+      try {
+        const [projectResponse, usersResponse] = await Promise.all([
+          axiosInstance.get(`/project-contributors/${projectId}`),
+          axiosInstance.get(`/users`),
+        ]);
+
+        const { contributors, groups } = projectResponse.data;
+        const users = usersResponse.data;
+
+        const contributorEmails = contributors.map((contributor) => contributor.email);
+        const projectGroups = groups.map((group) => group.group_name);
+
+        const formattedUsers = users
+          .filter((user) => contributorEmails.includes(user.email))
+          .map((user) => ({
+            label: `${user.first_name} ${user.last_name}`,
+            value: user.email,
+          }));
+
+        setProjectGroups(projectGroups);
+        setAvailableUsers(formattedUsers);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    fetchProjectDetails();
+    fetchGroupsandUsers();
     }, [projectId, refreshKey]);
 
-  const sampleFilters = [
-    {
-      type: "Owner",
-      options: ["Created by Me", "Shared with Me",],
-    },
-    {
-      type: "Users",
-      options: ["UserName1", "UserName2", "UserName3"],
-    },
-    {
-      type: "Groups",
-      options: ["Group1", "Group2", "GroupABC"],
-    },
-    {
-      type: "Status",
-      options: ["New", "In Progress", "Pending", "Done", "Closed"],
-    },
-    {
-      type: "Priority",
-      options: ["Low", "Normal", "High", "Critical"],
-    },
-    {
-      type: "Date Modified",
-      options: ["Today", "Last Week", "Last Month"],
-    },
-  ];
+      useEffect(() => {
+        const generateFilters = () => {
+          const ownershipOptions = ["Created by Me", "Shared with Me"];
+          const userOptions = availableUsers.map((user) => user.label);
+          console.log(userOptions)
+          const groupOptions = projectGroups;
+          const statusOptions = ["New", "In Progress", "Pending", "Done", "Closed"];
+          const priorityOptions = ["Low", "Normal", "High", "Critical"];
+          const dateModifiedOptions = ["Today", "This Week", "Last Month"];
+    
+          const filters = [
+            { type: "Owner", options: ownershipOptions },
+            { type: "Users", options: userOptions },
+            { type: "Groups", options: groupOptions },
+            { type: "Status", options: statusOptions },
+            { type: "Priority", options: priorityOptions },
+            { type: "Date Modified", options: dateModifiedOptions },
+          ];
+    
+          setFilters(filters);
+        };
+    
+        generateFilters();
+      }, [toDoData, availableUsers, projectGroups]);
 
-  const handleDropdownToggle = (filterType) => {
-    setActiveDropdown((prev) => (prev === filterType ? null : filterType));
-  };
+  useEffect(() => {
+    let filteredData = [...toDoData];
+  
+    Object.keys(selectedFilters).forEach((filterType) => {
+      const selectedOptions = selectedFilters[filterType];
+      if (selectedOptions.length > 0) {
+        filteredData = filteredData.filter((todo) => {
+          switch (filterType) {
+            case "Owner":
+              return selectedOptions.includes(todo.ownership ? "Created by Me" : "Shared with Me");
+            case "Users":
+              return selectedOptions.includes(todo.ownerUserName);
+            case "Groups":
+              return selectedOptions.includes(todo.group);
+            case "Status":
+              return selectedOptions.includes(todo.status);
+            case "Priority":
+              return selectedOptions.includes(todo.priority);
+            case "Date Modified":
+              { const dueDate = new Date(todo.modifiedOn);
+              const today = new Date();
+              if (selectedOptions.includes("Today")) {
+                return (
+                  dueDate.getFullYear() === today.getFullYear() &&
+                  dueDate.getMonth() === today.getMonth() &&
+                  dueDate.getDate() === today.getDate()
+                );
+              }
+              if (selectedOptions.includes("This Week")) {
+                const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+                const endOfWeek = new Date(startOfWeek);
+                endOfWeek.setDate(startOfWeek.getDate() + 6);
+                return dueDate >= startOfWeek && dueDate <= endOfWeek;
+              }
+              if (selectedOptions.includes("Last Month")) {
+                const lastMonth = new Date();
+                lastMonth.setMonth(today.getMonth() - 1);
+                return (
+                  dueDate.getFullYear() === lastMonth.getFullYear() &&
+                  dueDate.getMonth() === lastMonth.getMonth()
+                );
+              }
+              return true; }
+            default:
+              return true;
+          }
+        });
+      }
+    });
+  
+    setFilteredToDoData(filteredData);
+  }, [selectedFilters, toDoData]);
 
-  const renderDropdown = (filter) => {
-    return (
-      <div className="filter-dropdown">
+  
+    const handleCheckboxChange = (filterType, option) => {
+      setSelectedFilters((prevFilters) => ({
+        ...prevFilters,
+        [filterType]: prevFilters[filterType]?.includes(option)
+          ? prevFilters[filterType].filter((item) => item !== option)
+          : [...(prevFilters[filterType] || []), option],
+      }));
+    };
+  
+    // Render dropdown options
+    const renderDropdown = (filter) => (
+      <div className="filter-dropdown" ref={filterRef}>
         {filter.options.map((option, index) => (
-          <div
-            key={index}
-            className="dropdown-item"
-            onClick={() => console.log(`${filter.type} selected: ${option}`)}
-          >
-            {option}
+          <div key={index} className="dropdown-item">
+            <input
+              type="checkbox"
+              id={`${filter.type}-${index}`}
+              checked={selectedFilters[filter.type]?.includes(option) || false}
+              onChange={() => handleCheckboxChange(filter.type, option)}
+            />
+            <label className="filter-label" htmlFor={`${filter.type}-${index}`}>{option}</label>
           </div>
         ))}
       </div>
     );
-  };
+  
+    // Close dropdown when clicking outside
+    useEffect(() => {
+      const handleOutsideClick = (event) => {
+        if (filterRef.current && !filterRef.current.contains(event.target)) {
+          setActiveDropdown(null);
+        }
+      };
+  
+      document.addEventListener("mousedown", handleOutsideClick);
+      return () => {
+        document.removeEventListener("mousedown", handleOutsideClick);
+      };
+    }, []);
 
 
   const iconMappings = {
@@ -413,15 +526,11 @@ function ProjectToDo() {
                       <div className="view-filters">
                           <div className="filter-container null">
                             <div className="filters d-flex">
-                              {sampleFilters.map((filter) => (
-                                <div
-                                  key={filter.type}
-                                  className="filter-type mr-n1"
-                                  onClick={() => handleDropdownToggle(filter.type)}
-                                >
-                                  {filter.type} <FaCaretDown />
-                                  {activeDropdown === filter.type && renderDropdown(filter)}
-                                </div>
+                              {filters.map((filter) => (
+                                  <div key={filter.type} className="filter-type mr-n1" onClick={() => setActiveDropdown(filter.type)}>
+                                      {filter.type} <FaCaretDown />
+                                      {activeDropdown === filter.type && renderDropdown(filter)}
+                                  </div>
                               ))}
                             </div>
                           </div>
@@ -429,7 +538,7 @@ function ProjectToDo() {
                       <DataTable
                         className="dataTables_wrapperz mt-3"
                         columns={toDoTableColumns}
-                        data={toDoData}
+                        data={filteredToDoData}
                         pagination
                         paginationPerPage={10}
                         paginationRowsPerPageOptions={[10, 20, 30]}

@@ -5,7 +5,7 @@ html,
 body {
   height: 100%;
   margin: 0;
-  background-color: #fdffff;
+  background-color: #f8f8fa;
 }
 
 #root,
@@ -1428,6 +1428,10 @@ input[type="date"] {
 }
 
 @media (max-width: 767px) and (min-width: 425px) {
+
+  .App {
+    justify-content: unset;
+  }
   .create-resources-text {
     margin-bottom: 45px;
   }
@@ -1451,7 +1455,6 @@ input[type="date"] {
     align-self: center;
   }
   .container {
-    margin-left: 0px;
     padding: 0px 5px 5px 5px;
     overflow-x: hidden;
   }
@@ -1926,6 +1929,10 @@ input[type="date"] {
 }
 /* Styles for iPad Pro, iPad Air, and Surface Pro 7 */
 @media (min-width: 768px) and (max-width: 1024px) {
+  #add-new-project-btn{
+    float: inline-start !important;
+  }
+
   /* Container styling */
   .container-content {
     width: 700px;

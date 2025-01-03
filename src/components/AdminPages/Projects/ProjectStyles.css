@@ -480,6 +480,10 @@ background-color: transparent !important;
 /* End of To Do Style */
 
 /* Contributor Page Style*/
+.custom-group-btn{
+  font-size: 14px;
+}
+
 .contributor-wrapper {
   background-color: #fff;
   border-top: 1px solid #d0d0d7;
@@ -1072,7 +1076,15 @@ padding-bottom: 5px;
 }
 
   /* Media Queries for Responsiveness */
-  @media (max-width: 768px) {
+
+  @media (max-width: 1024px) {
+    #projectFolder-title {
+      margin-left: -75% !important;
+      top: -80px;
+  }
+   
+  }
+  @media  (max-width: 768px) {
     .container-content {
       flex-direction: column; /* Stack the sidebar and content */
     }
@@ -1080,9 +1092,44 @@ padding-bottom: 5px;
     .projectFolder-sidebar {
       width: 100%; /* Sidebar takes full width on smaller screens */
       margin-bottom: 20px; /* Space between sidebar and content */
+      height: 610px;
     }
   
     .projectFolder-display {
       width: 100%;
+      height: 610px;
+    }
+    
+    #add-new-project-btn{
+      width: 25%;
+      height: auto;
+      font-size: 10px;
+      padding: 5px;
+      margin-top: 8px;
+      margin-bottom: 10px;
+      float: inline-end !important;
+      top: -10px;
+      position: relative;
+    }
+    #nav-label {
+      font-size: .875rem;
+    }
+    #nav-icons {
+      width: 16px;
+      height: 16px;
+      margin-right: 2px;
     }
   }
+
+
+@media (max-width: 767px) {
+  .ifc-viewer-icon, .delete-project-icon {
+    visibility: hidden;
+  }
+}
+
+@media (max-width: 375px) {
+  #add-new-project-btn{
+    top: 0;
+  }
+}

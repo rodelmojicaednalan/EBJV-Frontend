@@ -4,7 +4,6 @@ import DataTable from 'react-data-table-component';
 import '../../../App.css';
 import 'font-awesome/css/font-awesome.min.css';
 import view_icon from '../../../assets/images/view-project-folder.png';
-import edit_icon from '../../../assets/images/edit-details.png';
 import view_model from '../../../assets/images/view-model.png';
 import delete_icon from '../../../assets/images/delete-log.png';
 import check from '../../../assets/images/check.png';
@@ -222,7 +221,7 @@ function Projects() {
           />
           {row.project_file && row.project_file.length > 0 && (
             <img
-              className="ml-3"
+              className="ifc-viewer-icon ml-3"
               src={view_model}
               title="View IFC Model"
               alt="view_ifc"
@@ -242,7 +241,7 @@ function Projects() {
             />
           )}
           <img
-            className="ml-3"
+            className="delete-project-icon ml-3"
             src={delete_icon}
             title="Delete project"
             style={{ cursor: 'pointer' }}
@@ -274,6 +273,7 @@ function Projects() {
             <button
               onClick={() => setShowAddModal(true)}
               className="btn btn-primary float-end add-user-btn"
+              id='add-new-project-btn'
             >
               {/* <i className="fa fa-plus"></i>  */}
               Add New Project
