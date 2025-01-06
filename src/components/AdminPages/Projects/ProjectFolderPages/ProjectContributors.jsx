@@ -13,7 +13,7 @@ import '../ProjectStyles.css'
 import { IoSearchSharp } from "react-icons/io5";
 import { BiDotsVertical } from "react-icons/bi";
 import { FaCaretDown } from "react-icons/fa";
-import { MdGroupOff } from "react-icons/md";
+import { MdGroupOff, MdGroupAdd, MdDeleteSweep   } from "react-icons/md";
 
 import ProjectSidebar from '../ProjectFolderSidebar';
 function ProjectContributors() {
@@ -742,10 +742,10 @@ useEffect(() => {
                                       <div className="group-action-buttons d-flex">
                                         <div style={{ position: "relative" }}>
                                           <button
-                                            className="btn custom-group-btn"
+                                            className="btn"
                                             onClick={() => setShowInviteBox((prev) => !prev)} // Toggle the invite dropdown visibility
                                           >
-                                            Invite to Group
+                                            <MdGroupAdd size={18}/>
                                           </button>
 
                                           {showInviteBox && (
@@ -784,10 +784,10 @@ useEffect(() => {
                                           )}
                                         </div>
                                         <button
-                                          className="btn custom-group-btn"
+                                          className="btn "
                                           onClick={() => handleDeleteGroup(selectedGroup.groupId)}
                                         >
-                                          Delete Group
+                                          <MdDeleteSweep size={18}/>
                                         </button>
                                       </div>
                                     )}

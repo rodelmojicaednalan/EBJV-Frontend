@@ -17,9 +17,14 @@ import ProjectSidebar from '../../ProjectFolderSidebar';
 
 function EditProject() {
   const { projectId } = useParams();
+  const [refreshKey, setRefreshKey] = useState(0); 
   const [projectName, setProjectName] = useState("");
   const [projectLocation, setProjectLocation] = useState("");
   const [ownerName, setOwnerName] = useState("")
+  const [projectThumbnail, setProjectThumbnail] = useState("")
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
+  const [projectDescription, setProjectDescription] = useState("")
   const [existingFiles, setExistingFiles] = useState([]); // Existing files
   const [fileName, setFileName] = useState([]);
   const [fileSize, setFileSize] = useState([])
@@ -74,11 +79,22 @@ const [totalFileSize, setTotalFileSize] = useState(0);
     const fetchProjectDetails = async () => {
       try {
         const response = await axiosInstance.get(`/project/${projectId}`);
-        const { project_name, owner, files, updatedAt, createdAt, project_file, project_location } = response.data;
+        const { project_name, owner, files, updatedAt, createdAt, 
+          project_file, project_location, project_thumbnail, start_date, end_date } = response.data;
+          const formatDateToInput = (date) => {
+            const d = new Date(date);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+            const day = String(d.getDate()).padStart(2, "0");
+            return `${year}-${month}-${day}`;
+          };  
 
         setProjectName(project_name);
         setProjectLocation(project_location);
-        setOwnerName(`${owner.first_name} ${owner.last_name}`)
+        setOwnerName(`${owner.first_name} ${owner.last_name}`);
+        setProjectThumbnail(project_thumbnail);
+        setStartDate(formatDateToInput(start_date))
+        setEndDate(formatDateToInput(end_date))
         setExistingFiles(project_file);
         setCreatedAt(new Intl.DateTimeFormat('en-US', {
           month: 'short',
@@ -157,7 +173,7 @@ const [totalFileSize, setTotalFileSize] = useState(0);
     
     fetchProjectDetails();
     fetchUserGroup();
-  }, [projectId]);
+  }, [projectId, refreshKey]);
 
   const handleLeaveProject = () => {
     Swal.fire({
@@ -195,6 +211,40 @@ const [totalFileSize, setTotalFileSize] = useState(0);
     });
   };
 
+  const handleUpdateProject = async (e) => {
+    e.preventDefault();
+  
+    const formData = new FormData();
+    formData.append("projectName", projectName);
+    formData.append("startDate", startDate);
+    formData.append("endDate", endDate);
+    formData.append("projectDescription", projectDescription);
+  
+    if (projectThumbnail) {
+      formData.append("projectThumbnail", projectThumbnail);
+    }
+  
+    try {
+      const response = await axiosInstance.put(`/update-project/${projectId}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+  
+      if (response.status === 200) {
+        Swal.fire("Success!", "Project updated successfully.", "success");
+        setRefreshKey((prevKey) => prevKey + 1);
+      } else {
+        Swal.fire("Error!", response.data.message || "Failed to update project.", "error");
+      }
+    } catch (error) {
+      console.error("Error updating project:", error);
+      Swal.fire("Error!", error.response?.data?.message || "An unexpected error occurred.", "error");
+    }
+  };
+  
+  
+
   return (
     <div className="container">
     <StickyHeader />
@@ -219,7 +269,7 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                         <h2>Edit Project Details</h2>
                       </div>
                       <div className="button-group d-flex">
-                        <button id="addbtn"className="btn btn-primary add-btn" title="Save">
+                        <button id="addbtn"className="btn btn-primary add-btn" title="Save" form="updateProjectForm">
                           Save Changes
                         </button>
                       </div>
@@ -229,6 +279,7 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                      <div className="col-md-12">
                       <div className="row">
                         <div className="col-12 col-md-12 col-lg-6">
+                          <form onSubmit={handleUpdateProject} id="updateProjectForm">
                           <div className="module mb-3">
                             <header> 
                               <h3> Details </h3>
@@ -241,7 +292,8 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                                   </label>
                                   <div className="input-focus-group">
                                   <input id="projectName" data-cy="projectName" type="text" 
-                                  autoComplete="off" maxLength="255" name="projectName" placeholder={projectName}/>
+                                  autoComplete="off" maxLength="255" name="projectName" defaultValue={projectName}
+                                  onChange={(e) => setProjectName(e.target.value)}/>
                                   </div>
                                 </div>
                               </div>
@@ -256,15 +308,24 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                                 <div className="label-group">
                                   <label> Project Thumbnail: </label>
                                   <div className="project-img-settings">
-                                    <img src={upload_icon}
-                                         style={{height:"40px", width:"40px"}}
-                                    /> 
+                                  <img 
+                                    src={projectThumbnail || upload_icon} 
+                                    alt="Project Thumbnail" 
+                                    style={{ height: "40px", width: "40px" }} 
+                                  />
                                   </div>
                                 </div>
                                 <div className="label-group uploadBtn">
-                                  <label></label>
                                   <div>
-                                  <button className="btn btn-primary add-btn" type="button" id="uploadbtn">Upload new</button>
+                                  <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    id="upload-thumbnail"
+                                    name="projectThumbnail"
+                                    // className="btn btn-primary add-btn"
+                                    // id="uploadbtn"
+                                    onChange={(e) => setProjectThumbnail(e.target.files[0])}
+                                  />
                                   </div>
                                 </div>
                                 </div>
@@ -325,24 +386,54 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                               <div className="col-6">
                                 <div className="input-group">
                                   <label htmlFor="startDate"><span>Start date: </span></label>
-                                  <input id="startDate" className="datepicker" data-cy="startDate" type="datetime-local" autoComplete="off" maxLength="255" name="startDate"/>
+                                  <input 
+                                  id="startDate" 
+                                  className="datepicker" 
+                                  data-cy="startDate" 
+                                  type="date" 
+                                  autoComplete="off" 
+                                  maxLength="255" 
+                                  name="startDate"
+                                  defaultValue={startDate}
+                                  onChange={(e) => setStartDate(e.target.value)}
+                                  />
                                 </div>
                               </div>
                               <div className="col-6">
                                 <div className="input-group">
                                   <label htmlFor="endDate"><span>End date: </span></label>
-                                  <input id="endDate" className="datepicker" data-cy="endDate" type="datetime-local" autoComplete="off" maxLength="255" name="endDate"/>
+                                  <input 
+                                  id="endDate" 
+                                  className="datepicker" 
+                                  data-cy="endDate" 
+                                  type="date"
+                                  autoComplete="off" 
+                                  maxLength="255" 
+                                  name="endDate"
+                                  defaultValue={endDate}
+                                  onChange={(e) => setEndDate(e.target.value)}
+                                  />
                                 </div>
                               </div>
                               <div className="col-12">
                                 <div className="input-group">
                                   <label htmlFor="description"><span>Description: </span></label>
-                                  <input id="description" style={{height:"4rem"}} data-cy="description" type="textarea" autoComplete="off" maxLength="255" name="description"/>
+                                  <input 
+                                  id="description" 
+                                  style={{height:"4rem"}} 
+                                  data-cy="description" 
+                                  type="textarea" 
+                                  autoComplete="off" 
+                                  maxLength="255" 
+                                  name="description"
+                                  defaultValue={projectDescription}
+                                  onChange={(e) => setProjectDescription(e.target.value)}
+                                  />
                                 </div>
                               </div>
                             </div>
                           </div>
-
+                          </form>
                         </div>
 
                         <div className="col-12 col-md-12 col-lg-6">

@@ -1215,6 +1215,10 @@ padding-bottom: 5px;
   display: flex;
 }
 
+#upload-thumbnail{
+  background-color: transparent;
+  border: none;
+}
 /* .subnav {
   border-left: 1px solid #eb6314;
 } */
