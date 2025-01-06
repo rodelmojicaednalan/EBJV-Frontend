@@ -1144,46 +1144,13 @@ input[type="date"] {
   .container-content {
     width: 700px;
   }
-  .image-grid {
-    padding: 45px 0px 33px;
-    width: 200px;
-    display: grid;
-    /* grid-template-columns: 0; */
-    grid-gap: 21px;
-  }
-
-  .video-item {
-    width: 200px;
-    height: auto;
-  }
-  .pdf-item {
-    width: 100%;
-    height: 500px;
-  }
-
-  .image-item {
-    width: 100%;
-    height: 200px;
-    object-fit: contain;
-    cursor: pointer;
-  }
 
   .title-page {
     position: fixed;
     z-index: 0;
     top: 20px;
   }
-  .resources-content {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 20px;
-    padding: 20px;
-    width: 100%;
 
-    /* border: 1px solid red; */
-    margin-left: 0;
-  }
   .pagination-controls {
     display: flex;
     flex-direction: column;
@@ -1424,6 +1391,12 @@ input[type="date"] {
   }
   .back-btn {
     margin: 20px 0 0;
+  }
+}
+
+@media (max-width: 425px) {
+  .title-page{
+   visibility: hidden;
   }
 }
 

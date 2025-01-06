@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import { useParams } from "react-router-dom";
 import StickyHeader from "../../../SideBar/StickyHeader";
 import DataTable from "react-data-table-component";
+import { CSVLink } from 'react-csv'
 
 import '../ProjectStyles.css'
 import { FaBookmark, FaCircleInfo  } from "react-icons/fa6";
@@ -280,28 +281,33 @@ function ProjectToDo() {
   const toDoTableColumns = [
     {
       name: "Title",
+      key: 'title',
       width: "25%",
       selector: (row) => row.title,
       sortable: true,
     },
     {
       name: "Assignee",
+      key: 'assignee',
       width: "20%",
       selector: (row) => row.assignee,
       sortable: true,
     },
     {
       name: "Created On",
+      key: 'createdOn',
       selector: (row) => row.createdOn,
       sortable: true,
     },
     {
       name: "Modified On",
+      key: 'modifiedOn',
       selector: (row) => row.modifiedOn,
       sortable: true,
     },
     {
       name: "Priority",
+      key: 'priority',
       selector: (row) => (
         <div className="d-flex align-items-center">
           {iconMappings.priority[row.priority.toLowerCase()] || (
@@ -314,6 +320,7 @@ function ProjectToDo() {
     },
     {
       name: "Status",
+      key: 'status',
       selector: (row) => (
         <div className="d-flex align-items-center">
           {iconMappings.statusIcon[row.status.toLowerCase()] || (
@@ -325,6 +332,21 @@ function ProjectToDo() {
       sortable: true,
     },
   ];
+
+  
+  const handleExportToCSV = () => {
+    // Filter out the checkbox column (no selector property)
+    const filteredColumns = toDoTableColumns.filter((col) => col.selector);
+    // Extract headers
+    const headers = filteredColumns.map((col) => ({ label: col.name, key: col.key }));
+    // Map data rows based on filtered columns
+    const data = toDoData.map((row) =>
+    Object.fromEntries(
+      filteredColumns.map((col) => [col.key, col.selector(row)]) // Extract values dynamically
+    )
+  );
+    return { headers, data };
+  };
 
   const handleAddNewToDo = () => {
     Swal.fire({
@@ -404,6 +426,7 @@ function ProjectToDo() {
 
                     // Wrapper Div for Priority and Due Date
                     const wrapperDiv = document.createElement('div');
+                    wrapperDiv.id = 'prio-due-div';
                     wrapperDiv.style.display = 'flex';
                     wrapperDiv.style.justifyContent = 'space-between';
                     wrapperDiv.style.gap = '10px';
@@ -502,12 +525,15 @@ function ProjectToDo() {
                             </button>
                             {menuOpen && (
                               <div className="dropdown-menu" id="toDo-dropdown">
-                                <div
-                                  className="dropdown-item"
-                                  
-                                  onClick={() => handleMenuOptionClick("Export To Do")}
-                                >
-                                  Export to Excel
+                                <div className="dropdown-item">
+                                  <CSVLink
+                                      {...handleExportToCSV()}
+                                      filename={`${ownerName}'s ${projectName}_To-Do-List.csv`}
+                                      className="exportToCSV"
+                                      target="_blank"
+                                    >
+                                      Export to CSV
+                                  </CSVLink>
                                 </div>
                                 <div
                                   className="dropdown-item"

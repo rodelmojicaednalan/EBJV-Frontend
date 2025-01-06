@@ -22,7 +22,7 @@
     z-index: -1;
 }
 
-.custom-login::after {
+/* .custom-login::after {
     content: '';
     position: absolute;
     top: 0;
@@ -31,7 +31,7 @@
     height: 100%;
     background: #FFFFFF;
     z-index: -1;
-}
+} */
 
 .card {
     border: none;
@@ -247,9 +247,9 @@ form label{
     direction: ltr;
     text-transform: uppercase;
 
-    option {
+    /* option {
         font-size: 14px;
-    }
+    } */
 }
 .alert.alert-danger {
     border-radius: 4px;

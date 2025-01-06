@@ -325,6 +325,7 @@ function Projects() {
                 className="form-select"
                 id="projectLocation"
                 value={newProject.location}
+                defaultValue="North America"
                 onChange={(e) =>
                   setNewProject({
                     ...newProject,

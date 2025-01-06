@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaFolderTree } from "react-icons/fa6";
 import { FaHistory, FaEye, FaCommentAlt, FaClipboardCheck, FaArrowLeft } from "react-icons/fa";
@@ -16,30 +16,57 @@ const Sidebar = ({ projectId }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    const storedState = localStorage.getItem("isCollapsed");
+    return storedState ? JSON.parse(storedState) : false;
+  });
+
+  // Function to toggle the collapsed state
+  useEffect(() => {
+    localStorage.setItem("isCollapsed", JSON.stringify(isCollapsed));
+  }, [isCollapsed]);
+
+  const collapseSubNav = () => {
+    setIsCollapsed((prev) => !prev);
+  };
   // Function to determine if a route is active
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => location.pathname.startsWith(path);
+
+  const handleClick = () => {
+    navigate(`/project-folder/${projectId}/data/project-explorer`);
+    collapseSubNav();
+  };
+
+  const handleBack = () => {
+    navigate(`/projects`)
+    localStorage.removeItem("isCollapsed");
+  }
+  
 
   return (
     <div className="projectFolder-sidebar">
       <ul className="navmenu">
       <li
-          className={`nav-item-group ${
-            isActive(`/project-folder/${projectId}/project-activity`) ? "active" : ""
-          }`}
+          className={`nav-item-group`}
         >
-          <div id="nav-item" onClick={() => navigate(`/projects`)}>
+          <div id="nav-item" onClick={handleBack}>
             <FaArrowLeft id="nav-icons" size={20}/>
             <span id="nav-label">All Projects</span>
           </div>
         </li>
         {/* Data Group */}
         <li className="nav-item-group">
-          <div id="nav-group">
-            <div className="big-nav-wrapper" onClick={() => navigate(`/project-folder/${projectId}/data/project-explorer`)}>
+          <div id="nav-group" >
+            <div className="big-nav-wrapper" onClick={handleClick}>
               <TbBrandDatabricks id="nav-icons" size={20}/>
               <span id="nav-label">Data</span>
             </div>
-            <ul className="subnav">
+            {!isCollapsed && (
+            <ul className={`subnav ${isCollapsed ? 'collapsed' : ''}`}
+            style={{
+              display: isCollapsed ? 'none' : '',
+              transition: 'height 0.3s ease, opacity 0.3s ease',
+            }} >
               <li
                 className={`nav-item-subgroup ${
                   isActive(`/project-folder/${projectId}/data/project-explorer`) ? "active" : ""
@@ -80,6 +107,7 @@ const Sidebar = ({ projectId }) => {
                 </div>
               </li>
             </ul>
+            )}
           </div>
         </li>
 
@@ -130,9 +158,20 @@ const Sidebar = ({ projectId }) => {
             <span id="nav-label">Project Contributors</span>
           </div>
         </li>
+          
+        <li
+          className={`nav-item-group ${
+            isActive(`/project-folder/${projectId}/settings/edit-project`) ? "active" : ""
+          }`}
+        >
+          <div id="nav-item" onClick={() => navigate(`/project-folder/${projectId}/settings/edit-project`)}>
+            <MdSettings id="nav-icons" size={20}/>
+            <span id="nav-label">Project Settings</span>
+          </div>
+        </li>
 
         {/* Settings Group */}
-        <li className="nav-item-group">
+        {/* <li className="nav-item-group">
           <div id="nav-group">
             <div className="big-nav-wrapper" 
                   onClick={() => navigate(`/project-folder/${projectId}/settings/edit-project`)}>
@@ -165,8 +204,8 @@ const Sidebar = ({ projectId }) => {
                   <HiCog id="nav-icons" />
                   <span id="nav-label">Topic Settings</span>
                 </div>
-              </li>
-              <li
+              </li> 
+               <li
                 className={`nav-item-subgroup ${
                   isActive(`/project-folder/${projectId}/settings/unit-settings`) ? "active" : ""
                 }`}
@@ -178,10 +217,10 @@ const Sidebar = ({ projectId }) => {
                   <TbRulerMeasure id="nav-icons" />
                   <span id="nav-label">Units</span>
                 </div>
-              </li>
+              </li> 
             </ul>
           </div>
-        </li>
+        </li> */}
       </ul>
     </div>
   );

@@ -137,7 +137,7 @@ function ProjectReleases() {
         filteredData = filteredData.filter((release) => {
           switch (filterType) {
             case "Owner":
-              return selectedOptions.includes(release.ownership ? "Shared with Me" : "Created by Me");
+              return selectedOptions.includes(release.ownership ? "Created by Me" : "Shared with Me");
             case "Users":
               return selectedOptions.includes(release.releaseOwner);
             case "Groups":

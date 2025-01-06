@@ -33,6 +33,13 @@ function EditProject() {
 
   const [dropdownStates, setDropdownStates] = useState({});
 
+  const [contributors, setContributors] = useState([])
+  const [contributorCount, setContributorCount] = useState(0);
+
+  const [groups, setGroups] = useState([]);
+  const [groupCount, setGroupCount] = useState(0);
+
+
   const handleMenuOptionClick = (option) => {
     Swal.fire(`Function to: ${option}`);
   };
@@ -109,9 +116,47 @@ const [totalFileSize, setTotalFileSize] = useState(0);
         console.error("Error fetching project details:", error);
       }
     };
-    
 
+    const fetchUserGroup = async () => {
+      try {
+        const response = await axiosInstance.get(`/project-contributors/${projectId}`);
+        const { contributors, groups } = response.data;
+    
+        const formattedContributors = contributors.map((contributor) => ({
+          contName: contributor.name,
+          contEmployer: contributor.employer,
+          contRole: contributor.role,
+          contStatus: contributor.status,
+          contEmail: contributor.email,
+          lastAccessed: contributor.last_login && contributor.last_login !== "No login record"
+            ? new Intl.DateTimeFormat('en-US', {
+                month: 'short',
+                day: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              }).format(new Date(contributor.last_login))
+            : "No login record", // Fallback when there's no valid date or the login record is "No login record"
+        }));
+    
+        const formattedGroups = groups.map((group) => ({
+          groupId: group.id,
+          groupName: group.group_name,
+          members: group.members || [],
+        }));
+    
+        setContributors(formattedContributors);
+        setContributorCount(contributors.length);
+        setGroups(formattedGroups);
+        setGroupCount(groups.length)
+
+      } catch (error) {
+        console.error('Error fetching project details:', error);
+      }
+    }
+    
     fetchProjectDetails();
+    fetchUserGroup();
   }, [projectId]);
 
   const handleLeaveProject = () => {
@@ -145,7 +190,7 @@ const [totalFileSize, setTotalFileSize] = useState(0);
       },
     }).then((result) => {
       if (result.isConfirmed) {
-        Swal.fire('Success!', 'You have left the project.', 'success');
+        Swal.fire('Success!', 'You have deleted the project.', 'success');
       }
     });
   };
@@ -251,8 +296,8 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                               </div>
                               <div className="col-6 col-sm-6 col-md-3">
                                 <div className="label-group">
-                                  <label> Folders: </label>
-                                  <div className="value"> 0 </div>
+                                  <label> Groups: </label>
+                                  <div className="value"> {groupCount} </div>
                                 </div>
                               </div>
                               <div className="col-6 col-sm-6 col-md-3">
@@ -264,7 +309,7 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                               <div className="col-6 col-sm-6 col-md-3">
                                 <div className="label-group">
                                   <label> Users: </label>
-                                  <div className="value"> 1 </div>
+                                  <div className="value"> {contributorCount} </div>
                                 </div>
                               </div>
                               </div>
@@ -393,7 +438,7 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                           </div>
                           <hr></hr>
                           <div className="d-flex mb-5">
-                            <button id="leaveProjectbtn"className="btn btn-default add-btn mr-3" title="Leave" onClick={handleLeaveProject}>
+                            <button id="leaveProjectbtn"className="btn btn-default add-btn mr-3" title="Leave" onClick={handleLeaveProject} disabled>
                               Leave Project
                             </button>
                             <button id="deleteProjectbtn"className="btn btn-danger add-btn" title="Delete" onClick={handleDeleteProject}>

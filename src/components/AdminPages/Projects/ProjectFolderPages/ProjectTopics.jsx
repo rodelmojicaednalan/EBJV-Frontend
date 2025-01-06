@@ -10,8 +10,10 @@ import { FaRegCalendar, FaCaretDown, FaListAlt  } from "react-icons/fa";
 import { GrStatusGoodSmall, GrSort } from "react-icons/gr";
 import { RiEdit2Fill } from "react-icons/ri";
 import { BiDotsVertical } from "react-icons/bi";
-import { MdCompress } from "react-icons/md";
+import { MdCompress, MdExpand  } from "react-icons/md";
 import { GoAlertFill } from "react-icons/go";
+import { TbSortAscending2, TbSortDescending2 } from "react-icons/tb";
+
 
 import ProjectSidebar from '../ProjectFolderSidebar';
 import Offcanvas from 'react-bootstrap/Offcanvas';
@@ -34,6 +36,11 @@ function ProjectTopics() {
   const [refreshKey, setRefreshKey] = useState(0); 
 
   const [showCanvas, setShowCanvas] = useState(false);
+
+  const [isCompressed, setIsCompressed] = useState(false);
+  const [showSortOptions, setShowSortOptions] = useState(false);
+  const [isSorted, setIsSorted] = useState('modifiedOn');
+  const [sortDirection, setSortDirection] = useState('asc');
 
   const handleMenuToggle = () => {
     setMenuOpen(!menuOpen);
@@ -69,6 +76,7 @@ function ProjectTopics() {
         const formattedTopics = project_topics.map((topic) => ({
           id: topic.id,
           name: topic.topicName,
+          creator: topic.topicCreator,
           description: topic.topicDescription,
           assignee: JSON.parse(topic.assignee),
           type: capitalizeWords(topic.topicType),
@@ -285,6 +293,31 @@ useEffect(() => {
     });
   };
 
+  const handleCompress = () => {
+    setIsCompressed((prev) => !prev);
+  }
+
+  const handleSort = (criteria) => {
+    setIsSorted(criteria);
+    // setShowSortOptions(false);
+  }
+
+  const toggleSortDirection = () => {
+    setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+  };
+
+   const sortedTopics = [...filteredTopics].sort((a, b) => {
+    const direction = sortDirection === 'asc' ? 1 : -1;
+
+    if (isSorted === 'modifiedOn') {
+      return (new Date(a.modifiedOn) - new Date(b.modifiedOn)) * direction;
+    }
+    if (isSorted === 'name' || isSorted === 'assignee' || isSorted === 'creator') {
+      return a[isSorted].localeCompare(b[isSorted]) * direction;
+    }
+    return 0;
+  });
+
     return (
       <div className="container">
       <StickyHeader />
@@ -306,13 +339,31 @@ useEffect(() => {
                           <h2>Topics</h2>
                         </div>
                         <div className="button-group d-flex">
-                          <button className="btn btn-icon grid-view-btn" title="Compress">
-                            <MdCompress /> 
+                          <button className="btn btn-icon grid-view-btn" title="Compress" onClick={handleCompress}>
+                           {isCompressed ? <MdExpand/> :  <MdCompress /> }
                           </button>
-                          <button className="btn btn-icon list-view-btn" title="Sort">
+                          <button className="btn btn-icon list-view-btn" title="Sort" onClick={() => setShowSortOptions((prev) => !prev)}>
                             <GrSort/>
                           </button>
-                          <div className="menu-btn-container position-relative">
+                          {showSortOptions && (
+                            <div className="sort-dropdown">
+                              <select
+                                onChange={(e) => handleSort(e.target.value)}
+                                value={isSorted}
+                                className="form-select"
+                                id="topic-sort"
+                              >
+                                <option value="modifiedOn">Sort by Modified On</option>
+                                <option value="name">Sort by Topic Title</option>
+                                <option value="assignee">Sort by Assignee</option>
+                                <option value="creator">Sort by Creator</option>
+                              </select>
+                              <button className="btn btn-icon ml-2" onClick={toggleSortDirection}>
+                                {sortDirection === 'asc' ? <TbSortAscending2/> : <TbSortDescending2/>}
+                              </button>
+                            </div>
+                          )}
+                          {/* <div className="menu-btn-container position-relative">
                             <button
                               className="btn btn-icon menu-btn"
                               title="Menu"
@@ -336,7 +387,7 @@ useEffect(() => {
                                 </div>
                               </div>
                             )}
-                          </div>
+                          </div> */}
                           <button id="addbtn"className="btn btn-primary add-btn" title="Add Topic" onClick={handleShowCanvas}>
                              New
                           </button>
@@ -451,8 +502,11 @@ useEffect(() => {
                       </div> 
 
                       <div className="topic-cards-box mt-2 d-flex">
-                        {filteredTopics.sort((a, b) => new Date(b.modifiedOn) - new Date(a.modifiedOn)).map((topic) => (
-                          <div key={topic.id} className="topic-card container-fluid">
+                        {sortedTopics.map((topic) => (
+                          <div key={topic.id}  className={`container-fluid topic-card ${isCompressed ? 'compressed' : ''}`}
+                          style={{
+                            marginTop: isCompressed ? '0' : '20px',
+                          }}>
                             <div className="topic-time d-none d-md-flex ">
                               <span className="text-muted">{topic.modifiedOn}</span>
                             </div>
@@ -468,10 +522,11 @@ useEffect(() => {
                                     </div>
                                     <div className="creator">
                                       <p>
-                                        <strong>Created by: </strong> {ownerName}
+                                        <strong>Created by: </strong> {topic.creator}
                                       </p>
                                     </div>
                                   </div>
+                                  {!isCompressed && (
                                   <div className="topic-config">
                                     <ul className="flex-row">
                                       <li className="mr-2">
@@ -488,6 +543,7 @@ useEffect(() => {
                                       </li>
                                     </ul>
                                   </div>
+                                  )}
                                 </div>
 
                               </div>

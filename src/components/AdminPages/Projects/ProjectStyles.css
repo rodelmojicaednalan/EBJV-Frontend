@@ -10,6 +10,10 @@
   margin-left: -80%;
 }
 
+.dropdown-item > input {
+  width: auto;
+}
+
 /* Sidebar Styling */
   .navmenu{
       padding: 0;
@@ -226,7 +230,7 @@
   }
   .grid-item > h5, p {
     display: flex;
-    justify-content: center;
+    word-break:break-all;
   }
   .project-display.list {
     display: block;
@@ -1093,13 +1097,24 @@ padding-bottom: 5px;
       width: 100%; /* Sidebar takes full width on smaller screens */
       margin-bottom: 20px; /* Space between sidebar and content */
       height: 610px;
+      padding-left: 10px;
     }
   
     .projectFolder-display {
       width: 100%;
       height: 610px;
     }
-    
+
+     /* #prio-due-div {
+       display: flex;
+       flex-direction: column;
+       width: 100% !important;
+     } */
+     #todo-due-date, #todo-priority, #todo-type, #todo-title, #todo-assignee, #todo-desc{
+       width: 96%;
+       font-size: 16px;
+     }
+
     #add-new-project-btn{
       width: 25%;
       height: auto;
@@ -1113,12 +1128,55 @@ padding-bottom: 5px;
     }
     #nav-label {
       font-size: .875rem;
+      display: none;
     }
     #nav-icons {
-      width: 16px;
-      height: 16px;
-      margin-right: 2px;
+      width: 18px;
+      height: 18px;
+      margin-right: 10px;
     }
+    .subnav{
+      margin-left: 10px;
+      /* display: none; */
+    }
+
+    .grid-item h5{
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .grid-item p {
+      font-size: .765rem;
+      margin-bottom: .5rem;
+    }
+    .dropdown-item{
+      font-size: .875rem;
+    }
+    .filter-dropdown > .dropdown-item{
+      margin: 2px;
+      padding: 1px;
+    }
+
+    /* .swal2-html-container{
+      background-color: ;
+    } */
+
+    div:where(.swal2-container).swal2-center>.swal2-popup {
+      width: 400px;
+    }
+    #share-with{
+      width: 100% !important;
+    }
+
+    #share-with > option {
+      font-size: 14px;
+    }
+
+    #topic-sort{
+      width: 175px;
+      font-size: 14px;
+    }
+
+
   }
 
 
@@ -1128,8 +1186,35 @@ padding-bottom: 5px;
   }
 }
 
+@media (max-width: 425px) {
+  .projectFolder-sidebar {
+   display: none;
+  }
+
+  #project-folder-container {
+    display: unset;
+  }
+
+  .projectFolder-display {
+    width: 100%;
+    height: unset;
+  }
+
+  .dataTables_wrapperz{
+    font-size: 12px;
+  }
+}
+
 @media (max-width: 375px) {
   #add-new-project-btn{
     top: 0;
   }
 }
+
+.sort-dropdown {
+  display: flex;
+}
+
+/* .subnav {
+  border-left: 1px solid #eb6314;
+} */

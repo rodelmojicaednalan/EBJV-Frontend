@@ -177,7 +177,6 @@ function ProjectExplorer() {
       filteredColumns.map((col) => [col.key, col.selector(row)]) // Extract values dynamically
     )
   );
-    console.log(headers)
     return { headers, data };
   };
 
