@@ -246,12 +246,14 @@ function ProjectContributors() {
       key: 'contEmployer',
       selector: (row) => row.contEmployer,
       sortable: true,
+      hide: 'md'
     },
     {
       name: "Role",
       key: 'contRole',
       selector: (row) => row.contRole,
       sortable: true,
+      hide: 'sm'
     },
     {
       name: "Status",
@@ -264,6 +266,7 @@ function ProjectContributors() {
       key: 'lastAccessed',
       selector: (row) => row.lastAccessed,
       sortable: true,
+      hide: 'md'
     },
   ];
 

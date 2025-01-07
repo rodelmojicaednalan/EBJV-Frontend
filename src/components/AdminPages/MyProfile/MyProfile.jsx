@@ -143,10 +143,10 @@ function MyProfile() {
 
   return (
     <div className="custom-profile-container">
-      <div className="col-lg-12">
-        <div className="row custom-row">
+      <div className="col-lg-12" id="profile-wrapper">
+        <div className="row custom-row" >
           <div
-            className="col-lg-7"
+            className="col-lg-7 ml-3 mt-3"
             style={{ paddingLeft: '0px', marginLeft: '-20px' }}
           >
             <h3 className="mb-3">

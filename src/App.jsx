@@ -39,6 +39,7 @@ import CheckEmail from './components/PasswordReset/CheckEmail';
 
 import IfcUploadPage from './components/AdminPages/IfcUploadPage/IfcUploadPage';
 import IfcViewer from './components/AdminPages/IfcViewer/IfcViewer';
+import ProjectMap from './components/AdminPages/Projects/ProjectFolderPages/ProjectMap';
 
 
 function Layout() {
@@ -102,6 +103,8 @@ function Layout() {
 
         <Route path="/my-profile" element={<ProtectedRoute element={<MyProfile />} allowedRoles={['Admin', 'Client']} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
+
+        <Route path="map" element={ProjectMap}/>
       </Routes>
     </>
     </AuthContextProvider>

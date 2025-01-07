@@ -11,7 +11,7 @@ import '../ProjectStyles.css';
 import { BiDotsVertical, BiSolidEditAlt } from 'react-icons/bi';
 import { LiaTimesSolid } from "react-icons/lia";
 import { IoMdDownload, IoMdPersonAdd  } from "react-icons/io";
-import { IoGrid } from 'react-icons/io5';
+import { IoGrid, IoMenu } from 'react-icons/io5';
 import { FaThList } from 'react-icons/fa';
 import { MdFolderOff } from "react-icons/md";
 
@@ -63,6 +63,8 @@ function ProjectExplorer() {
     setSelectedRow(row); // Set the clicked row's data
     handleShowCanvas(); // Show the Offcanvas
   };
+
+
 
   useEffect(() => {
     // Fetch project details and populate fields
@@ -139,29 +141,36 @@ function ProjectExplorer() {
     {
       name: 'File Name',
       key: 'fileName',
-      width: '30%',
+      // width: '30%',
       selector: (row) => row.fileName,
       sortable: true,
+      grow: 2,
+
     },
     {
       name: 'File Owner',
       key: 'fileOwner',
-      width: '20%',
+      // width: '20%',
       selector: (row) => row.fileOwner,
       sortable: true,
+      hide: 'sm'
     },
     {
       name: 'Last Modified',
       key: 'lastModified',
-      width: '20%',
+      // width: '20%',
       selector: (row) => row.lastModified,
       sortable: true,
+      right: true,
+      hide: 'md'
     },
     {
       name: 'File Size',
       key: 'fileSize',
       selector: (row) => row.fileSize,
       sortable: true,
+      right: true,
+      hide: 'md'
     },
   ];
 
@@ -390,9 +399,11 @@ function ProjectExplorer() {
   return (
     <div className="container">
       <StickyHeader />
+
       <h3 className="title-page" id="projectFolder-title">
         {ownerName}&apos;s {projectName}
       </h3>
+
       <div
         className="container-content"
         id="project-folder-container"
@@ -408,7 +419,7 @@ function ProjectExplorer() {
                   <div className="page-title">
                     <h2>Explorer</h2>
                   </div>
-                  <div className="button-group d-flex">
+                  <div className="button-group d-flex" id="explorer-buttons">
                   
                     <button
                       className={`btn btn-icon grid-view-btn ${
@@ -487,9 +498,9 @@ function ProjectExplorer() {
                   Delete Files
                 </button>
 
-                <div className={`project-display ${viewType}`}>
+                <div className={`project-display ${viewType}`} >
                   {viewType === 'grid' ? (
-                    <div className="grid-view">
+                    <div className="grid-view" >
                       {explorerTable.map((row, index) => (
                         <div key={index} className="grid-item">
                           <h5>{row.fileName}</h5>

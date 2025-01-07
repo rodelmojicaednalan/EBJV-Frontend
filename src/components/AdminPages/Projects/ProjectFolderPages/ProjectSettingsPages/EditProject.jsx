@@ -14,6 +14,7 @@ import { RiEdit2Fill } from "react-icons/ri";
 
 import map from '../../../../../assets/images/samplemap.png'
 import ProjectSidebar from '../../ProjectFolderSidebar';
+import ProjectMap from "../ProjectMap.jsx";
 
 function EditProject() {
   const { projectId } = useParams();
@@ -80,21 +81,16 @@ const [totalFileSize, setTotalFileSize] = useState(0);
       try {
         const response = await axiosInstance.get(`/project/${projectId}`);
         const { project_name, owner, files, updatedAt, createdAt, 
-          project_file, project_location, project_thumbnail, start_date, end_date } = response.data;
-          const formatDateToInput = (date) => {
-            const d = new Date(date);
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, "0"); // Months are 0-based
-            const day = String(d.getDate()).padStart(2, "0");
-            return `${year}-${month}-${day}`;
-          };  
-
+          project_file, project_location, project_thumbnail, 
+          start_date, end_date, project_description } = response.data;
+  
         setProjectName(project_name);
         setProjectLocation(project_location);
         setOwnerName(`${owner.first_name} ${owner.last_name}`);
         setProjectThumbnail(project_thumbnail);
-        setStartDate(formatDateToInput(start_date))
-        setEndDate(formatDateToInput(end_date))
+        setStartDate(start_date)
+        setEndDate(end_date)
+        setProjectDescription(project_description)
         setExistingFiles(project_file);
         setCreatedAt(new Intl.DateTimeFormat('en-US', {
           month: 'short',
@@ -243,7 +239,7 @@ const [totalFileSize, setTotalFileSize] = useState(0);
     }
   };
   
-  
+ 
 
   return (
     <div className="container">
@@ -309,9 +305,9 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                                   <label> Project Thumbnail: </label>
                                   <div className="project-img-settings">
                                   <img 
-                                    src={projectThumbnail || upload_icon} 
-                                    alt="Project Thumbnail" 
-                                    style={{ height: "40px", width: "40px" }} 
+                                    src={`https://ebjv-api.olongapobataanzambalesads.com/uploads/project-thumbnails/${projectThumbnail}` || upload_icon }
+                                    alt="" 
+                                    style={{ height: "36px", width: "36px" }} 
                                   />
                                   </div>
                                 </div>
@@ -394,7 +390,7 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                                   autoComplete="off" 
                                   maxLength="255" 
                                   name="startDate"
-                                  defaultValue={startDate}
+                                  value={startDate} 
                                   onChange={(e) => setStartDate(e.target.value)}
                                   />
                                 </div>
@@ -410,7 +406,7 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                                   autoComplete="off" 
                                   maxLength="255" 
                                   name="endDate"
-                                  defaultValue={endDate}
+                                  value={endDate}
                                   onChange={(e) => setEndDate(e.target.value)}
                                   />
                                 </div>
@@ -476,8 +472,8 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                                 </div>
                               </div>
                               <div className="map-container"> 
-                                <div id="projectBoundaryMap" className="">
-                                  <img src={map}
+                              <div id="projectBoundaryMap" className="">
+                              <img src={map}
                                   style={{width:"50%"}}
                                        className="mb-4"
                                   />
