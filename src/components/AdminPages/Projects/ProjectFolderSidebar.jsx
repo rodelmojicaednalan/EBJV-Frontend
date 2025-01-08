@@ -3,12 +3,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { FaFolderTree } from "react-icons/fa6";
 import { FaHistory, FaEye, FaCommentAlt, FaClipboardCheck, FaArrowLeft } from "react-icons/fa";
 import { TbBrandDatabricks, TbBox } from "react-icons/tb";
-import { IoIosPaper } from "react-icons/io";
 import { IoPeopleSharp } from "react-icons/io5";
 import { MdSettings } from "react-icons/md";
-import { BiSolidEdit } from "react-icons/bi";
-import { HiCog } from "react-icons/hi2";
-import { TbRulerMeasure } from "react-icons/tb";
+
 
 import './ProjectStyles.css'
 
@@ -42,7 +39,6 @@ const Sidebar = ({ projectId }) => {
     localStorage.removeItem("isCollapsed");
   }
   
-
   return (
     <div className="projectFolder-sidebar">
       <ul className="navmenu">

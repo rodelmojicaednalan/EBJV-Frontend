@@ -8,7 +8,11 @@ import '../ProjectStyles.css'
 import ProjectSidebar from '../ProjectFolderSidebar';
 import { FaCaretDown, FaFileExcel, FaHistory } from "react-icons/fa";
 
+import SidebarOffcanvas from '../MobileSidebar';
+import useWindowWidth from './windowWidthHook.jsx'
 function ProjectActivity() {
+  const windowWidthHook = useWindowWidth();
+  const isMobile = windowWidthHook <= 425;
   const { projectId } = useParams();
   const [projectName, setProjectName] = useState("");
   const [ownerName, setOwnerName] = useState("")
@@ -237,11 +241,15 @@ useEffect(() => {
     <div className="container">
       <StickyHeader />
       <h3 className="title-page" id="projectFolder-title">
-        {ownerName}'s {projectName} 
+        {ownerName}&apos;s {projectName} 
       </h3>
       <div className="container-content" id="project-folder-container">
       <div className="projectFolder-sidebar-container">
-      <ProjectSidebar projectId={projectId}/>
+      {isMobile ? (
+          <SidebarOffcanvas projectId={projectId} />
+        ) : (
+          <ProjectSidebar projectId={projectId} />
+        )}
       </div>
 
         <div className="projectFolder-display">

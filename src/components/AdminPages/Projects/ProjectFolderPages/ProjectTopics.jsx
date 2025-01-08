@@ -14,11 +14,14 @@ import { MdCompress, MdExpand  } from "react-icons/md";
 import { GoAlertFill } from "react-icons/go";
 import { TbSortAscending2, TbSortDescending2 } from "react-icons/tb";
 
-
 import ProjectSidebar from '../ProjectFolderSidebar';
 import Offcanvas from 'react-bootstrap/Offcanvas';
+import SidebarOffcanvas from '../MobileSidebar';
+import useWindowWidth from './windowWidthHook.jsx'
 
 function ProjectTopics() {
+  const windowWidthHook = useWindowWidth();
+  const isMobile = windowWidthHook <= 425;
   const { projectId } = useParams();
   const [projectName, setProjectName] = useState("");
   const [ownerName, setOwnerName] = useState("")
@@ -326,7 +329,11 @@ useEffect(() => {
       </h3>
       <div className="container-content" id="project-folder-container">
       <div className="projectFolder-sidebar-container">
-      <ProjectSidebar projectId={projectId}/>
+      {isMobile ? (
+          <SidebarOffcanvas projectId={projectId} />
+        ) : (
+          <ProjectSidebar projectId={projectId} />
+        )}
       </div>
 
       <div className="projectFolder-display">

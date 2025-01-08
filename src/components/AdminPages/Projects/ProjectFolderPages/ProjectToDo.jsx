@@ -16,8 +16,12 @@ import { GoAlertFill } from "react-icons/go";
 import { FaClipboardQuestion } from "react-icons/fa6";
 
 import ProjectSidebar from '../ProjectFolderSidebar';
+import SidebarOffcanvas from '../MobileSidebar';
+import useWindowWidth from './windowWidthHook.jsx'
 
 function ProjectToDo() {
+  const windowWidthHook = useWindowWidth();
+  const isMobile = windowWidthHook <= 425;
   const { projectId } = useParams();
   const [projectName, setProjectName] = useState("");
   const [ownerName, setOwnerName] = useState("")
@@ -502,7 +506,11 @@ function ProjectToDo() {
       </h3>
       <div className="container-content" id="project-folder-container">
       <div className="projectFolder-sidebar-container">
-      <ProjectSidebar projectId={projectId}/>
+      {isMobile ? (
+          <SidebarOffcanvas projectId={projectId} />
+        ) : (
+          <ProjectSidebar projectId={projectId} />
+        )}
       </div>
 
         <div className="projectFolder-display">

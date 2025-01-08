@@ -16,7 +16,11 @@ import { FaCaretDown } from "react-icons/fa";
 import { MdGroupOff, MdGroupAdd, MdDeleteSweep   } from "react-icons/md";
 
 import ProjectSidebar from '../ProjectFolderSidebar';
+import SidebarOffcanvas from '../MobileSidebar';
+import useWindowWidth from './windowWidthHook.jsx'
 function ProjectContributors() {
+  const windowWidthHook = useWindowWidth();
+  const isMobile = windowWidthHook <= 425;
   const { projectId } = useParams();
   const [refreshKey, setRefreshKey] = useState(0); 
   const [projectName, setProjectName] = useState("");
@@ -652,7 +656,11 @@ useEffect(() => {
       </h3>
       <div className="container-content" id="project-folder-container">
       <div className="projectFolder-sidebar-container">
-      <ProjectSidebar projectId={projectId}/>
+      {isMobile ? (
+          <SidebarOffcanvas projectId={projectId} />
+        ) : (
+          <ProjectSidebar projectId={projectId} />
+        )}
       </div>
 
       <div className="projectFolder-display">

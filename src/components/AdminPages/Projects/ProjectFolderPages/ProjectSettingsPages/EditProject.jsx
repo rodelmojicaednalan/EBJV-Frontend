@@ -15,8 +15,11 @@ import { RiEdit2Fill } from "react-icons/ri";
 import map from '../../../../../assets/images/samplemap.png'
 import ProjectSidebar from '../../ProjectFolderSidebar';
 import ProjectMap from "../ProjectMap.jsx";
-
+import SidebarOffcanvas from '../../MobileSidebar';
+import useWindowWidth from '../windowWidthHook.jsx'
 function EditProject() {
+  const windowWidthHook = useWindowWidth();
+  const isMobile = windowWidthHook <= 425;
   const { projectId } = useParams();
   const [refreshKey, setRefreshKey] = useState(0); 
   const [projectName, setProjectName] = useState("");
@@ -249,7 +252,11 @@ const [totalFileSize, setTotalFileSize] = useState(0);
       </h3>
     <div className="container-content" id="project-folder-container">
     <div className="projectFolder-sidebar-container">
-      <ProjectSidebar projectId={projectId}/>
+    {isMobile ? (
+          <SidebarOffcanvas projectId={projectId} />
+        ) : (
+          <ProjectSidebar projectId={projectId} />
+        )}
       </div>
 
     <div className="projectFolder-display">

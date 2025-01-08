@@ -1103,7 +1103,7 @@ padding-bottom: 5px;
 }
  
 }
-@media  (max-width: 768px) and (min-width: 425px) {
+@media  (max-width: 768px) {
   .container-content {
     flex-direction: column; /* Stack the sidebar and content */
   }
@@ -1196,8 +1196,105 @@ padding-bottom: 5px;
     font-size: 14px;
   }
 
-
 }
+
+
+/* Styles for screens between 426px and 767px */
+@media (min-width: 426px) and (max-width: 767px) {
+  .container-content {
+    flex-direction: column; /* Stack the sidebar and content */
+  }
+  
+  #projectFolder-title {
+    margin-top: 0.5rem;
+    margin-left: 0; /* Adjusted for better alignment */
+    text-align: center; /* Center align the title */
+    z-index: 1 !important;
+  }
+
+  .projectFolder-sidebar {
+    width: 100%; /* Sidebar takes full width */
+    margin-bottom: 15px; /* Space between sidebar and content */
+    padding-left: 10px;
+  }
+
+  .projectFolder-display {
+    width: 100%;
+  }
+
+  #todo-due-date,
+  #todo-priority,
+  #todo-type,
+  #todo-title,
+  #todo-assignee,
+  #todo-desc {
+    width: 100%; /* Full width for form inputs */
+    font-size: 14px; /* Slightly smaller font for better fit */
+  }
+
+  #add-new-project-btn {
+    width: 40%; /* Adjust button width */
+    height: auto;
+    font-size: 12px;
+    padding: 6px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    float: right; /* Align to the end */
+    position: relative;
+  }
+
+  #nav-label {
+    font-size: 0.75rem;
+    display: none; /* Hide the nav label */
+  }
+
+  #nav-icons {
+    width: 20px; /* Adjust icon size */
+    height: 20px;
+    margin-right: 8px;
+  }
+
+  .subnav {
+    margin-left: 10px;
+  }
+
+  .grid-item h5 {
+    font-size: 10px; /* Adjust header size */
+    font-weight: bold;
+  }
+
+  .grid-item p {
+    font-size: 0.7rem; /* Smaller text */
+    margin-bottom: 0.4rem;
+  }
+
+  .dropdown-item {
+    font-size: 0.8rem;
+  }
+
+  .filter-dropdown > .dropdown-item {
+    margin: 2px;
+    padding: 2px;
+  }
+
+  div:where(.swal2-container).swal2-center>.swal2-popup {
+    width: 350px;
+  }
+
+  #share-with {
+    width: 100% !important;
+  }
+
+  #share-with > option {
+    font-size: 13px;
+  }
+
+  #topic-sort {
+    width: 150px;
+    font-size: 13px;
+  }
+}
+
 
 @media (max-width: 767px) {
 .ifc-viewer-icon, .delete-project-icon {
@@ -1219,7 +1316,6 @@ padding-bottom: 5px;
   height: unset;
 }
 
-
 #explorer-buttons{
   display: none !important;
 }
@@ -1227,6 +1323,56 @@ padding-bottom: 5px;
 .dataTables_wrapperz{
   font-size: 12px;
 }
+
+/* Mobile Nav Menu */
+.sidebar-toggle-btn {
+  background-color: transparent;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 1.2rem;
+  color: white;
+}
+.mobile-nav-icon{
+  color: #eb6314;
+}
+
+.custom-offcanvas .offcanvas-header {
+  border-bottom: 1px solid #eaeaea;
+}
+
+.custom-offcanvas .offcanvas-body {
+  padding: 0;
+}
+
+.projectFolder-sidebar-mobile ul{
+  list-style-type: none;
+}
+#mobile-nav-icons{
+  color: #eb6314;
+  width: 1rem;
+  height: auto;
+}
+#mobile-nav-label{
+  color: #212A31;
+  font-weight: 600;
+  font-size: .875rem;
+  margin-left: 5px;
+}
+
+#mobile-nav-item{
+  padding-left: 5px;
+}
+#mobile-nav-item.active,
+.mobile-nav-item-subgroup.active, 
+.mobile-nav-item-group.active {
+  background-color: #fec19db8;
+  border-left: 4px solid #eb6314;
+  margin-left: 4px;
+}
+
+/* End of Mobile Menu */
+
 }
 
 @media (max-width: 375px) {
@@ -1234,3 +1380,4 @@ padding-bottom: 5px;
   top: 0;
 }
 }
+

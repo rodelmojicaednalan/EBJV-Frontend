@@ -131,7 +131,8 @@
 
 @media (max-width: 767px) and (min-width: 425px) {
   .sticky-header-container {
-     box-shadow: none !important;
+     /* box-shadow: none !important; */
+     width: 100% !important;
   }
   .toggle-btn{
     left: 40px;

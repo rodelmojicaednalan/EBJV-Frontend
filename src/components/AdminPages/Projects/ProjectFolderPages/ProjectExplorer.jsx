@@ -11,15 +11,19 @@ import '../ProjectStyles.css';
 import { BiDotsVertical, BiSolidEditAlt } from 'react-icons/bi';
 import { LiaTimesSolid } from "react-icons/lia";
 import { IoMdDownload, IoMdPersonAdd  } from "react-icons/io";
-import { IoGrid, IoMenu } from 'react-icons/io5';
+import { IoGrid } from 'react-icons/io5';
 import { FaThList } from 'react-icons/fa';
 import { MdFolderOff } from "react-icons/md";
 
 import { Modal, Button } from 'react-bootstrap';
 import ProjectSidebar from '../ProjectFolderSidebar';
+import SidebarOffcanvas from '../MobileSidebar';
 import Offcanvas from 'react-bootstrap/Offcanvas';
+import useWindowWidth from './windowWidthHook.jsx'
 
 function ProjectExplorer() {
+  const windowWidthHook = useWindowWidth();
+  const isMobile = windowWidthHook <= 425;
   const { projectId } = useParams();
   const [projectName, setProjectName] = useState('');
   const [ownerName, setOwnerName] = useState('');
@@ -409,7 +413,11 @@ function ProjectExplorer() {
         id="project-folder-container"
       >
         <div className="projectFolder-sidebar-container">
+        {isMobile ? (
+          <SidebarOffcanvas projectId={projectId} />
+        ) : (
           <ProjectSidebar projectId={projectId} />
+        )}
         </div>
         <div className="projectFolder-display">
           <div className="main">
