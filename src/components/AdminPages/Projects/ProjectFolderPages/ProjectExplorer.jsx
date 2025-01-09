@@ -703,6 +703,7 @@ function ProjectExplorer() {
         <Offcanvas.Body className="offcanvas-body">
         <div className="offcanvas-button-group2 mb-3 flex-wrap">
               <label htmlFor="buttons">  </label>
+              {selectedRow?.fileName?.endsWith('.ifc') && (
               <button className="btn mr-4 ml-1"
                       onClick={() =>
                         navigate(`/ifc-viewer/${projectId}`, {
@@ -714,6 +715,7 @@ function ProjectExplorer() {
                       style={{fontSize: "12px"}}>
                 View 
               </button>
+              )}
               <button className="btn mr-1" onClick={handleShare}><IoMdPersonAdd size={20}/></button>
               <button className="btn mr-1" onClick={() => downloadFile(selectedRow.fileName)} ><IoMdDownload size={20}/></button>
               <button className="btn " onClick={handleOCMenuToggle}><BiDotsVertical size={20}/></button>  

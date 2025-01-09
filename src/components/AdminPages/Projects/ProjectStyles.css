@@ -907,8 +907,9 @@ padding-bottom: 5px;
 }
 
 #explorer-offcanvas{
-  width: 250px !important;
+  width: 33% !important;
   padding: .875rem;
+  background-color: #f3f3f7;
 }
 
 #offcanvas-dropdown{
