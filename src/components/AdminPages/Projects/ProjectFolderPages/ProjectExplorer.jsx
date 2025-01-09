@@ -12,8 +12,10 @@ import { BiDotsVertical, BiSolidEditAlt } from 'react-icons/bi';
 import { LiaTimesSolid } from "react-icons/lia";
 import { IoMdDownload, IoMdPersonAdd  } from "react-icons/io";
 import { IoGrid } from 'react-icons/io5';
-import { FaThList } from 'react-icons/fa';
+import { FaThList, FaFolderPlus } from 'react-icons/fa';
 import { MdFolderOff } from "react-icons/md";
+import { RiAddLargeFill } from "react-icons/ri";
+import { AiOutlineFileAdd } from "react-icons/ai";
 
 import { Modal, Button } from 'react-bootstrap';
 import ProjectSidebar from '../ProjectFolderSidebar';
@@ -33,6 +35,12 @@ function ProjectExplorer() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0); 
   const [offcanvasMenuOpen, setOffcanvasMenuOpen] = useState(false);
+
+  const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+
+  const addMenuToggle = () => {
+    setIsAddMenuOpen(!isAddMenuOpen);
+  }
 
   const handleOCMenuToggle = () => {
     setOffcanvasMenuOpen(!offcanvasMenuOpen);
@@ -195,6 +203,8 @@ function ProjectExplorer() {
 
   
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showAddFolderModal, setShowAddFolderModal] = useState(false);
+  const [newFolder, setNewFolder] = useState("");
   const [newFiles, setNewFiles] = useState([]);
 
   const handleAddNewFile = async () => {
@@ -228,6 +238,10 @@ function ProjectExplorer() {
       });
     }
   };
+
+  const handleAddNewFolder = async () => {
+    console.log("Folder Added")
+  }
 
   const handleDeleteFiles = async () => {
     try {
@@ -362,6 +376,7 @@ function ProjectExplorer() {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setMenuOpen(false);
         setOffcanvasMenuOpen(false);
+        setIsAddMenuOpen(false)
       }
     };
 
@@ -399,6 +414,7 @@ function ProjectExplorer() {
     }
   };
   
+  
 
   return (
     <div className="container">
@@ -422,6 +438,29 @@ function ProjectExplorer() {
         <div className="projectFolder-display">
           <div className="main">
             <div className="container-fluid moduleFluid">
+            <div className="add-files-menu-container">
+            <button
+              id="addFiles-btn"
+              className="btn addFiles-btn btn-primary"
+              title="Add"
+              onClick={addMenuToggle}
+            >
+              <RiAddLargeFill/> 
+            </button>
+            {isAddMenuOpen && (
+              <div className="addFile-dropdown" ref={menuRef}>
+                <div className="addFile-dd-item" onClick={() => setShowAddFolderModal(true)}>
+                  <FaFolderPlus className="addFile-dd-icon" />
+                  <span>Create folder</span>
+                </div>
+                <div className="addFile-dd-divider" />
+                <div className="addFile-dd-item" onClick={() => setShowAddModal(true)}>
+                  <AiOutlineFileAdd className="addFile-dd-icon" />
+                  <span>Upload files</span>
+                </div>
+              </div>
+            )}
+            </div>
               <div className="project-content">
                 <div className="table-header d-flex justify-content-between align-items-center mb-3">
                   <div className="page-title">
@@ -486,14 +525,14 @@ function ProjectExplorer() {
                         </div>
                       )}
                     </div>
-                    <button
+                     <button
                       id="addbtn"
                       className="btn btn-primary add-btn"
                       title="Add"
-                      onClick={() => setShowAddModal(true)}
+                      onClick={addMenuToggle}
                     >
-                      + Add
-                    </button>
+                      Add 
+                    </button> 
                   </div>
                 </div>
         
@@ -546,7 +585,7 @@ function ProjectExplorer() {
       </div>
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Upload New IFC Files</Modal.Title>
+          <Modal.Title>Upload Files</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <form onSubmit={(e) => e.preventDefault()}>
@@ -557,7 +596,7 @@ function ProjectExplorer() {
               <input
                 type="file"
                 name="projectFiles"
-                accept=".ifc"
+                accept=".ifc,.nc1,.dxf,.pdf"
                 multiple
                 className="form-control"
                 id="projectFile"
@@ -589,6 +628,44 @@ function ProjectExplorer() {
           </Button>
           <Button id="saveAdd" variant="primary" onClick={handleAddNewFile}>
             Upload
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showAddFolderModal} onHide={() => setShowAddFolderModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Create Folder</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form onSubmit={(e) => e.preventDefault()}>
+            <div className="mb-3">
+              <label htmlFor="projectFolder" className="form-label">
+                Please enter a name for the new folder:
+              </label>
+              <input
+                type="text"
+                name="projectFolders"
+                className="form-control"
+                id="projectFolder"
+                placeholder='Folder name'
+                onChange={(e) => {
+                  const foldername = (e.target.value);
+                  setNewFolder(foldername);
+                }}
+              />
+            </div>
+          </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            id="closeAdd"
+            variant="secondary"
+            onClick={() => setShowAddFolderModal(false)}
+          >
+            Close
+          </Button>
+          <Button id="saveAdd" variant="primary" onClick={handleAddNewFolder}>
+            Create
           </Button>
         </Modal.Footer>
       </Modal>

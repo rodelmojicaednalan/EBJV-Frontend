@@ -101,7 +101,11 @@
     height: auto;
     /*height: 600px;*/
   }
-  
+
+#addFiles-btn{
+  display: none;
+}
+
   .dataTables_wrapperz {
     box-shadow: none;
   }
@@ -288,7 +292,7 @@
   margin-right: 5px
 }
   
- #addbtn:hover {
+ #addbtn:hover, #addFiles-btn:hover {
     background-color: #eb6314;
   }
   
@@ -381,9 +385,13 @@ flex-direction: column;
 .offcanvas {
   background: white;
   padding: 20px;
-  width: 350px !important;
+  width: 45% !important;
   border-radius: 8px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#topic-ocform-dropdown{
+  background-color: #eb6314;
 }
 
 .topic-card {
@@ -927,7 +935,7 @@ padding-bottom: 5px;
 
 .offcanvas-header {
   width: 100%; /* Takes full width of Offcanvas */
-  max-width: 250px; /* Ensures it stays within Offcanvas limits */
+  /* max-width: 250px; Ensures it stays within Offcanvas limits */
   display: flex;
   justify-content: space-between; /* Space between span and button group */
   align-items: center; /* Align vertically */
@@ -1094,8 +1102,57 @@ padding-bottom: 5px;
 }
 
 
- /* Media Queries for Responsiveness */
+#nav-icons-toggle{
+  color: #eb6314;
+  float: inline-end;
+  margin-top: 5px;
+}
 
+/* .addFile-dropdown{
+  display: none;
+} */
+
+.addFile-dd-icon{
+  color: #eb6314;
+}
+
+.addFile-dropdown {
+  position: absolute;
+  top: 6.3rem; /* Position the dropdown above the button */
+  right: 2rem;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 200px;
+  z-index: 1001;
+  padding: 0.5rem 0;
+}
+
+.addFile-dd-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.addFile-dd-item:hover {
+  background: #f8f9fa;
+}
+
+.addFile-dd-icon {
+  margin-right: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.addFile-dd-divider {
+  border-top: 1px solid #ddd;
+  margin: 0.5rem 0;
+}
+
+
+ /* Media Queries for Responsiveness */
  @media (max-width: 1024px) {
   #projectFolder-title {
     margin-left: -65% !important;
@@ -1118,6 +1175,66 @@ padding-bottom: 5px;
     margin-bottom: 20px; /* Space between sidebar and content */
     /* height: 610px; */
     padding-left: 10px;
+  }
+
+  #addbtn{
+    display: none;
+  }
+  #addFiles-btn{
+    border-radius: 50%;
+    position: fixed; /* Fix the button relative to the viewport */
+    bottom: 1rem;    /* Distance from the bottom of the screen */
+    right: 1rem;     /* Distance from the right of the screen */
+    border-radius: 50%; /* Make it circular */
+    width: 3rem;     /* Adjust the width */
+    height: 3rem;    /* Adjust the height */
+    color: #fff;     /* Optional: Set the text/icon color */
+    display: flex;   /* Center the content inside */
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow for better visibility */
+    cursor: pointer; /* Change cursor to pointer */
+    z-index: 1000;   /* Ensure it stays on top */
+  }
+
+  .addFile-dropdown {
+    position: absolute;
+    top: unset;
+    bottom: 4rem; /* Position the dropdown above the button */
+    right: 2rem;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    z-index: 1001;
+    padding: 0.5rem 0;
+  }
+  
+  .addFile-dd-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .addFile-dd-item:hover {
+    background: #f8f9fa;
+  }
+  
+  .addFile-dd-icon {
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+  }
+  
+  .addFile-dd-divider {
+    border-top: 1px solid #ddd;
+    margin: 0.5rem 0;
+  }
+
+  #nav-icons-toggle{
+    display: none;
   }
 
   .projectFolder-display {
@@ -1228,7 +1345,7 @@ padding-bottom: 5px;
   #todo-title,
   #todo-assignee,
   #todo-desc {
-    width: 100%; /* Full width for form inputs */
+    width: 90%; /* Full width for form inputs */
     font-size: 14px; /* Slightly smaller font for better fit */
   }
 

@@ -11,6 +11,85 @@ import { FaComments, FaPen, FaBug   } from "react-icons/fa";
 import { IoShieldCheckmarkSharp, IoWarningSharp, IoBookmarkSharp  } from "react-icons/io5";
 import { GrStatusUnknown } from "react-icons/gr";
 
+const sortSelect = [
+  {
+    "value": 'modifiedOn', "label": 'Sort by Modified On'
+  },
+  {
+    "value": 'name', "label": 'Sort by Topic Title'
+  },
+  {
+    "value": 'assignee', "label": 'Sort by Assignee'
+  },
+  {
+    "value": 'creator', "label": 'Sort by Creator'
+  }
+];
+
+
+const prioSelect = [
+  {
+    "value": 'low', "label": 'Low'
+  },
+  {
+    "value": 'normal', "label": 'Normal'
+  },
+  {
+    "value": 'high', "label": 'High'
+  },
+  {
+    "value": 'critical', "label": 'Critical'
+  }
+];
+
+const statusSelect = [
+  {
+    "value": 'new', "label": 'New'
+  },
+  {
+    "value": 'in-progress', "label": 'In-progress'
+  },
+  {
+    "value": 'pending', "label": 'Pending'
+  },
+  {
+    "value": 'closed', "label": 'Closed'
+  },
+  {
+    "value": 'done', "label": 'Done'
+  }
+];
+
+const typeSelect = [
+  {
+    "value": 'undefined', "label": 'Undefined'
+  },
+  {
+    "value": 'comment', "label": 'Comment'
+  },
+  {
+    "value": 'issue', "label": 'Issue'
+  },
+  {
+    "value": 'request', "label": 'Request'
+  },
+  {
+    "value": 'fault', "label": 'Fault'
+  },
+  {
+    "value": 'inquiry', "label": 'Inquiry'
+  },
+  {
+    "value": 'solution', "label": 'Solution'
+  },
+  {
+    "value": 'remark', "label": 'Remark'
+  },
+  {
+    "value": 'clash', "label": 'Clash'
+  }
+];
+
 const sampleData1 = [
   {
     id: 1,
@@ -47,6 +126,7 @@ const sampleData1 = [
     icon: <span style={{cursor:"pointer"}}> <IoIosListBox color="teal" size={24}/> <FiChevronDown/></span>,
     type: "Request",
     action: "Action1",
+
   },
   {
     id: 7,
@@ -98,7 +178,7 @@ const sampleColumns1 = [
   },
 ];
 
-
 export {
-  sampleData1, sampleColumns1, 
+  sortSelect,
+prioSelect, statusSelect, typeSelect, sampleData1, sampleColumns1
 };

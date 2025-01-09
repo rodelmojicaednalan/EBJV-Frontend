@@ -1,42 +1,72 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FaFolderTree } from "react-icons/fa6";
+import { FaFolderTree, FaChevronRight, FaChevronDown   } from "react-icons/fa6";
 import { FaHistory, FaEye, FaCommentAlt, FaClipboardCheck, FaArrowLeft } from "react-icons/fa";
-import { TbBrandDatabricks, TbBox } from "react-icons/tb";
+import { TbBrandDatabricks, TbBox, TbRulerMeasure } from "react-icons/tb";
 import { IoPeopleSharp } from "react-icons/io5";
 import { MdSettings } from "react-icons/md";
+import { BiSolidEdit } from "react-icons/bi";
+import { HiCog } from "react-icons/hi";
 
 
 import './ProjectStyles.css'
-
+import { AuthContext } from '../../Authentication/authContext';
 const Sidebar = ({ projectId }) => {
+  const { user } = useContext(AuthContext);
+  const [roleCheck, setRoleCheck] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
+  // console.log(roleCheck)
 
-  const [isCollapsed, setIsCollapsed] = useState(() => {
-    const storedState = localStorage.getItem("isCollapsed");
-    return storedState ? JSON.parse(storedState) : false;
-  });
-
-  // Function to toggle the collapsed state
   useEffect(() => {
-    localStorage.setItem("isCollapsed", JSON.stringify(isCollapsed));
-  }, [isCollapsed]);
+    if (user?.roles) {
+      setRoleCheck(user.roles.map((role) => role.role_name));
+     } 
+  }, [user]);
 
-  const collapseSubNav = () => {
-    setIsCollapsed((prev) => !prev);
-  };
+
   // Function to determine if a route is active
   const isActive = (path) => location.pathname.startsWith(path);
 
-  const handleClick = () => {
+  const [isDataCollapsed, setIsDataCollapsed] = useState(() => {
+    const storedState = localStorage.getItem("isDataCollapsed");
+    return storedState ? JSON.parse(storedState) : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("isDataCollapsed", JSON.stringify(isDataCollapsed));
+  }, [isDataCollapsed]);
+
+  const collapseDataGroup = () => {
+    setIsDataCollapsed((prev) => !prev);
+  };
+  
+  const handleDataCollapse = () => {
     navigate(`/project-folder/${projectId}/data/project-explorer`);
-    collapseSubNav();
+    collapseDataGroup();
+  };
+
+  const [isSettingsCollapsed, setIsSettingsCollapsed] = useState(() => {
+    const storedState = localStorage.getItem("isSettingsCollapsed");
+    return storedState ? JSON.parse(storedState) : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("isSettingsCollapsed", JSON.stringify(isSettingsCollapsed));
+  }, [isSettingsCollapsed]);
+
+  const collapseSettingGroup = () => {
+    setIsSettingsCollapsed((prev) => !prev);
+  };
+  
+  const handleSettingsCollapse = () => {
+    navigate(`/project-folder/${projectId}/settings/edit-project`);
+    collapseSettingGroup();
   };
 
   const handleBack = () => {
     navigate(`/projects`)
-    localStorage.removeItem("isCollapsed");
+    localStorage.removeItem("isDataCollapsed");
   }
   
   return (
@@ -53,14 +83,19 @@ const Sidebar = ({ projectId }) => {
         {/* Data Group */}
         <li className="nav-item-group">
           <div id="nav-group" >
-            <div className="big-nav-wrapper" onClick={handleClick}>
+            <div className="big-nav-wrapper" onClick={handleDataCollapse}>
               <TbBrandDatabricks id="nav-icons" size={20}/>
               <span id="nav-label">Data</span>
+              {isDataCollapsed ? (
+              <FaChevronRight id="nav-icons-toggle"/>
+              ) : (
+              <FaChevronDown id="nav-icons-toggle"/>
+              )}
             </div>
-            {!isCollapsed && (
-            <ul className={`subnav ${isCollapsed ? 'collapsed' : ''}`}
+            {!isDataCollapsed && (
+            <ul className={`subnav ${isDataCollapsed ? 'collapsed' : ''}`}
             style={{
-              display: isCollapsed ? 'none' : '',
+              display: isDataCollapsed ? 'none' : '',
               transition: 'height 0.3s ease, opacity 0.3s ease',
             }} >
               <li
@@ -108,6 +143,8 @@ const Sidebar = ({ projectId }) => {
         </li>
 
         {/* Activity */}
+      {roleCheck?.includes("Admin") && (
+      <>
         <li
           className={`nav-item-group ${
             isActive(`/project-folder/${projectId}/project-activity`) ? "active" : ""
@@ -155,7 +192,7 @@ const Sidebar = ({ projectId }) => {
           </div>
         </li>
           
-        <li
+        {/* <li
           className={`nav-item-group ${
             isActive(`/project-folder/${projectId}/settings/edit-project`) ? "active" : ""
           }`}
@@ -164,17 +201,26 @@ const Sidebar = ({ projectId }) => {
             <MdSettings id="nav-icons" size={20}/>
             <span id="nav-label">Project Settings</span>
           </div>
-        </li>
+        </li> */}
 
         {/* Settings Group */}
-        {/* <li className="nav-item-group">
+        <li className="nav-item-group">
           <div id="nav-group">
-            <div className="big-nav-wrapper" 
-                  onClick={() => navigate(`/project-folder/${projectId}/settings/edit-project`)}>
+            <div className="big-nav-wrapper" onClick={handleSettingsCollapse}>
               <MdSettings id="nav-icons" size={20}/>
               <span id="nav-label">Settings</span>
+              {isSettingsCollapsed ? (
+              <FaChevronRight id="nav-icons-toggle"/>
+              ) : (
+              <FaChevronDown id="nav-icons-toggle"/>
+              )}
             </div>
-            <ul className="subnav">
+            {!isSettingsCollapsed && (
+            <ul className={`subnav ${isSettingsCollapsed ? 'collapsed' : ''}`}
+            style={{
+              display: isSettingsCollapsed ? 'none' : '',
+              transition: 'height 0.3s ease, opacity 0.3s ease',
+            }} >
               <li
                 className={`nav-item-subgroup ${
                   isActive(`/project-folder/${projectId}/settings/edit-project`) ? "active" : ""
@@ -215,8 +261,11 @@ const Sidebar = ({ projectId }) => {
                 </div>
               </li> 
             </ul>
+            )}
           </div>
-        </li> */}
+        </li>
+        </>
+        )}  
       </ul>
     </div>
   );

@@ -19,6 +19,9 @@ import ProjectSidebar from '../ProjectFolderSidebar';
 import SidebarOffcanvas from '../MobileSidebar';
 import useWindowWidth from './windowWidthHook.jsx'
 
+import Select from 'react-select';
+import { prioSelect, statusSelect, typeSelect} from '../ProjectFolderPages/ProjectSettingsPages/dummyTopicSettings';
+
 function ProjectToDo() {
   const windowWidthHook = useWindowWidth();
   const isMobile = windowWidthHook <= 425;

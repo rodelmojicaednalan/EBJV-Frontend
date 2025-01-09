@@ -3,11 +3,13 @@ import { Offcanvas, Button } from "react-bootstrap";
 import { FaBars } from "react-icons/fa";
 import "./ProjectStyles.css";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FaFolderTree } from "react-icons/fa6";
+import { FaFolderTree, FaChevronRight, FaChevronDown   } from "react-icons/fa6";
 import { FaHistory, FaEye, FaCommentAlt, FaClipboardCheck, FaArrowLeft } from "react-icons/fa";
-import { TbBrandDatabricks, TbBox } from "react-icons/tb";
+import { TbBrandDatabricks, TbBox, TbRulerMeasure } from "react-icons/tb";
 import { IoPeopleSharp } from "react-icons/io5";
 import { MdSettings } from "react-icons/md";
+import { BiSolidEdit } from "react-icons/bi";
+import { HiCog } from "react-icons/hi";
 
 
 const SidebarOffcanvas = ({ projectId }) => {
@@ -16,34 +18,54 @@ const SidebarOffcanvas = ({ projectId }) => {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-   const navigate = useNavigate();
-    const location = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Function to determine if a route is active
+  const isActive = (path) => location.pathname.startsWith(path);
+
+  const [isDataCollapsed, setIsDataCollapsed] = useState(() => {
+    const storedState = localStorage.getItem("isDataCollapsed");
+    return storedState ? JSON.parse(storedState) : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("isDataCollapsed", JSON.stringify(isDataCollapsed));
+  }, [isDataCollapsed]);
+
+  const collapseDataGroup = () => {
+    setIsDataCollapsed((prev) => !prev);
+  };
   
-    const [isCollapsed, setIsCollapsed] = useState(() => {
-      const storedState = localStorage.getItem("isCollapsed");
-      return storedState ? JSON.parse(storedState) : false;
-    });
+  const handleDataCollapse = () => {
+    navigate(`/project-folder/${projectId}/data/project-explorer`);
+    collapseDataGroup();
+  };
+
+  const [isSettingsCollapsed, setIsSettingsCollapsed] = useState(() => {
+    const storedState = localStorage.getItem("isSettingsCollapsed");
+    return storedState ? JSON.parse(storedState) : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("isSettingsCollapsed", JSON.stringify(isSettingsCollapsed));
+  }, [isSettingsCollapsed]);
+
+  const collapseSettingGroup = () => {
+    setIsSettingsCollapsed((prev) => !prev);
+  };
   
-    // Function to toggle the collapsed state
-    useEffect(() => {
-      localStorage.setItem("isCollapsed", JSON.stringify(isCollapsed));
-    }, [isCollapsed]);
-  
-    const collapseSubNav = () => {
-      setIsCollapsed((prev) => !prev);
-    };
-    // Function to determine if a route is active
-    const isActive = (path) => location.pathname.startsWith(path);
-  
-    const handleClick = () => {
-      navigate(`/project-folder/${projectId}/data/project-explorer`);
-      collapseSubNav();
-    };
-  
-    const handleBack = () => {
-      navigate(`/projects`)
-      localStorage.removeItem("isCollapsed");
-    }
+  const handleSettingsCollapse = () => {
+    navigate(`/project-folder/${projectId}/settings/edit-project`);
+    collapseSettingGroup();
+  };
+
+
+
+  const handleBack = () => {
+    navigate(`/projects`)
+    localStorage.removeItem("isDataCollapsed");
+  }
     
   return (
     <>
@@ -93,14 +115,19 @@ const SidebarOffcanvas = ({ projectId }) => {
                   {/* Data Group */}
                   <li className="mobile-nav-item-group">
                     <div id="nav-group" >
-                      <div className="big-nav-wrapper" onClick={handleClick}>
+                      <div className="big-nav-wrapper" onClick={handleDataCollapse}>
                         <TbBrandDatabricks id="mobile-nav-icons" size={20}/>
                         <span id="mobile-nav-label">Data</span>
+                        {isDataCollapsed ? (
+                        <FaChevronRight id="nav-icons-toggle"/>
+                        ) : (
+                        <FaChevronDown id="nav-icons-toggle"/>
+                        )}
                       </div>
-                      {!isCollapsed && (
-                      <ul className={`subnav ${isCollapsed ? 'collapsed' : ''}`}
+                      {!isDataCollapsed && (
+                      <ul className={`subnav ${isDataCollapsed ? 'collapsed' : ''}`}
                       style={{
-                        display: isCollapsed ? 'none' : '',
+                        display: isDataCollapsed ? 'none' : '',
                         transition: 'height 0.3s ease, opacity 0.3s ease',
                       }} >
                         <li
@@ -195,7 +222,7 @@ const SidebarOffcanvas = ({ projectId }) => {
                     </div>
                   </li>
                     
-                  <li
+                  {/* <li
                     className={`mobile-nav-item-group ${
                       isActive(`/project-folder/${projectId}/settings/edit-project`) ? "active" : ""
                     }`}
@@ -204,59 +231,69 @@ const SidebarOffcanvas = ({ projectId }) => {
                       <MdSettings id="mobile-nav-icons" size={20}/>
                       <span id="mobile-nav-label">Project Settings</span>
                     </div>
-                  </li>
+                  </li> */}
           
                   {/* Settings Group */}
-                  {/* <li className="mobile-nav-item-group">
+                  <li className="mobile-nav-item-group">
                     <div id="nav-group">
-                      <div className="big-nav-wrapper" 
-                            onClick={() => navigate(`/project-folder/${projectId}/settings/edit-project`)}>
+                      <div className="big-nav-wrapper" onClick={handleSettingsCollapse}>
                         <MdSettings id="mobile-nav-icons" size={20}/>
                         <span id="mobile-nav-label">Settings</span>
-                      </div>
-                      <ul className="subnav">
-                        <li
-                          className={`mobile-nav-item-subgroup ${
-                            isActive(`/project-folder/${projectId}/settings/edit-project`) ? "active" : ""
-                          }`}
-                        >
-                          <div
-                            className="subgroup-items"
-                            onClick={() => navigate(`/project-folder/${projectId}/settings/edit-project`)}
+                        {isSettingsCollapsed ? (
+                          <FaChevronRight id="nav-icons-toggle"/>
+                          ) : (
+                          <FaChevronDown id="nav-icons-toggle"/>
+                          )}
+                        </div>
+                        {!isSettingsCollapsed && (
+                        <ul className={`subnav ${isSettingsCollapsed ? 'collapsed' : ''}`}
+                        style={{
+                          display: isSettingsCollapsed ? 'none' : '',
+                          transition: 'height 0.3s ease, opacity 0.3s ease',
+                        }} >
+                          <li
+                            className={`mobile-nav-item-subgroup ${
+                              isActive(`/project-folder/${projectId}/settings/edit-project`) ? "active" : ""
+                            }`}
                           >
-                            <BiSolidEdit id="mobile-nav-icons" />
-                            <span id="mobile-nav-label">Edit Project</span>
-                          </div>
-                        </li>
-                        <li
-                          className={`mobile-nav-item-subgroup ${
-                            isActive(`/project-folder/${projectId}/settings/topic-settings`) ? "active" : ""
-                          }`}
-                        >
-                          <div
-                            className="subgroup-items"
-                            onClick={() => navigate(`/project-folder/${projectId}/settings/topic-settings`)}
+                            <div
+                              className="subgroup-items"
+                              onClick={() => navigate(`/project-folder/${projectId}/settings/edit-project`)}
+                            >
+                              <BiSolidEdit id="mobile-nav-icons" />
+                              <span id="mobile-nav-label">Edit Project</span>
+                            </div>
+                          </li>
+                          <li
+                            className={`mobile-nav-item-subgroup ${
+                              isActive(`/project-folder/${projectId}/settings/topic-settings`) ? "active" : ""
+                            }`}
                           >
-                            <HiCog id="mobile-nav-icons" />
-                            <span id="mobile-nav-label">Topic Settings</span>
-                          </div>
-                        </li> 
-                         <li
-                          className={`mobile-nav-item-subgroup ${
-                            isActive(`/project-folder/${projectId}/settings/unit-settings`) ? "active" : ""
-                          }`}
-                        >
-                          <div
-                            className="subgroup-items"
-                            onClick={() => navigate(`/project-folder/${projectId}/settings/unit-settings`)}
+                            <div
+                              className="mobile-subgroup-items"
+                              onClick={() => navigate(`/project-folder/${projectId}/settings/topic-settings`)}
+                            >
+                              <HiCog id="mobile-nav-icons" />
+                              <span id="mobile-nav-label">Topic Settings</span>
+                            </div>
+                          </li> 
+                          <li
+                            className={`mobile-nav-item-subgroup ${
+                              isActive(`/project-folder/${projectId}/settings/unit-settings`) ? "active" : ""
+                            }`}
                           >
-                            <TbRulerMeasure id="mobile-nav-icons" />
-                            <span id="mobile-nav-label">Units</span>
-                          </div>
-                        </li> 
-                      </ul>
+                            <div
+                              className="mobile-subgroup-items"
+                              onClick={() => navigate(`/project-folder/${projectId}/settings/unit-settings`)}
+                            >
+                              <TbRulerMeasure id="mobile-nav-icons" />
+                              <span id="mobile-nav-label">Units</span>
+                            </div>
+                          </li> 
+                        </ul>
+                        )}
                     </div>
-                  </li> */}
+                  </li>
                 </ul>
               </div>
         </Offcanvas.Body>

@@ -35,6 +35,8 @@ function Projects() {
     file: null,
   });
 
+  const [roleCheck, setRoleCheck] = useState("");
+
   useEffect(() => {
     if (user && user.id) {
       setProjectOwner(user.id);
@@ -53,8 +55,9 @@ function Projects() {
         const userRole = userResponse.data?.roles?.map(
           (role) => role.role_name
         ); // Assuming `role` is returned from the API
+        setRoleCheck(userRole);
         let response;
-
+       
         if (userRole == 'Admin') {
           // Fetch all projects for Admin
           response = await axiosInstance.get('/projects');
@@ -240,6 +243,7 @@ function Projects() {
               style={{ cursor: 'pointer' }}
             />
           )}
+          {roleCheck == "Admin" && (
           <img
             className="delete-project-icon ml-3"
             src={delete_icon}
@@ -250,6 +254,7 @@ function Projects() {
             width="25"
             height="25"
           />
+          )}
         </div>
       ),
       sortable: false,
@@ -270,6 +275,7 @@ function Projects() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
+            {roleCheck == "Admin" && (
             <button
               onClick={() => setShowAddModal(true)}
               className="btn btn-primary float-end add-user-btn"
@@ -278,6 +284,7 @@ function Projects() {
               {/* <i className="fa fa-plus"></i>  */}
               Add New Project
             </button>
+              )}
           </div>
           <div className="container-content">
             <DataTable

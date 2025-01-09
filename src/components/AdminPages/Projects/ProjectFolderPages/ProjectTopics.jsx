@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axiosInstance from "../../../../../axiosInstance.js";
 import Swal from "sweetalert2";
 import { useNavigate, useParams } from "react-router-dom";
+import Select from 'react-select';
 import check from "../../../../assets/images/check.png";
 import StickyHeader from "../../../SideBar/StickyHeader";
 import '../ProjectStyles.css'
@@ -18,6 +19,8 @@ import ProjectSidebar from '../ProjectFolderSidebar';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import SidebarOffcanvas from '../MobileSidebar';
 import useWindowWidth from './windowWidthHook.jsx'
+
+import { sortSelect, prioSelect, statusSelect, typeSelect} from '../ProjectFolderPages/ProjectSettingsPages/dummyTopicSettings';
 
 function ProjectTopics() {
   const windowWidthHook = useWindowWidth();
@@ -354,7 +357,17 @@ useEffect(() => {
                           </button>
                           {showSortOptions && (
                             <div className="sort-dropdown">
-                              <select
+                              <Select
+                              className="basic-single"
+                              classNamePrefix="select"
+                              defaultValue={sortSelect[0]}
+                              name="sortSelect"
+                              options={sortSelect}
+                              id="topic-sort"
+                              onChange={(selectedOption) => handleSort(selectedOption.value)}
+                              required
+                              />
+                              {/* <select
                                 onChange={(e) => handleSort(e.target.value)}
                                 value={isSorted}
                                 className="form-select"
@@ -364,7 +377,7 @@ useEffect(() => {
                                 <option value="name">Sort by Topic Title</option>
                                 <option value="assignee">Sort by Assignee</option>
                                 <option value="creator">Sort by Creator</option>
-                              </select>
+                              </select> */}
                               <button className="btn btn-icon ml-2" onClick={toggleSortDirection}>
                                 {sortDirection === 'asc' ? <TbSortAscending2/> : <TbSortDescending2/>}
                               </button>
@@ -446,37 +459,40 @@ useEffect(() => {
                               />
                             </div>
                             <div className="form-group mb-3">
-                              <label htmlFor="priority">Priority</label>
-                              <select id="priority" name="topicPrio" className="form-control" required>
-                                <option value="low">Low</option>
-                                <option value="normal">Normal</option>
-                                <option value="high">High</option>
-                                <option value="critical">Critical</option>
-                              </select>
+                            <label htmlFor="topicPrio-ocform-dropdown">Priority</label>
+                            <Select
+                              className="basic-single"
+                              classNamePrefix="select"
+                              defaultValue={prioSelect[0]}
+                              name="topicPrio"
+                              options={prioSelect}
+                              id="topicPrio-ocform-dropdown"
+                              required
+                            />
                             </div>
                             <div className="form-group mb-3">
-                              <label htmlFor="status">Status</label>
-                              <select id="status" name="topicStatus" className="form-control" required>
-                                <option value="new">New</option>
-                                <option value="in-progress">In Progress</option>
-                                <option value="pending">Pending</option>
-                                <option value="closed">Closed</option>
-                                <option value="done">Done</option>
-                              </select>
+                            <label htmlFor="topicStatus-ocform-dropdown">Status</label>
+                            <Select
+                              className="basic-single"
+                              classNamePrefix="select"
+                              defaultValue={statusSelect[0]}
+                              name="topicStatus"
+                              options={statusSelect}
+                              id="topicStatus-ocform-dropdown"
+                              required
+                            />
                             </div>
                             <div className="form-group mb-3">
-                              <label htmlFor="type">Type</label>
-                              <select id="type" name="topicType" className="form-control" required>
-                                <option value="undefined">Undefined</option>
-                                <option value="comment">Comment</option>
-                                <option value="issue">Issue</option>
-                                <option value="request">Request</option>
-                                <option value="fault">Fault</option>
-                                <option value="inquiry">Inquiry</option>
-                                <option value="solution">Solution</option>
-                                <option value="remark">Remark</option>
-                                <option value="clash">Clash</option>
-                              </select>
+                            <label htmlFor="topicType-ocform-dropdown">Type</label>
+                            <Select
+                              className="basic-single"
+                              classNamePrefix="select"
+                              defaultValue={typeSelect[0]}
+                              name="topicType"
+                              options={typeSelect}
+                              id="topicType-ocform-dropdown"
+                              required
+                            />
                             </div>
                             <div className="form-group mb-3">
                               <label htmlFor="deadline">Deadline</label>

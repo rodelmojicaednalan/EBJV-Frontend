@@ -48,6 +48,7 @@ function EditProject() {
   const [groups, setGroups] = useState([]);
   const [groupCount, setGroupCount] = useState(0);
 
+  const [userRole, setUserRole] = useState("")
 
   const handleMenuOptionClick = (option) => {
     Swal.fire(`Function to: ${option}`);
@@ -169,7 +170,7 @@ const [totalFileSize, setTotalFileSize] = useState(0);
         console.error('Error fetching project details:', error);
       }
     }
-    
+
     fetchProjectDetails();
     fetchUserGroup();
   }, [projectId, refreshKey]);
