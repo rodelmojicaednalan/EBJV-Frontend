@@ -7,7 +7,7 @@ import view_icon from '../../../assets/images/view-project-folder.png';
 import view_model from '../../../assets/images/view-model.png';
 import delete_icon from '../../../assets/images/delete-log.png';
 import check from '../../../assets/images/check.png';
-
+import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
 import { Modal, Button } from 'react-bootstrap';
 import Swal from 'sweetalert2';
@@ -25,6 +25,7 @@ function Projects() {
   const [filteredData, setFilteredData] = useState([]);
   const { setLoading } = useLoader();
   const [projectOwner, setProjectOwner] = useState('');
+  const [projectLocation, setProjectLocation] = useState('');
   
   const [refreshKey, setRefreshKey] = useState(0); 
 
@@ -116,7 +117,7 @@ function Projects() {
       const formData = new FormData();
       formData.append('project_name', newProject.projectName);
       formData.append('user_id', projectOwner);
-      formData.append('project_location', newProject.location);
+      formData.append('project_location', projectLocation /*newProject.location*/);
       formData.append('project_file', newProject.file);
 
       await axiosInstance.post('/create-project', formData);
@@ -261,6 +262,13 @@ function Projects() {
     },
   ];
 
+  const locationOptions = [
+    {"value": "North America", "label": "North America"},
+    {"value": "Europe", "label": "Europe"},
+    {"value": "Asia", "label": "Asia"},
+    {"value": "Australia", "label": "Australia"}
+  ]
+  console.log(projectLocation)
   return (
     <div className="container">
       <StickyHeader />
@@ -328,7 +336,15 @@ function Projects() {
               <label htmlFor="projectLocation" className="form-label">
                 Location
               </label>
-              <select
+              <Select
+                id="projectLocation"
+                options={locationOptions}
+                onChange={(selectedOptions) => setProjectLocation(selectedOptions?.value || null)}
+                name="location"
+                className="basic-single"
+                classNamePrefix="select"
+              />
+              {/* <select
                 className="form-select"
                 id="projectLocation"
                 value={newProject.location}
@@ -339,12 +355,12 @@ function Projects() {
                     location: e.target.value,
                   })
                 }
-              >
+              > 
                 <option value="North America">North America</option>
                 <option value="Europe">Europe</option>
                 <option value="Asia">Asia</option>
                 <option value="Australia">Australia</option>
-              </select>
+              </select>*/}
             </div>
             <div className="mb-3">
               <label htmlFor="projectFile" className="form-label">
