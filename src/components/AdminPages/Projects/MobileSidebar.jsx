@@ -11,8 +11,16 @@ import { MdSettings } from "react-icons/md";
 import { BiSolidEdit } from "react-icons/bi";
 import { HiCog } from "react-icons/hi";
 
+import { getCookie } from '../../Authentication/getCookie';
 
 const SidebarOffcanvas = ({ projectId }) => {
+  const roleName = getCookie("role_name")
+  const [userRole, setUserRole] = useState('');
+  useEffect(() => {
+    setUserRole(roleName);
+
+  }, [])
+
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
@@ -174,7 +182,10 @@ const SidebarOffcanvas = ({ projectId }) => {
                     </div>
                   </li>
           
+                        
                   {/* Activity */}
+                  {userRole === 'Admin' && (
+                    <>
                   <li
                     className={`mobile-nav-item-group ${
                       isActive(`/project-folder/${projectId}/project-activity`) ? "active" : ""
@@ -294,6 +305,8 @@ const SidebarOffcanvas = ({ projectId }) => {
                         )}
                     </div>
                   </li>
+                  </>
+                  )}
                 </ul>
               </div>
         </Offcanvas.Body>

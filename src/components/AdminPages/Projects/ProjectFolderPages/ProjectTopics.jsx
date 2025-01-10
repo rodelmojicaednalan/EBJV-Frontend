@@ -9,8 +9,8 @@ import '../ProjectStyles.css'
 import { FaBookmark, FaCircleInfo  } from "react-icons/fa6";
 import { FaRegCalendar, FaCaretDown, FaListAlt  } from "react-icons/fa";
 import { GrStatusGoodSmall, GrSort } from "react-icons/gr";
-import { RiEdit2Fill } from "react-icons/ri";
-import { BiDotsVertical } from "react-icons/bi";
+import { RiEdit2Fill, RiAddLargeFill } from "react-icons/ri";
+import { BiSolidCommentAdd } from "react-icons/bi";
 import { MdCompress, MdExpand  } from "react-icons/md";
 import { GoAlertFill } from "react-icons/go";
 import { TbSortAscending2, TbSortDescending2 } from "react-icons/tb";
@@ -47,6 +47,9 @@ function ProjectTopics() {
   const [showSortOptions, setShowSortOptions] = useState(false);
   const [isSorted, setIsSorted] = useState('modifiedOn');
   const [sortDirection, setSortDirection] = useState('asc');
+
+  const [availableEmails, setAvailableEmails] = useState([]);
+  const [recipients, setRecipients] = useState([])
 
   const handleMenuToggle = () => {
     setMenuOpen(!menuOpen);
@@ -109,7 +112,39 @@ function ProjectTopics() {
         console.error("Error fetching project details:", error);
       }
     };
+
+    const fetchAvailableUsers = async () => {
+      try {
+        const [currentUserResponse,projectResponse, usersResponse] = await Promise.all([
+          axiosInstance.get(`/user`),
+          axiosInstance.get(`/project-contributors/${projectId}`),
+          axiosInstance.get(`/users`),
+        ]);
+
+        const currentUser = currentUserResponse.data;
+        const { contributors } = projectResponse.data;
+        const users = usersResponse.data;
+
+        const contributorEmails = contributors.map((contributor) => contributor.email);
+
+        const formattedToAdd = users
+          .filter((user) => 
+          user.email !== currentUser.email && // Exclude current user
+          contributorEmails.includes(user.email) 
+          )
+          .map((user) => ({
+            label: `${user.first_name} ${user.last_name} (${user.email})`, // Label for dropdown
+            value: user.email, // Value for dropdown
+          }));
+  
+          setAvailableEmails(formattedToAdd);
+
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
     
+    fetchAvailableUsers();
     fetchProjectDetails();
   }, [projectId, refreshKey]);
 
@@ -251,6 +286,7 @@ useEffect(() => {
     e.preventDefault(); // Prevent default form submission behavior
     const formData = new FormData(e.target); // Automatically gathers form inputs
     const topicData = Object.fromEntries(formData);
+    topicData.assigneeList = recipients.map((recipient) => recipient.value);
     Swal.fire({
       title: 'Confirm topic creation',
       showCancelButton: true,
@@ -342,8 +378,17 @@ useEffect(() => {
       <div className="projectFolder-display">
                 <div className="main"> 
                     <div className="container-fluid moduleFluid">
+                    <div className="add-files-menu-container">
+                     <button
+                       id="addFiles-btn"
+                       className="btn addFiles-btn btn-primary"
+                       title="Add"
+                       onClick= {handleShowCanvas}
+                     >
+                      <BiSolidCommentAdd/> 
+                     </button>
+                    </div>
                       <div className="project-content">
-    
                       <div className="table-header d-flex justify-content-between align-items-center mb-3">
                         <div className="page-title">
                           <h2>Topics</h2>
@@ -450,12 +495,14 @@ useEffect(() => {
                             </div>
                             <div className="form-group mb-3">
                               <label htmlFor="assignedTo">Assigned To</label>
-                              <input
-                                type="text"
+                              <Select
                                 id="assignedTo"
+                                options={availableEmails}
+                                isMulti
+                                onChange={(selectedOptions) => setRecipients(selectedOptions)}
                                 name="assigneeList"
-                                className="form-control"
-                                placeholder="Enter assignee's name"
+                                className="basic-multi-select"
+                                classNamePrefix="select"
                               />
                             </div>
                             <div className="form-group mb-3">

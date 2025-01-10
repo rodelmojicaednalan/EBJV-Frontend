@@ -3,9 +3,11 @@ import DataTable from 'react-data-table-component';
 import axiosInstance from '../../../../../axiosInstance.js';
 import Swal from 'sweetalert2';
 import { useNavigate, useParams } from 'react-router-dom';
+import ReactDOM from "react-dom";
 import StickyHeader from '../../../SideBar/StickyHeader';
 import { saveAs } from 'file-saver'
 import { CSVLink } from 'react-csv'
+import Select from 'react-select';
 
 import '../ProjectStyles.css';
 import { BiDotsVertical, BiSolidEditAlt } from 'react-icons/bi';
@@ -17,7 +19,7 @@ import { MdFolderOff } from "react-icons/md";
 import { RiAddLargeFill } from "react-icons/ri";
 import { AiOutlineFileAdd } from "react-icons/ai";
 
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, ToastContainer, Toast } from 'react-bootstrap';
 import ProjectSidebar from '../ProjectFolderSidebar';
 import SidebarOffcanvas from '../MobileSidebar';
 import Offcanvas from 'react-bootstrap/Offcanvas';
@@ -37,6 +39,18 @@ function ProjectExplorer() {
   const [offcanvasMenuOpen, setOffcanvasMenuOpen] = useState(false);
 
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [availableEmails, setAvailableEmails] = useState([]);
+  const [recipients, setRecipients] = useState([]);
+  const [releaseNote, setReleaseNote] = useState("")
+
+  const handleOpenShareModal = () => setIsShareModalOpen(true);
+  const handleCloseShareModal = () => setIsShareModalOpen(false);
+
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [toastPosition, setToastPosition] = useState('bottom-end')
+  const showToast = () => setShowSuccessToast(!showSuccessToast);
 
   const addMenuToggle = () => {
     setIsAddMenuOpen(!isAddMenuOpen);
@@ -77,8 +91,6 @@ function ProjectExplorer() {
   };
 
 
-
-  useEffect(() => {
     // Fetch project details and populate fields
     const fetchProjectDetails = async () => {
       try {
@@ -124,6 +136,39 @@ function ProjectExplorer() {
       }
     };
 
+    const fetchAvailableUsers = async () => {
+      try {
+        const [currentUserResponse, projectResponse, usersResponse] = await Promise.all([
+          axiosInstance.get(`/user`),
+          axiosInstance.get(`/project-contributors/${projectId}`),
+          axiosInstance.get(`/users`),
+        ]);
+    
+        const currentUser = currentUserResponse.data;
+        const { contributors } = projectResponse.data; // Get contributors from project details
+        const users = usersResponse.data;
+    
+        // Extract emails of contributors
+        const contributorEmails = contributors.map((contributor) => contributor.email);
+
+        const formattedToAdd = users
+        .filter((user) => 
+        user.email !== currentUser.email && // Exclude current user
+        contributorEmails.includes(user.email) 
+        )
+        .map((user) => ({
+          label: `${user.first_name} ${user.last_name} (${user.email})`, // Label for dropdown
+          value: user.email, // Value for dropdown
+        }));
+
+        setAvailableEmails(formattedToAdd);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+
+    useEffect(() => {
+    fetchAvailableUsers();
     fetchProjectDetails();
   }, [projectId, refreshKey]);
 
@@ -289,86 +334,92 @@ function ProjectExplorer() {
     }
   };
 
+  const handleShare = () => {
+    if (recipients.length === 0) {
+      alert("Please select at least one recipient.");
+      return;
+    }
+    console.log("Share data:", { recipients, releaseNote });
+    // Perform the share action (e.g., API call)
+    handleCloseShareModal();
+    showToast();
 
-  const handleShare = async () => {
-    document.querySelector(".offcanvas").setAttribute("aria-hidden", "true");
-    // Optionally add inert to prevent focusability
-    document.querySelector(".offcanvas").setAttribute("inert", "true");
-    Swal.fire({
-      title: 'Share Data',
-      html: `
-        <div style="text-align: left;">
-          <label for="share-with" style="display: block; margin-bottom: 5px;">Share With</label>
-          <select id="share-with" class="swal2-input" style="margin-bottom: 15px; width:100%;">
-            <option value="" disabled selected>Select an option</option>
-            <option value="Specific People">Specific people in the project</option>
-            <option value="Signed In Users">Signed in users with the link</option>
-            <option value="Anyone">Anyone with the link</option>
-          </select>
-          
-          <label for="recipients" style="display: block; margin-bottom: 5px;">People/Groups</label>
-          <input type="text" id="recipients" class="swal2-input" placeholder="Enter names or groups..." style="margin-bottom: 15px; width:100%;">
-  
-          <label for="release-note" style="display: block; margin-bottom: 5px;">Note/Message</label>
-          <textarea id="release-note" class="swal2-input" placeholder="Write a note..." style="
-            margin-bottom: 10px; width: 100%; 
-            white-space: pre-wrap; word-wrap: break-word;
-            background-color: #FFF; color: black;
-          "></textarea>
-        </div>
-      `,
-      confirmButtonText: 'Share',
-      showCancelButton: true,
-      customClass: {
-        confirmButton: "btn btn-success rel-btn-success",
-        cancelButton: "btn btn-danger rel-btn-danger"
-      },
-      preConfirm: () => {
-        const shareWith = document.getElementById('share-with').value.trim();
-        const recipients = document.getElementById('recipients').value.trim();
-        const releaseNote = document.getElementById('release-note').value.trim();
-  
-        if (!shareWith || !recipients) {
-          Swal.showValidationMessage('Please fill in all required fields.');
-          return null;
-        }
-  
-        const recipientList = recipients.split(',').map((name) => name.trim());
-  
-        if (recipientList.length === 0) {
-          Swal.showValidationMessage('Please enter at least one recipient.');
-          return null;
-        }
-  
-        return { shareWith, recipients: recipientList, releaseNote };
-      },
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        document.querySelector(".offcanvas").removeAttribute("aria-hidden");
-        document.querySelector(".offcanvas").removeAttribute("inert");
-        const { shareWith, recipients, releaseNote } = result.value;
-        return console.log("success", shareWith, recipients, releaseNote)
-        
-        // try {
-        //   await axiosInstance.post(`/share-data/${projectId}`, {
-        //     shareWith,
-        //     recipients,
-        //     releaseNote,
-        //   });
-        //   Swal.fire('Success!', 'The new release has been added.', 'success');
-        // } catch (error) {
-        //   Swal.fire('Error!', 'Failed to add the release. Try again.', 'error');
-        //   console.error(error);
-        // }
-        
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        // If the user cancels, restore focus and remove inert attributes
-        document.querySelector(".offcanvas").removeAttribute("aria-hidden");
-        document.querySelector(".offcanvas").removeAttribute("inert");
-        document.querySelector(".offcanvas button").focus();
-      }
-    });
   };
+
+
+
+  // const handleShare = async () => {
+  //   document.querySelector(".offcanvas").setAttribute("aria-hidden", "true");
+  //   document.querySelector(".offcanvas").setAttribute("inert", "true");
+  //   Swal.fire({
+  //     title: 'Share Data',
+  //     html: `
+  //       <div style="text-align: left;">
+          
+  //         <label for="recipients" style="display: block; margin-bottom: 5px;">Choose recipient(s):</label>
+  //         <div id="swal-recipient-select" style= "margin-bottom: 15px; width: 100%;"></div>
+  
+  //         <label for="release-note" style="display: block; margin-bottom: 5px;">Note/Message</label>
+  //         <textarea id="release-note" class="swal2-input" placeholder="Write a note..." style="
+  //           margin-bottom: 10px; width: 100%; 
+  //           white-space: pre-wrap; word-wrap: break-word;
+  //           background-color: #FFF; color: black;
+  //         "></textarea>
+  //       </div>
+  //     `,
+  //     confirmButtonText: 'Share',
+  //     showCancelButton: true,
+  //     customClass: {
+  //       confirmButton: "btn btn-success rel-btn-success",
+  //       cancelButton: "btn btn-danger rel-btn-danger"
+  //     },
+  //     preConfirm: () => {
+  //       const shareWith = document.getElementById('share-with').value.trim();
+  //       const recipients = document.getElementById('recipients').value.trim();
+  //       const releaseNote = document.getElementById('release-note').value.trim();
+  
+  //       if (!shareWith || !recipients) {
+  //         Swal.showValidationMessage('Please fill in all required fields.');
+  //         return null;
+  //       }
+  
+  //       const recipientList = recipients.split(',').map((name) => name.trim());
+  
+  //       if (recipientList.length === 0) {
+  //         Swal.showValidationMessage('Please enter at least one recipient.');
+  //         return null;
+  //       }
+  
+  //       return { shareWith, recipients: recipientList, releaseNote };
+  //     },
+      
+  //   }).then(async (result) => {
+  //     if (result.isConfirmed) {
+  //       document.querySelector(".offcanvas").removeAttribute("aria-hidden");
+  //       document.querySelector(".offcanvas").removeAttribute("inert");
+  //       const { shareWith, recipients, releaseNote } = result.value;
+  //       return console.log("success", shareWith, recipients, releaseNote)
+        
+  //       // try {
+  //       //   await axiosInstance.post(`/share-data/${projectId}`, {
+  //       //     shareWith,
+  //       //     recipients,
+  //       //     releaseNote,
+  //       //   });
+  //       //   Swal.fire('Success!', 'The new release has been added.', 'success');
+  //       // } catch (error) {
+  //       //   Swal.fire('Error!', 'Failed to add the release. Try again.', 'error');
+  //       //   console.error(error);
+  //       // }
+        
+  //     } else if (result.dismiss === Swal.DismissReason.cancel) {
+  //       // If the user cancels, restore focus and remove inert attributes
+  //       document.querySelector(".offcanvas").removeAttribute("aria-hidden");
+  //       document.querySelector(".offcanvas").removeAttribute("inert");
+  //       document.querySelector(".offcanvas button").focus();
+  //     }
+  //   });
+  // };
 
   const menuRef  = useRef(null);
   useEffect(() => {
@@ -389,7 +440,6 @@ function ProjectExplorer() {
 
   const downloadFile = async (fileName) => {
     console.log(fileName);
-  
     Swal.fire({
       title: 'Fetching file...',
       text: 'Please wait.',
@@ -398,7 +448,6 @@ function ProjectExplorer() {
         Swal.showLoading();
       },
     });
-  
     try {
       const response = await axiosInstance.get(`/download-file/${projectId}/${fileName}`, {
         responseType: 'blob', 
@@ -413,7 +462,6 @@ function ProjectExplorer() {
       Swal.close();
     }
   };
-  
   
 
   return (
@@ -495,7 +543,9 @@ function ProjectExplorer() {
                         <BiDotsVertical />
                       </button>
                       {menuOpen && (
-                        <div className="dropdown-menu" ref={menuRef}>
+                        <div className="dropdown-menu" 
+                             ref={menuRef}
+                             id="explorer-dropdown">
                           <div className="dropdown-item">
                               <CSVLink
                                 {...handleExportToCSV()}
@@ -596,7 +646,7 @@ function ProjectExplorer() {
               <input
                 type="file"
                 name="projectFiles"
-                accept=".ifc,.nc1,.dxf,.pdf"
+                accept=".ifc,.nc1,.dxf,.dwg,.pdf"
                 multiple
                 className="form-control"
                 id="projectFile"
@@ -670,6 +720,63 @@ function ProjectExplorer() {
         </Modal.Footer>
       </Modal>
 
+      <Modal show={isShareModalOpen} onHide={() => setIsShareModalOpen(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>File Sharing</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form onSubmit={(e) => e.preventDefault()}>
+            <div className="mb-3">
+            <div style={{ marginBottom: "15px" }}>
+          <label htmlFor="recipients" style={{ marginBottom: "5px", display: "block" }}>
+            Choose recipient(s):
+          </label>
+          <Select
+            id="recipients"
+            options={availableEmails}
+            isMulti
+            onChange={(selectedOptions) => setRecipients(selectedOptions)}
+            className="basic-multi-select"
+            classNamePrefix="select"
+          />
+        </div>
+
+        <div style={{ marginBottom: "15px" }}>
+          <label htmlFor="release-note" style={{ marginBottom: "5px", display: "block" }}>
+            Note/Message
+          </label>
+          <textarea
+            id="release-note"
+            placeholder="Write a note..."
+            value={releaseNote}
+            onChange={(e) => setReleaseNote(e.target.value)}
+            style={{
+              width: "100%",
+              height: "80px",
+              padding: "8px",
+              resize: "none",
+              backgroundColor: "#FFF",
+              color: "black",
+            }}
+          ></textarea>
+        </div>
+            </div>
+          </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            id="closeAdd"
+            variant="secondary"
+            onClick={() => setIsShareModalOpen(false)}
+          >
+            Close
+          </Button>
+          <Button id="saveAdd" variant="primary" onClick={handleShare}>
+            Share
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       <Offcanvas 
         show={showCanvas} 
         onHide={handleCloseCanvas} 
@@ -677,7 +784,6 @@ function ProjectExplorer() {
         //backdrop="static"
         className="offcanvas"
         id="explorer-offcanvas"
-
       >
       <Offcanvas.Header className="offcanvas-head">
         <Offcanvas.Title>
@@ -716,9 +822,9 @@ function ProjectExplorer() {
                 View 
               </button>
               )}
-              <button className="btn mr-1" onClick={handleShare}><IoMdPersonAdd size={20}/></button>
+              <button className="btn mr-1" onClick={handleOpenShareModal}><IoMdPersonAdd size={20}/></button>
               <button className="btn mr-1" onClick={() => downloadFile(selectedRow.fileName)} ><IoMdDownload size={20}/></button>
-              <button className="btn " onClick={handleOCMenuToggle}><BiDotsVertical size={20}/></button>  
+              {/* <button className="btn " onClick={handleOCMenuToggle}><BiDotsVertical size={20}/></button>  
               {offcanvasMenuOpen && (
                         <div className="dropdown-menu" id="offcanvas-dropdown" ref={menuRef}>
                            <div className="dropdown-item"
@@ -738,7 +844,7 @@ function ProjectExplorer() {
                             Export to Excel
                           </div>
                         </div>
-                      )}            
+                      )}             */}
           </div>
         {selectedRow && (
           <div style={{fontSize: "12px"}}>
@@ -754,6 +860,27 @@ function ProjectExplorer() {
         </Offcanvas.Body>
       </Offcanvas>
 
+        <div
+        className="position-relative toast-block"
+        style={{ minHeight: '240px' }}> 
+        {/* <Button onClick={showToast} className="mb-2">
+          Toggle Toast <strong>with</strong> Animation
+        </Button> */}
+        <ToastContainer
+          className="p-3"
+          position={toastPosition}
+          style={{ zIndex: 1046, position: 'fixed', maxWidth: '300px' }}
+        >
+        <Toast show={showSuccessToast} onClose={showToast} style={{backgroundColor: "#fec19db8"}} delay={3000} autohide>
+          <Toast.Header className='justify-content-between' style={{backgroundColor: "#ee8a50b8"}}>
+            <small > File Shared Successfully </small>
+          </Toast.Header>
+          <Toast.Body style={{fontSize: '.785rem'}}>
+          "Your file(s) have been shared with the selected recipient(s). They will receive an email notification shortly."
+          </Toast.Body>
+        </Toast>
+        </ToastContainer>
+        </div>
     </div>
   );
 }

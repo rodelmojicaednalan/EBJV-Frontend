@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useContext } from "react";
+import React, {useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaFolderTree, FaChevronRight, FaChevronDown   } from "react-icons/fa6";
 import { FaHistory, FaEye, FaCommentAlt, FaClipboardCheck, FaArrowLeft } from "react-icons/fa";
@@ -10,19 +10,19 @@ import { HiCog } from "react-icons/hi";
 
 
 import './ProjectStyles.css'
-import { AuthContext } from '../../Authentication/authContext';
+import { getCookie } from '../../Authentication/getCookie';
 const Sidebar = ({ projectId }) => {
-  const { user } = useContext(AuthContext);
-  const [roleCheck, setRoleCheck] = useState([]);
+  const roleName = getCookie("role_name")
+  const [userRole, setUserRole] = useState('');
+  
   const navigate = useNavigate();
   const location = useLocation();
   // console.log(roleCheck)
 
-  useEffect(() => {
-    if (user?.roles) {
-      setRoleCheck(user.roles.map((role) => role.role_name));
-     } 
-  }, [user]);
+useEffect(() => {
+  setUserRole(roleName);
+
+}, [])
 
 
   // Function to determine if a route is active
@@ -143,7 +143,7 @@ const Sidebar = ({ projectId }) => {
         </li>
 
         {/* Activity */}
-      {roleCheck?.includes("Admin") && (
+      {userRole === "Admin" && (
       <>
         <li
           className={`nav-item-group ${

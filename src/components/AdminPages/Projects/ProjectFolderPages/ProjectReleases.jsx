@@ -8,11 +8,15 @@ import DataTable from "react-data-table-component";
 import '../ProjectStyles.css'
 import {  FiEdit, FiMoreVertical } from "react-icons/fi";
 import { FaCaretDown } from "react-icons/fa";
-import { TbBoxOff } from "react-icons/tb";
+import { TbBoxOff, TbCubePlus  } from "react-icons/tb";
+import { RiAddLargeFill } from "react-icons/ri";
 import ProjectSidebar from '../ProjectFolderSidebar';
 
 import SidebarOffcanvas from '../MobileSidebar';
 import useWindowWidth from './windowWidthHook.jsx'
+
+import { Modal, Button, ToastContainer, Toast } from 'react-bootstrap';
+import Select from 'react-select';
 
 function ProjectReleases() {
   const windowWidthHook = useWindowWidth();
@@ -29,6 +33,15 @@ function ProjectReleases() {
   const [projectGroups, setProjectGroups] = useState([]);
   const [filters, setFilters] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({});
+
+  // Modal variable states 
+  const [availableEmails, setAvailableEmails] = useState([]);
+  const [showAddReleaseModal, setShowAddReleaseModal] = useState(false);
+  const [releaseName, setReleaseName] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [recipients, setRecipients] = useState([]);
+  const [isNoteAdded, setIsNoteAdded] = useState(false);
+  const [releaseNote, setReleaseNote] = useState("");
   
   const [filteredReleases, setFilteredReleases] = useState([]);
   const dropdownRef = useRef(null);
@@ -39,7 +52,7 @@ function ProjectReleases() {
   };
 
   const [releasesTable ,setReleasesTable] = useState([])
-
+ 
   useEffect(() => {
     const fetchProjectDetails = async () => {
       try {
@@ -71,7 +84,7 @@ function ProjectReleases() {
 
         setReleasesTable(formattedReleases);
         setFilteredReleases(formattedReleases);
-        console.log(formattedReleases)
+        // console.log(formattedReleases)
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
@@ -79,11 +92,13 @@ function ProjectReleases() {
 
     const fetchAvailableUsers = async () => {
       try {
-        const [projectResponse, usersResponse] = await Promise.all([
+        const [currentUserResponse,projectResponse, usersResponse] = await Promise.all([
+          axiosInstance.get(`/user`),
           axiosInstance.get(`/project-contributors/${projectId}`),
           axiosInstance.get(`/users`),
         ]);
 
+        const currentUser = currentUserResponse.data;
         const { contributors, groups } = projectResponse.data;
         const users = usersResponse.data;
 
@@ -96,6 +111,18 @@ function ProjectReleases() {
             label: `${user.first_name} ${user.last_name}`,
             value: user.email,
           }));
+
+        const formattedToAdd = users
+          .filter((user) => 
+          user.email !== currentUser.email && // Exclude current user
+          contributorEmails.includes(user.email) 
+          )
+          .map((user) => ({
+            label: `${user.first_name} ${user.last_name} (${user.email})`, // Label for dropdown
+            value: user.email, // Value for dropdown
+          }));
+  
+          setAvailableEmails(formattedToAdd);
 
         setProjectGroups(projectGroups);
         setAvailableUsers(formattedUsers);
@@ -113,7 +140,7 @@ function ProjectReleases() {
     const generateFilters = () => {
       const ownershipOptions = ["Created by Me", "Shared with Me"];
       const userOptions = availableUsers.map((user) => user.label);
-      console.log(userOptions);
+      // console.log(userOptions);
       const groupOptions = projectGroups;
       const statusOptions = Array.from(new Set(releasesTable.map((release) => release.releaseStatus)));
       const dueDateOptions = ["Today", "This Week", "Last Month"];
@@ -253,20 +280,24 @@ function ProjectReleases() {
       name: "Files",
       selector: (row) => row.totalFiles,
       sortable: true,
+      hide: 'sm'
     },
     {
       name: "Due Date",
       selector: (row) => row.dueDate,
       sortable: true,
+      // hide: 'sm'
     },
     {
       name: "Recipients",
       selector: (row) => row.recipients,
       sortable: true,
+      hide: 'md'
     },
     {
       name: "Status",
       button: true,
+      hide: 'md',
       cell: (row) => (
         <button className="draft-btn">
           <FiEdit size={18} color="#6A6976" /> {row.releaseStatus}
@@ -307,98 +338,134 @@ function ProjectReleases() {
 
 
   const handleAddNewRelease = async () => {
-    Swal.fire({
-      title: 'Add New Release',
-      html: `
-        <div style="text-align: left;">
-          <label for="release-name" style="display: block; margin-bottom: 5px;">Release Name</label>
-          <input type="text" id="release-name" class="swal2-input" placeholder="Enter release name" style="margin-bottom: 15px; width:100%;">
-          
-          <label for="due-date" style="display: block; margin-bottom: 5px;">Due Date</label>
-          <input type="date" id="due-date" class="swal2-input" placeholder="Select due date" style="margin-bottom: 15px; width:100%;">
-          
-          <label for="recipients" style="display: block; margin-bottom: 5px;">Recipients</label>
-          <input type="text" id="recipients" class="swal2-input" placeholder="Enter recipients (comma-separated)" style="width:100%;">
-          
-          <div id="group-container" style="margin-top: 10px;">
-            <button id="add-releaseNote-btn" type="button" class="btn btn-primary" style="margin-bottom: 10px;">Add a note?</button>
-          </div>
-        </div>
-      `,
-      confirmButtonText: 'Add Release',
-      showCancelButton: true,
-      customClass: {
-        confirmButton: "btn btn-success rel-btn-success",
-        cancelButton: "btn btn-danger rel-btn-danger"
-      },
-      didOpen: () => {
-        const addNoteBtn = document.getElementById('add-releaseNote-btn');
-        const groupContainer = document.getElementById('group-container');
-  
-        // Replace button with a text input when clicked
-        addNoteBtn.addEventListener('click', () => {
-          if (!document.getElementById('release-note')) {
-            const textArea = document.createElement('textarea');
-            textArea.id = 'release-note';
-            textArea.className = 'swal2-input';
-            textArea.placeholder = 'Write a note...';
-            textArea.style = `
-              margin-bottom: 10px; width: 100%; 
-              white-space: pre-wrap; word-wrap: break-word;
-              background-color: #FFF; color: black;
-            `;
-            groupContainer.appendChild(textArea);
-            addNoteBtn.disabled = true; // Disable button after note addition
-          }
-        });
-      },
-      preConfirm: () => {
-        const releaseName = document.getElementById('release-name').value.trim();
-        const dueDate = document.getElementById('due-date').value.trim();
-        const recipients = document.getElementById('recipients').value.trim();
-        const releaseNote = document.getElementById('release-note')
-          ? document.getElementById('release-note').value.trim()
-          : null;
+    if (!releaseName || !dueDate || recipients.length === 0) {
+      alert("Please fill in all required fields.");
+      return;
+    }
 
-        if (!releaseName || !dueDate || !recipients) {
-          Swal.showValidationMessage('Please fill in all required fields.');
-          return null;
-        }
-  
-        const recipientList = recipients.split(',').map((email) => email.trim());
-        const invalidEmails = recipientList.filter(
-          (email) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-        );
-  
-        if (invalidEmails.length > 0) {
-          Swal.showValidationMessage(
-            `Invalid email(s): ${invalidEmails.join(', ')}`
-          );
-          return null;
-        }
-  
-        return { releaseName, dueDate, recipients: recipientList, releaseNote };
-      },
-    }).then(async(result) => {
-      if (result.isConfirmed) {
-        const { releaseName, dueDate, recipients, releaseNote } = result.value;
-  
-        try {
-          await axiosInstance.post(`/create-release/${projectId}`, {
-            releaseName,
-            dueDate,
-            recipients,
-            releaseNote,
-          });
-        Swal.fire('Success!', 'The new release has been added.', 'success');
-        setRefreshKey((prevKey) => prevKey + 1);
-        } catch (error){
-          Swal.fire('Error!', 'Failed to add the release. Try again.', 'error');
-        console.error(error);
-        }
-      }
-    });
+    const recipientList = recipients.map((recipient) => recipient.value);
+
+    try {
+      await axiosInstance.post(`/create-release/${projectId}`, {
+        releaseName,
+        dueDate,
+        recipients: recipientList,
+        releaseNote,
+      });
+      alert("The new release has been added successfully.");
+      setRefreshKey((prevKey) => prevKey + 1);
+      handleClose();
+    } catch (error) {
+      console.error(error);
+      alert("Failed to add the release. Please try again.");
+    }
   };
+
+  const handleClose = () => {
+    setShowAddReleaseModal(false);
+    setReleaseName("");
+    setDueDate("");
+    setRecipients([]);
+    setReleaseNote("");
+    setIsNoteAdded(false);
+  };
+
+  const handleShow = () => setShowAddReleaseModal(true);
+
+
+  // const handleAddNewRelease = async () => {
+  //   Swal.fire({
+  //     title: 'Add New Release',
+  //     html: `
+  //       <div style="text-align: left;">
+  //         <label for="release-name" style="display: block; margin-bottom: 5px;">Release Name</label>
+  //         <input type="text" id="release-name" class="swal2-input" placeholder="Enter release name" style="margin-bottom: 15px; width:100%;">
+          
+  //         <label for="due-date" style="display: block; margin-bottom: 5px;">Due Date</label>
+  //         <input type="date" id="due-date" class="swal2-input" placeholder="Select due date" style="margin-bottom: 15px; width:100%;">
+          
+  //         <label for="recipients" style="display: block; margin-bottom: 5px;">Recipients</label>
+  //         <input type="text" id="recipients" class="swal2-input" placeholder="Enter recipients (comma-separated)" style="width:100%;">
+          
+  //         <div id="group-container" style="margin-top: 10px;">
+  //           <button id="add-releaseNote-btn" type="button" class="btn btn-primary" style="margin-bottom: 10px;">Add a note?</button>
+  //         </div>
+  //       </div>
+  //     `,
+  //     confirmButtonText: 'Add Release',
+  //     showCancelButton: true,
+  //     customClass: {
+  //       confirmButton: "btn btn-success rel-btn-success",
+  //       cancelButton: "btn btn-danger rel-btn-danger"
+  //     },
+  //     didOpen: () => {
+  //       const addNoteBtn = document.getElementById('add-releaseNote-btn');
+  //       const groupContainer = document.getElementById('group-container');
+  
+  //       // Replace button with a text input when clicked
+  //       addNoteBtn.addEventListener('click', () => {
+  //         if (!document.getElementById('release-note')) {
+  //           const textArea = document.createElement('textarea');
+  //           textArea.id = 'release-note';
+  //           textArea.className = 'swal2-input';
+  //           textArea.placeholder = 'Write a note...';
+  //           textArea.style = `
+  //             margin-bottom: 10px; width: 100%; 
+  //             white-space: pre-wrap; word-wrap: break-word;
+  //             background-color: #FFF; color: black;
+  //           `;
+  //           groupContainer.appendChild(textArea);
+  //           addNoteBtn.disabled = true; // Disable button after note addition
+  //         }
+  //       });
+  //     },
+  //     preConfirm: () => {
+  //       const releaseName = document.getElementById('release-name').value.trim();
+  //       const dueDate = document.getElementById('due-date').value.trim();
+  //       const recipients = document.getElementById('recipients').value.trim();
+  //       const releaseNote = document.getElementById('release-note')
+  //         ? document.getElementById('release-note').value.trim()
+  //         : null;
+
+  //       if (!releaseName || !dueDate || !recipients) {
+  //         Swal.showValidationMessage('Please fill in all required fields.');
+  //         return null;
+  //       }
+  
+  //       const recipientList = recipients.split(',').map((email) => email.trim());
+  //       const invalidEmails = recipientList.filter(
+  //         (email) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  //       );
+  
+  //       if (invalidEmails.length > 0) {
+  //         Swal.showValidationMessage(
+  //           `Invalid email(s): ${invalidEmails.join(', ')}`
+  //         );
+  //         return null;
+  //       }
+  
+  //       return { releaseName, dueDate, recipients: recipientList, releaseNote };
+  //     },
+  //   }).then(async(result) => {
+  //     if (result.isConfirmed) {
+  //       const { releaseName, dueDate, recipients, releaseNote } = result.value;
+  
+  //       try {
+  //         await axiosInstance.post(`/create-release/${projectId}`, {
+  //           releaseName,
+  //           dueDate,
+  //           recipients,
+  //           releaseNote,
+  //         });
+  //       Swal.fire('Success!', 'The new release has been added.', 'success');
+  //       setRefreshKey((prevKey) => prevKey + 1);
+  //       } catch (error){
+  //         Swal.fire('Error!', 'Failed to add the release. Try again.', 'error');
+  //       console.error(error);
+  //       }
+  //     }
+  //   });
+  // };
 
   const handleDeleteRelease = async (id) => {
     Swal.fire({
@@ -469,6 +536,16 @@ function ProjectReleases() {
         <div className="projectFolder-display">
         <div className="main"> 
                     <div className="container-fluid moduleFluid">
+                    <div className="add-files-menu-container">
+            <button
+              id="addFiles-btn"
+              className="btn addFiles-btn btn-primary"
+              title="Add"
+              onClick={handleShow}
+            >
+              <TbCubePlus/> 
+            </button>
+            </div>
                       <div className="project-content">
 
                       <div className="table-header d-flex justify-content-between align-items-center mb-3">
@@ -522,6 +599,99 @@ function ProjectReleases() {
                     </div>
                 </div>
         </div>
+        <Modal id="releaseAddModal" show={showAddReleaseModal} onHide={() => setShowAddReleaseModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Add New Release</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form onSubmit={(e) => e.preventDefault()}>
+            <div className="mb-3">
+          <div className="modal-form" style={{ marginBottom: "15px" }}>
+          <label htmlFor="modal-releaseName" style={{ marginBottom: "5px", display: "block" }}>
+            Enter release name:
+          </label>
+          <input
+               type="text"
+               id="modal-releaseName"
+               placeholder="Enter release name"
+               value={releaseName}
+               onChange={(e) => setReleaseName(e.target.value)}
+               required
+          />
+        </div>
+
+        <div className="modal-form" style={{ marginBottom: "15px" }}>
+          <label htmlFor="modal-dueDate" style={{ marginBottom: "5px", display: "block" }}>
+            Enter release name:
+          </label>
+          <input
+               type="date"
+               id="modal-dueDate"
+               value={dueDate}
+               onChange={(e) => setDueDate(e.target.value)}
+               required
+          />
+        </div>
+
+          <div className="modal-form" style={{ marginBottom: "15px" }}>
+          <label htmlFor="recipients" style={{ marginBottom: "5px", display: "block" }}>
+            Choose recipient(s):
+          </label>
+          <Select
+            id="recipients"
+            options={availableEmails}
+            isMulti
+            onChange={(selectedOptions) => setRecipients(selectedOptions)}
+            className="basic-multi-select"
+            classNamePrefix="select"
+          />
+        </div>
+
+        {isNoteAdded ? (
+        <div className="modal-form" style={{ marginBottom: "15px" }}>
+          <label htmlFor="release-note" style={{ marginBottom: "5px", display: "block" }}>
+            Note/Message
+          </label>
+          <textarea
+            id="release-note"
+            placeholder="Write a note..."
+            value={releaseNote}
+            onChange={(e) => setReleaseNote(e.target.value)}
+            style={{
+              width: "100%",
+              height: "80px",
+              padding: "8px",
+              resize: "none",
+              backgroundColor: "#FFF",
+              color: "black",
+            }}
+          ></textarea>
+        </div>
+          ) : (
+            <Button
+                variant="text"
+                onClick={() => setIsNoteAdded(true)}
+                className="p-0"
+              >
+                Add a note?
+              </Button>
+            )}
+            </div>
+          </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            id="closeAdd"
+            variant="secondary"
+            onClick={() => setShowAddReleaseModal(false)}
+          >
+            Close
+          </Button>
+          <Button id="saveAdd" variant="primary" onClick={handleAddNewRelease}>
+            Add
+          </Button>
+        </Modal.Footer>
+      </Modal>
       </div>
     </div>
   );

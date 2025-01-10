@@ -10,7 +10,8 @@ import { CSVLink } from 'react-csv'
 import StickyHeader from "../../../SideBar/StickyHeader";
 import '../ProjectStyles.css'
 
-import { IoSearchSharp } from "react-icons/io5";
+import { RiAddLargeFill } from "react-icons/ri";
+import { IoSearchSharp, IoPersonAddSharp  } from "react-icons/io5";
 import { BiDotsVertical } from "react-icons/bi";
 import { FaCaretDown } from "react-icons/fa";
 import { MdGroupOff, MdGroupAdd, MdDeleteSweep   } from "react-icons/md";
@@ -209,8 +210,8 @@ function ProjectContributors() {
 
         setAvailableUsers(formattedToAdd);
         setAvailableEmails(emailOptions);
-        //console.log(formattedUsers)
-        //console.log(formattedToAdd)
+        // console.log(availableUsers)
+        // console.log(availableEmails)
       } catch (error) {
         console.error('Error fetching users:', error);
       }
@@ -520,7 +521,6 @@ function ProjectContributors() {
   //   handleInviteToProject(projectId, groups, availableEmails);
   // };
   
-
 useEffect(() => {
   const generateFilters = () => {
     const roleOptions = Array.from(
@@ -666,6 +666,16 @@ useEffect(() => {
       <div className="projectFolder-display">
                 <div className="main"> 
                     <div className="container-fluid moduleFluid px-0">
+                    <div className="add-files-menu-container">
+            <button
+              id="addFiles-btn"
+              className="btn addFiles-btn btn-primary"
+              title="Add"
+              onClick={handleInviteToProject}
+            >
+              <IoPersonAddSharp/> 
+            </button>
+            </div>
                     <div className="table-header d-flex justify-content-between align-items-center mb-3">
                         <div className="page-title ml-2">
                           <h2>Project Contributors</h2>

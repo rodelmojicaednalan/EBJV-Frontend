@@ -9,6 +9,11 @@
 
 #projectFolder-title{
   margin-left: -75%;
+  white-space: nowrap;        /* Prevents text from wrapping to a new line */
+  /* overflow: hidden;           Hides the overflowed content */
+  text-overflow: ellipsis; 
+  display: block;
+  width: 270px;
 }
 
 /* .form-group > select > option{
@@ -213,6 +218,18 @@
 
 /* End of Global Filter layout*/
 
+/* Global Modal Styles */
+#modal-releaseName, #modal-dueDate,
+#modal-todoTitle, #modal-todoDesc,
+#modal-todoPrio, #modal-todoDueDate, #modal-todoType{
+  background-color: transparent;
+  padding: .450rem;
+}
+
+#releaseAddModal{
+  width: 400px;
+}
+/* End of Global Modal Styles */
   /* Project Explorer*/
   .exportToCSV, .exportToCSV:hover {
     color: #212A31;
@@ -444,6 +461,11 @@ flex-direction: column;
 .assignee>p{
   border-right: 1px solid #626262;
   padding-right: 15px;
+  white-space: nowrap;        /* Prevents text from wrapping to a new line */
+  overflow: hidden;        
+  text-overflow: ellipsis; 
+  display: block;
+  width: 250px;
 }
 
 .topic-config {
@@ -691,6 +713,7 @@ background-color: transparent !important;
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-start;
+  font-size: .875rem;
 }
 
 .mr-n1 {
@@ -907,7 +930,7 @@ padding-bottom: 5px;
 }
 
 #explorer-offcanvas{
-  width: 33% !important;
+  width: 250px !important;
   padding: .875rem;
   background-color: #f3f3f7;
 }
@@ -1152,6 +1175,10 @@ padding-bottom: 5px;
   margin: 0.5rem 0;
 }
 
+#explorer-dropdown{
+  left: -95px;
+  top: 35px;
+}
 
  /* Media Queries for Responsiveness */
  @media (max-width: 1024px) {
@@ -1162,6 +1189,7 @@ padding-bottom: 5px;
  
 }
 @media  (max-width: 768px) {
+ 
   .container-content {
     flex-direction: column; /* Stack the sidebar and content */
   }
@@ -1439,6 +1467,26 @@ padding-bottom: 5px;
 }
 
 .dataTables_wrapperz{
+  font-size: 12px;
+}
+.topic-card{
+  padding:20px
+}
+
+.topic-title{
+  font-size: 18px;
+}
+.row-distribute{
+  gap: 5px;
+}
+.assignee>p{
+  width: 150px;
+  font-size: 14px;
+}
+.creator{
+  font-size: 14px;
+}
+.topic-config > ul > li{
   font-size: 12px;
 }
 
