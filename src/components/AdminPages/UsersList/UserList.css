@@ -3,7 +3,7 @@
   color: #FFFFFF;
   border-radius: 5px;
   border: none !important;
-  padding: 7px 20px; 
+  padding: 7px 20px;
   font-size: 14px;
 }
 
@@ -17,6 +17,7 @@
   right: 50px;
   top: 15px;
 }
+
 .manage-ticket-btn-2 {
   background-color: #eb6314 !important;
   border-color: #eb6314 !important;
@@ -27,20 +28,22 @@
   right: 300px;
   top: 15px;
 }
+
 .manage-ticket-btn:hover {
-  background-color: #c74a44 ;
-  border-color: #c74a44 ;
+  background-color: #c74a44;
+  border-color: #c74a44;
   font-weight: 400;
 }
 
 .top-filter #filter {
-  border: none ;
-  border-radius: 3px ;
-  color: #626262 ;
+  border: none;
+  border-radius: 3px;
+  color: #626262;
   cursor: pointer;
-  border: 1px solid #dfdfdf ;
+  border: 1px solid #dfdfdf;
   margin-right: 6px;
 }
+
 #search-bar {
   padding: 7px 20px;
   border: none;
@@ -51,11 +54,14 @@
   background-color: #fdffff;
   box-shadow: rgba(0, 0, 0, 0.20) 0px 1px 2px;
 }
-.title-page{
+
+.title-page {
   margin-bottom: 50px;
 }
+
 .dataTables_wrapper .rdt_TableHead .rdt_TableHeadRow {
-  background-color: #f3f2f2; /* changed */
+  background-color: #f3f2f2;
+  /* changed */
   /* border-radius: 10px; */
   margin-bottom: 6px;
   border: none;
@@ -63,29 +69,34 @@
   font-weight: 600;
   color: #101720;
 }
+
 .user-details {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
 }
+
 span.user-email-row {
   color: #a7a7a7;
   font-size: 12px;
   margin-top: 2px;
 }
-.iGxMlw{
-  border-bottom-color: rgb(191 191 191 / 12%)!important;
+
+.iGxMlw {
+  border-bottom-color: rgb(191 191 191 / 12%) !important;
 }
+
 .kqWIVd {
-  border-top: 0!important;
-  justify-content: flex-start!important;   
-  margin-top: 40px; 
+  border-top: 0 !important;
+  justify-content: flex-start !important;
+  margin-top: 40px;
 }
+
 .fceIjj {
-  border-top: 0!important;
-  justify-content: flex-start!important;   
-  margin-top: 40px; 
+  border-top: 0 !important;
+  justify-content: flex-start !important;
+  margin-top: 40px;
 }
 
 .profile-container {
@@ -98,16 +109,19 @@ span.user-email-row {
   /* text-align: center; */
   flex-wrap: nowrap;
 }
+
 .profile-image {
   background: #73c3f9;
   border-radius: 5px;
 }
-.profile-image  img {
+
+.profile-image img {
   width: 152px;
   height: 165px;
   border-radius: 50%;
   object-fit: cover;
 }
+
 .profile-details {
   width: 100%;
   display: flex;
@@ -116,6 +130,7 @@ span.user-email-row {
   justify-content: flex-start;
   padding: 3px 15px;
 }
+
 .profile-container .user-details {
   display: grid;
   grid-template-columns: auto auto;
@@ -124,17 +139,20 @@ span.user-email-row {
   align-content: center;
   text-align: left;
   font-size: 15px;
-      gap: 2px 52px;
+  gap: 2px 52px;
 }
-.profile-container p{
+
+.profile-container p {
   font-size: 14px;
 }
-.profile-container h2{
+
+.profile-container h2 {
   font-size: 20px;
   font-weight: 500;
   margin-bottom: 10px;
 
 }
+
 .user-details div p {
   margin: 0;
   word-wrap: break-word;
@@ -144,11 +162,13 @@ span.user-email-row {
 .email-text {
   word-break: break-all;
 }
-.container .custom-content-container{
+
+.container .custom-content-container {
   margin-top: 50px;
 }
+
 @media (max-width: 768px) {
-  .container .custom-content-container{
+  .container .custom-content-container {
     margin-top: 0px;
   }
 }
