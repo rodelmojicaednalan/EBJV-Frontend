@@ -14,7 +14,7 @@ import { BiDotsVertical, BiSolidEditAlt } from 'react-icons/bi';
 import { LiaTimesSolid } from "react-icons/lia";
 import { IoMdDownload, IoMdPersonAdd  } from "react-icons/io";
 import { IoGrid } from 'react-icons/io5';
-import { FaThList, FaFolderPlus } from 'react-icons/fa';
+import { FaThList, FaFolderPlus, FaEdit, FaGoogleDrive, FaChevronLeft } from 'react-icons/fa';
 import { MdFolderOff } from "react-icons/md";
 import { RiAddLargeFill } from "react-icons/ri";
 import { AiOutlineFileAdd } from "react-icons/ai";
@@ -25,7 +25,11 @@ import SidebarOffcanvas from '../MobileSidebar';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import useWindowWidth from './windowWidthHook.jsx'
 
+import useDrivePicker from 'react-google-drive-picker';
+
 function ProjectExplorer() {
+  const [openPicker, data, authResponse] = useDrivePicker();
+
   const windowWidthHook = useWindowWidth();
   const isMobile = windowWidthHook <= 425;
   const { projectId } = useParams();
@@ -39,6 +43,7 @@ function ProjectExplorer() {
   const [offcanvasMenuOpen, setOffcanvasMenuOpen] = useState(false);
 
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+  const [showAddFolderSubMenu, setShowAddFolderSubMenu] = useState(false);
 
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [availableEmails, setAvailableEmails] = useState([]);
@@ -90,6 +95,81 @@ function ProjectExplorer() {
     handleShowCanvas(); // Show the Offcanvas
   };
 
+  const handleOpenPicker = () => {
+    openPicker({
+      clientId: '1043565058642-l6jbl5nq0i519h8dctpoo0i1ru2vp5s6.apps.googleusercontent.com',
+      developerKey: "AIzaSyCeFx5pGWMSp1kGmkFdCj5BTU8bCqP-ORo",
+      viewId:"FOLDERS",
+      showUploadView: true,
+      showUploadFolders: true,
+      supportDrives: true,
+      multiselect: false,
+      callbackFunction: (response) => {
+        if (response.action === "picked") {
+          const folderId = response.docs[0]?.id; // Get the selected folder ID
+          console.log("Selected Folder ID:", folderId);
+          fetchFolderContents(folderId); // Call a function to fetch folder contents
+        } else {
+          console.log("No folder selected.");
+        }
+      },
+      onError: (error) => {
+        console.error("Picker Error: ", error);
+      },
+    });
+  }
+
+  useEffect(() => {
+    if (data && data.folders) {
+      data.folders.map((i) => console.log(i)); 
+    }
+  }, [data]);
+
+  const fetchFolderContents = async (folderId) => {
+    const accessToken = authResponse.access_token; // Assuming you get this from the Picker's authResponse
+    const apiUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&fields=files(id,name,mimeType)`;
+  
+    try {
+      const response = await fetch(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const data = await response.json();
+      console.log("Folder Contents:", data.files);
+  
+      // Example: Copy a file
+      if (data.files.length > 0) {
+        copyFile(data.files[0].id, "New File Name", folderId, accessToken);
+      }
+    } catch (error) {
+      console.error("Error fetching folder contents:", error);
+    }
+  };
+
+  const copyFile = async (fileId, newName, parentFolderId, accessToken) => {
+    const apiUrl = `https://www.googleapis.com/drive/v3/files/${fileId}/copy`;
+    try {
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newName,
+          parents: [parentFolderId], // Copy into the same folder
+        }),
+      });
+      const data = await response.json();
+      console.log("File copied:", data);
+    } catch (error) {
+      console.error("Error copying file:", error);
+    }
+  };
+  
+  
+  
 
     // Fetch project details and populate fields
     const fetchProjectDetails = async () => {
@@ -497,9 +577,27 @@ function ProjectExplorer() {
             </button>
             {isAddMenuOpen && (
               <div className="addFile-dropdown" ref={menuRef}>
-                <div className="addFile-dd-item" onClick={() => setShowAddFolderModal(true)}>
+                <div className="addFile-dd-item" 
+                onMouseEnter={() => setShowAddFolderSubMenu(true)}
+                onMouseLeave={() => setShowAddFolderSubMenu(false)}
+                /*onClick={() => handleOpenPicker()}*/ 
+                /*onClick={() => setShowAddFolderModal(true)}*/>
+                  <FaChevronLeft className="submenu-indicator"/>
                   <FaFolderPlus className="addFile-dd-icon" />
                   <span>Create folder</span>
+                  {showAddFolderSubMenu && (
+                    <div className="addFolder-subDropdown">
+                      <div className="addFolder-subdd-item" onClick={handleOpenPicker}>
+                        <FaGoogleDrive className="addFile-dd-icon" />
+                        <span>Get Folder From Drive</span>
+                      </div>
+                      <div className="addFile-dd-divider" />
+                      <div className="addFolder-subdd-item" onClick={setShowAddFolderModal}>
+                        <FaEdit className="addFile-dd-icon" />
+                        <span>Manually Create Folder</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="addFile-dd-divider" />
                 <div className="addFile-dd-item" onClick={() => setShowAddModal(true)}>
@@ -876,7 +974,7 @@ function ProjectExplorer() {
             <small > File Shared Successfully </small>
           </Toast.Header>
           <Toast.Body style={{fontSize: '.785rem'}}>
-          "Your file(s) have been shared with the selected recipient(s). They will receive an email notification shortly."
+          &quot;Your file(s) have been shared with the selected recipient(s). They will receive an email notification shortly.&quot;
           </Toast.Body>
         </Toast>
         </ToastContainer>

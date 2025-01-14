@@ -1279,18 +1279,39 @@ p {
   z-index: 1001;
   padding: 0.5rem 0;
 }
+.addFolder-subDropdown{
+  position: absolute;
+  top: 0;
+  right: 12.5rem;
+  background-color:  #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 200px;
+  z-index: 1001;
+  padding: 0.5rem 0;
+}
 
-.addFile-dd-item {
+.addFile-dd-item, .addFolder-subdd-item {
   display: flex;
   align-items: center;
   padding: 0.5rem 1rem;
   cursor: pointer;
   transition: background 0.3s ease;
 }
-
-.addFile-dd-item:hover {
-  background: #f8f9fa;
+.submenu-indicator{
+  display: none;
 }
+
+.addFile-dd-item:hover, .addFolder-subdd-item:hover {
+  background: #fec19db8;
+  .submenu-indicator{
+    display: unset;
+    font-size: 0.8rem;
+    color: #eb6314;
+  }
+}
+
 
 .addFile-dd-icon {
   margin-right: 0.5rem;
@@ -1665,6 +1686,16 @@ p {
 
   .topic-config>ul>li {
     font-size: 12px;
+  }
+
+  .addFolder-subDropdown{
+    width: 150px;
+  }
+  .addFolder-subdd-item{
+    font-size: .875rem;
+  }
+  .addFile-dd-icon{
+    width: 1.5rem;
   }
 
   /* Mobile Nav Menu */
