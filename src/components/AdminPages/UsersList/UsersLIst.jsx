@@ -315,7 +315,7 @@ function UsersList() {
             </button>
           </div>
 
-          <div className="container-content">
+          <div className="container-content" id="userlist-container">
             <DataTable
               className="dataTables_wrapper"
               columns={columns}

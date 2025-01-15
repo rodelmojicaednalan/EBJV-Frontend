@@ -10,7 +10,7 @@ import { CSVLink } from 'react-csv'
 import StickyHeader from "../../../SideBar/StickyHeader";
 import '../ProjectStyles.css'
 
-import { RiAddLargeFill } from "react-icons/ri";
+// import { RiAddLargeFill } from "react-icons/ri";
 import { IoSearchSharp, IoPersonAddSharp  } from "react-icons/io5";
 import { BiDotsVertical } from "react-icons/bi";
 import { FaCaretDown } from "react-icons/fa";
@@ -243,7 +243,18 @@ function ProjectContributors() {
     {
       name: "Name",
       key: 'contName',
-      selector: (row) => row.contName,
+      // selector: (row) => row.contName,
+       selector: (row) => (
+              <div style={{ display: "flex", alignItems: "center" }}>      
+                <div className="user-details">
+                  <span>
+                    {" "}
+                    {row.contName}
+                  </span>
+                  <span className="user-email-row">{row.contEmail}</span>
+                </div>
+              </div>
+            ),
       sortable: true,
     },
     {
@@ -374,7 +385,7 @@ function ProjectContributors() {
         } catch (error) {
           Swal.fire({
             title: 'Error!',
-            text: 'There was an error adding user(s) to the group.',
+            text: error,
             icon: 'error',
             confirmButtonText: 'OK',
             confirmButtonColor: '#EC221F',
@@ -428,7 +439,7 @@ function ProjectContributors() {
         } catch (error) {
           Swal.fire({
             title: 'Error!',
-            text: 'There was an error deleting the group.',
+            text: error,
             icon: 'error',
             confirmButtonText: 'OK',
             confirmButtonColor: '#EC221F',

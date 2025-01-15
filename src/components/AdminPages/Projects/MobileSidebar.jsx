@@ -84,8 +84,8 @@ const SidebarOffcanvas = ({ projectId }) => {
           className="sidebar-toggle-btn"
           onClick={handleShow}
           style={{
-            position: "fixed",
-            top: "10px",
+            position: "absolute",
+            top: "-20px",
             left: "10px",
             zIndex: show ? 1 : 1050, // Lower z-index or hide when Offcanvas is active
             opacity: show ? 0 : 1, // Hide the button if Offcanvas is active

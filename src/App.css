@@ -837,6 +837,9 @@ input[type="date"] {
     width: 100%;
     align-self: center;
   }
+  #userlist-container{
+    max-width: 410px;
+  }
   .container {
     /* padding: 0px 5px 5px 5px; */
     overflow-x: hidden;

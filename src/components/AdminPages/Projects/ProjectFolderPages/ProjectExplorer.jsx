@@ -654,7 +654,7 @@ function ProjectExplorer() {
                                 Export to CSV
                             </CSVLink>
                           </div>
-                          <div
+                          {/* <div
                             className="dropdown-item"
                             onClick={() =>
                               handleMenuOptionClick('Checkin')
@@ -669,7 +669,7 @@ function ProjectExplorer() {
                             }
                           >
                             Checkout Files
-                          </div>
+                          </div> */}
                         </div>
                       )}
                     </div>
@@ -969,7 +969,7 @@ function ProjectExplorer() {
           position={toastPosition}
           style={{ zIndex: 1046, position: 'fixed', maxWidth: '300px' }}
         >
-        <Toast show={showSuccessToast} onClose={showToast} style={{backgroundColor: "#fec19db8"}} delay={3000} autohide>
+        <Toast show={showSuccessToast} onClose={showToast} style={{backgroundColor: "#fec19db8"}} delay={5000} autohide>
           <Toast.Header className='justify-content-between' style={{backgroundColor: "#ee8a50b8"}}>
             <small > File Shared Successfully </small>
           </Toast.Header>

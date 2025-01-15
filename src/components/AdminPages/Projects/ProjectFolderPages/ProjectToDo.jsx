@@ -7,17 +7,18 @@ import DataTable from "react-data-table-component";
 import { CSVLink } from 'react-csv'
 
 import '../ProjectStyles.css'
-import { FaBookmark, FaCircleInfo  } from "react-icons/fa6";
-import { FaRegCalendar, FaCaretDown, FaListAlt  } from "react-icons/fa";
+import { FaBookmark, FaCircleInfo, FaClipboardQuestion  } from "react-icons/fa6";
+import { FaRegCalendar, FaCaretDown, FaListAlt, FaFileExcel, FaTrash, FaFile  } from "react-icons/fa";
 import { GrStatusGoodSmall } from "react-icons/gr";
-import { RiEdit2Fill, RiAddLargeFill } from "react-icons/ri";
-import { BiDotsVertical } from "react-icons/bi";
+import { RiEdit2Fill } from "react-icons/ri";
+import { BiDotsVertical, BiSolidEditAlt } from "react-icons/bi";
+import { LiaTimesSolid } from "react-icons/lia";
 import { GoAlertFill } from "react-icons/go";
-import { FaClipboardQuestion } from "react-icons/fa6";
 import { BsClipboard2PlusFill } from "react-icons/bs";
 
 import ProjectSidebar from '../ProjectFolderSidebar';
 import SidebarOffcanvas from '../MobileSidebar';
+import Offcanvas from 'react-bootstrap/Offcanvas';
 import useWindowWidth from './windowWidthHook.jsx'
 
 import { Modal, Button, ToastContainer, Toast } from 'react-bootstrap';
@@ -55,7 +56,18 @@ function ProjectToDo() {
   const [todoDueDate, setTodoDueDate] = useState("");
   const [todoType, setTodoType] = useState("");
   
-  
+  // Custom toast messages
+  const [toastPosition, setToastPosition] = useState('bottom-end')
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [showDeleteSuccessToast, setShowDeleteSuccessToast] = useState(false);
+  const [showDeleteErrorToast, setShowDeleteErrorToast] = useState(false);  
+    
+  const openSuccessToast = () => setShowSuccessToast(!showSuccessToast);
+  const openErrorToast = () => setShowErrorToast(!showErrorToast);
+  const openDeleteSuccessToast = () => setShowDeleteSuccessToast(!showDeleteSuccessToast);
+  const openDeleteErrorToast = () => setShowDeleteErrorToast(!showDeleteErrorToast); 
+
   const handleMenuToggle = () => {
     setMenuOpen(!menuOpen);
   };
@@ -69,7 +81,35 @@ function ProjectToDo() {
     console.log("Toggling dropdown for ID:", id);
     setOpenDropdownId(openDropdownId === id ? null : id);
   };
- 
+//  Row Click Related Variables
+    const [showCanvas, setShowCanvas] = useState(false);
+    const handleCloseCanvas = () => setShowCanvas(false);
+    const handleShowCanvas = () => setShowCanvas(true);
+  
+    const [selectedRow, setSelectedRow] = useState(null); // State to hold the selected row details
+  
+  // Handle row click
+    const handleRowClick = (row) => {
+      setSelectedRow(row); // Set the clicked row's data
+      handleShowCanvas(); // Show the Offcanvas
+    };
+
+// Menu ref
+const todoMenuRef = useRef(null);
+
+useEffect(() => {
+  const handleOutsideClick = (event) => {
+    if (todoMenuRef.current && !todoMenuRef.current.contains(event.target)) {
+      setMenuOpen(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleOutsideClick);
+  return () => {
+    document.removeEventListener("mousedown", handleOutsideClick);
+  };
+}, []);
+  
   useEffect(() => {
     // Fetch project details and populate fields
     const fetchProjectDetails = async () => {
@@ -92,6 +132,7 @@ function ProjectToDo() {
         const formattedToDos = project_toDos.map((toDo) => ({
           id: toDo.id,
           title: toDo.toDoTitle,
+          description: toDo.toDoDesc,
           ownership: toDo.is_owner,
           ownerUserName: toDo.owner,
           assignee: JSON.parse(toDo.toDoAssignee), //.replace(/"/g, " ", /[]]/g, " "),
@@ -106,7 +147,8 @@ function ProjectToDo() {
             year: 'numeric'
           }).format(new Date(toDo.lastUpdated)),
           priority: capitalizeWords(toDo.toDoPriority),
-          status: capitalizeWords(toDo.toDoStatus)
+          status: capitalizeWords(toDo.toDoStatus),
+          type: capitalizeWords(toDo.toDoType)
         }));
 
         setToDoData(formattedToDos)
@@ -318,6 +360,17 @@ function ProjectToDo() {
       key: 'title',
       // width: "25%",
       selector: (row) => row.title,
+      // selector: (row) => (
+      //   <div style={{ display: "flex", alignItems: "center" }}>      
+      //     <div className="user-details">
+      //       <span>
+      //         {" "}
+      //         {row.title}
+      //       </span>
+      //       <span className="user-email-row" id="todo-table-desc">{row.description}</span>
+      //     </div>
+      //   </div>
+      // ),
       sortable: true,
     },
     {
@@ -404,12 +457,12 @@ function ProjectToDo() {
         todoDueDate,
         todoType,
       });
-      alert("The new to do has been added successfully.");
+      openSuccessToast();
       setRefreshKey((prevKey) => prevKey + 1);
       handleClose();
     } catch (error) {
       console.error(error);
-      alert("Failed to add to do. Please try again.");
+      openErrorToast();
     }
   };
 
@@ -426,150 +479,6 @@ function ProjectToDo() {
   };
 
   const handleShow = () => setShowAddTodoModal(true);
-
-//   const handleAddNewToDo = () => {
-//     Swal.fire({
-//         title: 'Add New To Do',
-//         html: `
-//             <div style="text-align: left; max-height: 550px; overflow-y: auto;">
-//                 <label for="todo-title" style="display: block;">Title:</label>
-//                 <input type="text" id="todo-title" class="swal2-input" placeholder="Enter title" style="margin-bottom: 10px; width: 100%;">
-
-//                 <label for="todo-desc" style="display: block;">Description:</label>
-//                 <input type="text" id="todo-desc" class="swal2-input" placeholder="Enter description" style="margin-bottom: 10px; width: 100%;">
-
-//                 <label for="todo-assignee" style="display: block;">Assignee:</label>
-//                 <input type="text" id="todo-assignee" class="swal2-input" placeholder="Select people (comma-separated)" style="margin-bottom: 10px; width: 100%;">
-
-//                 <div id="details-container" style="margin-top: 10px;">
-//                     <button id="add-details-btn" type="button" class="btn btn-primary" style="margin-bottom: 10px;">Add Additional Details</button>
-//                 </div>
-//             </div>
-//         `,
-//         confirmButtonText: 'Add To Do',
-//         showCancelButton: true,
-//         customClass: {
-//             confirmButton: "btn btn-success todo-btn-success",
-//             cancelButton: "btn btn-danger todo-btn-danger"
-//         },
-//         didOpen: () => {
-//             const addDetailsBtn = document.getElementById('add-details-btn');
-//             const detailsContainer = document.getElementById('details-container');
-
-//             addDetailsBtn.addEventListener('click', () => {
-//                 if (!document.getElementById('todo-priority')) {
-//                     // Priority Field
-//                     const priorityLabel = document.createElement('label');
-//                     priorityLabel.setAttribute('for', 'todo-priority');
-//                     priorityLabel.style.display = 'block';
-//                     priorityLabel.textContent = 'Priority:';
-
-//                     const prioritySelect = document.createElement('select');
-//                     prioritySelect.id = 'todo-priority';
-//                     prioritySelect.className = 'swal2-input';
-//                     ['Critical', 'High', 'Normal', 'Low'].forEach(priority => {
-//                         const option = document.createElement('option');
-//                         option.value = priority.toLowerCase();
-//                         option.textContent = priority;
-//                         prioritySelect.appendChild(option);
-//                     });
-
-//                     // Due Date Field
-//                     const dueDateLabel = document.createElement('label');
-//                     dueDateLabel.setAttribute('for', 'todo-due-date');
-//                     dueDateLabel.style.display = 'block';
-//                     dueDateLabel.textContent = 'Due Date:';
-
-//                     const dueDateInput = document.createElement('input');
-//                     dueDateInput.type = 'date';
-//                     dueDateInput.id = 'todo-due-date';
-//                     dueDateInput.className = 'swal2-input';
-
-//                     // To-Do Type Field
-//                     const typeLabel = document.createElement('label');
-//                     typeLabel.setAttribute('for', 'todo-type');
-//                     typeLabel.style.display = 'block';
-//                     typeLabel.textContent = 'To-Do Type:';
-
-//                     const typeSelect = document.createElement('select');
-//                     typeSelect.id = 'todo-type';
-//                     typeSelect.className = 'swal2-input';
-//                     ["Undefined", "Comment", "Issue", "Request", "Fault", 
-//                       "Inquiry", "Solution", "Remark", "Clash"].forEach(type => {
-//                         const option = document.createElement('option');
-//                         option.value = type.toLowerCase();
-//                         option.textContent = type;
-//                         typeSelect.appendChild(option);
-//                     });
-//                     typeSelect.style.width = "96%";
-
-//                     // Wrapper Div for Priority and Due Date
-//                     const wrapperDiv = document.createElement('div');
-//                     wrapperDiv.id = 'prio-due-div';
-//                     wrapperDiv.style.display = 'flex';
-//                     wrapperDiv.style.justifyContent = 'space-between';
-//                     wrapperDiv.style.gap = '10px';
-//                     wrapperDiv.style.marginBottom = '10px';
-
-//                     const priorityWrapper = document.createElement('div');
-//                     priorityWrapper.style.flex = '1';
-//                     priorityWrapper.appendChild(priorityLabel);
-//                     priorityWrapper.appendChild(prioritySelect);
-
-//                     const dueDateWrapper = document.createElement('div');
-//                     dueDateWrapper.style.flex = '1';
-//                     dueDateWrapper.appendChild(dueDateLabel);
-//                     dueDateWrapper.appendChild(dueDateInput);
-
-//                     wrapperDiv.appendChild(priorityWrapper);
-//                     wrapperDiv.appendChild(dueDateWrapper);
-
-//                     // Append Fields to Details Container
-//                     detailsContainer.appendChild(wrapperDiv);
-//                     detailsContainer.appendChild(typeLabel);
-//                     detailsContainer.appendChild(typeSelect);
-
-//                     addDetailsBtn.disabled = true; // Disable button after fields are added
-//                 }
-//             });
-//         },
-//         preConfirm: () => {
-//             const todoTitle = document.getElementById('todo-title').value.trim();
-//             const todoDesc = document.getElementById('todo-desc').value.trim();
-//             const todoAssignee = document.getElementById('todo-assignee').value.trim();
-//             const todoPriority = document.getElementById('todo-priority')?.value || null;
-//             const todoDueDate = document.getElementById('todo-due-date')?.value || null;
-//             const todoType = document.getElementById('todo-type')?.value || null;
-
-//             if (!todoTitle || !todoDesc || !todoAssignee) {
-//                 Swal.showValidationMessage('Please fill in all required fields.');
-//                 return null;
-//             }
-
-//             return { todoTitle, todoDesc, todoAssignee, todoPriority, todoDueDate, todoType };
-//         },
-//     }).then(async (result) => {
-//         if (result.isConfirmed) {
-//             const { todoTitle, todoDesc, todoAssignee, todoPriority, todoDueDate, todoType } = result.value;
-
-//             try {
-//                 await axiosInstance.post(`/create-todo/${projectId}`, {
-//                     todoTitle,
-//                     todoDesc,
-//                     todoAssignee,
-//                     todoPriority,
-//                     todoDueDate,
-//                     todoType,
-//                 });
-//                 Swal.fire('Success!', 'The to-do has been added.', 'success');
-//                 setRefreshKey((prevKey) => prevKey + 1);
-//             } catch (error) {
-//                 Swal.fire('Error!', 'Failed to add to-do. Try again.', 'error');
-//                 console.error(error);
-//             }
-//         }
-//     });
-// };
 
     return (
     <div className="container">
@@ -615,7 +524,7 @@ function ProjectToDo() {
                               <BiDotsVertical />
                             </button>
                             {menuOpen && (
-                              <div className="dropdown-menu" id="toDo-dropdown">
+                              <div className="dropdown-menu" id="toDo-dropdown"  ref={todoMenuRef}>
                                 <div className="dropdown-item">
                                   <CSVLink
                                       {...handleExportToCSV()}
@@ -642,9 +551,9 @@ function ProjectToDo() {
                       </div>
                       <div className="view-filters">
                           <div className="filter-container null">
-                            <div className="filters d-flex">
+                            <div className="filters d-flex" id="todo-filters">
                               {filters.map((filter) => (
-                                  <div key={filter.type} className="filter-type mr-n1" onClick={() => setActiveDropdown(filter.type)}>
+                                  <div key={filter.type} id="todo-filter-item" className="filter-type mr-n1" onClick={() => setActiveDropdown(filter.type)}>
                                       {filter.type} <FaCaretDown />
                                       {activeDropdown === filter.type && renderDropdown(filter)}
                                   </div>
@@ -656,6 +565,7 @@ function ProjectToDo() {
                         className="dataTables_wrapperz mt-3"
                         columns={toDoTableColumns}
                         data={filteredToDoData}
+                        onRowClicked={handleRowClick}
                         pagination
                         paginationPerPage={10}
                         paginationRowsPerPageOptions={[10, 20, 30]}
@@ -671,7 +581,7 @@ function ProjectToDo() {
                             <FaClipboardQuestion size={65} color="#9a9a9c"/>
                           </div>
                           <div className="no-display-text mt-2">
-                            No to do's found.
+                            No to dos found.
                           </div>
                         </div>
                         }
@@ -799,6 +709,149 @@ function ProjectToDo() {
           </Button>
         </Modal.Footer>
       </Modal>
+
+          {/* Create Topic Messages */}
+              <ToastContainer className="p-3" position={toastPosition}>
+                <Toast className="success-toast-container" show={showSuccessToast} onClose={openSuccessToast} delay={5000} autohide>
+                  <Toast.Header className='success-toast-header justify-content-between'>
+                 <span> To Do Created Successfully! </span>   
+                  </Toast.Header>
+                  <Toast.Body className="success-toast-body">
+                    Review the details, share with your team, and proceed with the distribution of work.
+                  </Toast.Body>
+                </Toast>
+              </ToastContainer>
+      
+              <ToastContainer className="p-3" position={toastPosition}>
+                <Toast className="error-toast-container" show={showErrorToast} onClose={openErrorToast} delay={5000} autohide>
+                  <Toast.Header className='error-toast-header justify-content-between'>
+                  <span> To Do Creation Unsuccessful </span>
+                  </Toast.Header>
+                  <Toast.Body className="error-toast-body">
+                    Please review the error details, check your configurations, and try again.
+                  </Toast.Body>
+                </Toast>
+              </ToastContainer>
+                {/* End of Create Topic Messages */}
+      
+                {/* Delete Toast Messages */}
+              <ToastContainer className="p-3" position={toastPosition}>
+                <Toast className="success-toast-container" show={showDeleteSuccessToast} onClose={openDeleteSuccessToast} delay={5000} autohide>
+                  <Toast.Header className='success-toast-header justify-content-between'>
+                    <span > To Do Deleted Successfully! </span>
+                  </Toast.Header>
+                  <Toast.Body className="success-toast-body">
+                  The changes have been applied, and the to do item is no longer available.
+                  </Toast.Body>
+                </Toast> 
+              </ToastContainer>
+      
+              <ToastContainer className="p-3" position={toastPosition}>
+              <Toast className="error-toast-container" show={showDeleteErrorToast} onClose={openDeleteErrorToast} delay={5000} autohide>
+                <Toast.Header className='error-toast-header justify-content-between'>
+                  <span > To Do Deletion Unsuccessful </span>
+                </Toast.Header>
+                <Toast.Body className="error-toast-body">
+                  Please review the error details, check your configurations, and try again.
+                </Toast.Body>
+              </Toast>
+              </ToastContainer>
+                {/* End of Delete Toast Messages */}
+
+
+                {/* Row Click Offcanvas */}
+                <Offcanvas 
+                show={showCanvas} 
+                onHide={handleCloseCanvas} 
+                placement="end" 
+                //backdrop="static"
+                className="offcanvas"
+                id="explorer-offcanvas"
+              >
+              <Offcanvas.Header className="offcanvas-head">
+                <Offcanvas.Title>
+                <div className="offcanvas-header d-flex justify-content-between align-items-center">
+                <div className="offcanvas-title-description d-flex"
+                  style={{flexDirection: 'column'}}>
+                  <h5 className="offcanvas-title "
+                    style={{fontSize: '1rem', fontWeight: 'bold', margin: '0'}}>
+                    {selectedRow ? selectedRow.title : "To Do Title"}
+                  </h5>
+                </div>
+                  <div className="offcanvas-button-group">
+                    <button className="offcanvas-btn" title="Edit">
+                      <BiSolidEditAlt size={18} />
+                    </button>
+                    <button
+                      className="offcanvas-btn"
+                      title="Close"
+                      onClick={handleCloseCanvas}
+                    >
+                      <LiaTimesSolid size={18} />
+                    </button>
+                  </div>
+                </div>
+                </Offcanvas.Title>
+              </Offcanvas.Header>
+                <Offcanvas.Body className="offcanvas-body">
+                <div className="offcanvas-button-group2 mb-3 flex-wrap">
+                      <label htmlFor="buttons">  </label>
+                      <button className="btn mr-1" ><FaFileExcel size={18}/></button>
+                      <button className="btn mr-1" ><FaTrash size={18}/></button>
+
+                  </div>
+                {selectedRow && (
+                  <div className="todo-details-container" style={{fontSize: "12px"}}>
+                    <p><strong>Details: </strong></p>
+                    <label style={{margin: "0", fontWeight: "300"}}>Description:</label>
+                        <p>{selectedRow.description}</p>
+                      <label style={{margin: "0", fontWeight: "300"}}>Assignee(s):</label>
+                        <p>{selectedRow.assignee}</p>
+                      <label style={{margin: "0", fontWeight: "300"}}>Date Created:</label>
+                        <p>{selectedRow.createdOn} by {selectedRow.ownerUserName}</p>
+                      <label style={{margin: "0", fontWeight: "300"}}>Last Modified:</label>
+                        <p>{selectedRow.modifiedOn} by {selectedRow.ownerUserName}</p>
+                        <label style={{margin: "0", fontWeight: "300"}}>Priority:</label>
+                        <div className="d-flex align-items-center mb-3">
+                          {iconMappings.priority[selectedRow.priority.toLowerCase()] || (
+                            <FaBookmark style={{ color: "gray" }} />
+                          )}
+                          <span className="ms-2" style={{fontSize: ".85rem"}}>{selectedRow.priority}</span>
+                        </div>
+                        <label style={{margin: "0", fontWeight: "300"}}>Status:</label>
+                        <div className="d-flex align-items-center mb-3">
+                          {iconMappings.statusIcon[selectedRow.status.toLowerCase()] || (
+                            <FaBookmark style={{ color: "gray" }} />
+                          )}
+                          <span className="ms-2" style={{fontSize: ".85rem"}}>{selectedRow.status}</span>
+                        </div>
+                        <label style={{margin: "0", fontWeight: "300"}}>Status:</label>
+                        <div className="d-flex align-items-center mb-3">
+                          {iconMappings.type[selectedRow.type.toLowerCase()] || (
+                            <FaBookmark style={{ color: "gray" }} />
+                          )}
+                          <span className="ms-2" style={{fontSize: ".85rem"}}>{selectedRow.type}</span>
+                        </div>
+                  </div>
+                )}
+                  <div className="todo-attachments-container">
+                    <label style={{margin: "0", fontWeight: "300"}}>Attachments:</label>
+                    <div className="todo-attachments-list">
+                      <div className="todo-attachment">
+                        <FaFile size={18} />
+                        <span className="ms-2">sample-attachment1.ifc</span>
+                        <button className="btn btn-sm btn-outline-danger ml-2">Delete</button>
+                      </div>
+                      <div className="todo-attachment">
+                        <FaFile size={18} />
+                        <span className="ms-2">sampleAttachment2.nc1</span>
+                        <button className="btn btn-sm btn-outline-danger ml-2">Delete</button>
+                      </div>
+                    </div>
+                  </div>
+                </Offcanvas.Body>
+              </Offcanvas>
+                {/* End of Row Click Offcanvas */}
       </div>
     </div>
   );

@@ -41,7 +41,6 @@ import IfcUploadPage from './components/AdminPages/IfcUploadPage/IfcUploadPage';
 import IfcViewer from './components/AdminPages/IfcViewer/IfcViewer';
 import ProjectMap from './components/AdminPages/Projects/ProjectFolderPages/ProjectMap';
 
-
 function Layout() {
   const location = useLocation();
   const userRole = getCookie('role_name');
@@ -73,7 +72,7 @@ function Layout() {
         <Route path="/" element={<Login />} />
         <Route path="/userlist" element={<ProtectedRoute element={<UsersList />} allowedRoles={['Admin']} />} />
         <Route path="/uploaded-ifc-file" element={<ProtectedRoute element={<IfcUploadPage />} allowedRoles={['Admin']} />} />
-        <Route path="/ifc-viewer/:projectId" element={<ProtectedRoute element={<IfcViewer />} allowedRoles={['Admin']} />} />
+        <Route path="/ifc-viewer/:projectId" element={<ProtectedRoute element={<IfcViewer />} allowedRoles={['Admin', 'Client']} />} />
         <Route path="/forgot-password"  element={<ForgotPassword />}/>
         <Route path="/reset-password/:passwordToken" name="reset-password"  element={<ResetPassword />}/>
         <Route path="/open-email"  element={<CheckEmail />}/>

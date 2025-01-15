@@ -16,6 +16,8 @@ import { useLoader } from '../../Loaders/LoaderContext';
 import StickyHeader from '../../SideBar/StickyHeader';
 import { AuthContext } from '../../Authentication/authContext';
 
+import BackToTopButton from "../../../utils/BackToTopButton";
+
 function Projects() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -134,7 +136,7 @@ function Projects() {
       setRefreshKey((prevKey) => prevKey + 1);
     } catch (error) {
       Swal.fire({
-        title: 'Error!',
+        title: error,
         text: 'Failed to add the project. Please try again.',
         icon: 'error',
         confirmButtonText: 'OK',
@@ -181,7 +183,7 @@ function Projects() {
         } catch (error) {
           Swal.fire({
             title: 'Error!',
-            text: 'There was an error deleting the project.',
+            text: error,
             icon: 'error',
             confirmButtonText: 'OK',
             confirmButtonColor: '#EC221F',
@@ -268,10 +270,11 @@ function Projects() {
     {"value": "Asia", "label": "Asia"},
     {"value": "Australia", "label": "Australia"}
   ]
-  console.log(projectLocation)
+
   return (
     <div className="container">
       <StickyHeader />
+      <BackToTopButton/>
       <div className="row">
         <div className="col-lg-12 col-md-6 custom-content-container">
           <h3 className="title-page">Projects</h3>

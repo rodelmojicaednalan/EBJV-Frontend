@@ -4,7 +4,6 @@
   height: calc(100% - 2rem);
   width: 100%;
   position: absolute;
-
 }
 
 #projectFolder-title {
@@ -254,6 +253,34 @@
 }
 
 /* End of Global Modal Styles */
+
+/* Global Toast Styles */
+.toast-container{
+  z-index: 1046;
+  position: fixed;
+  max-width: 300px;
+}
+.success-toast-container{
+  background-color: #f7b996;
+}
+.success-toast-header{
+  background-color: #fa9a61;
+  font-weight: 700;
+  font-size: .755rem;
+}
+.success-toast-body, .error-toast-body{
+  font-size: .755rem;
+}
+.error-toast-container{
+  background-color: #f39292;
+}
+.error-toast-header{
+  background-color: #e06666;
+  font-weight: 700;
+  font-size: .755rem;
+}
+/* End of Global Toast Styles */
+
 /* Project Explorer*/
 .exportToCSV,
 .exportToCSV:hover {
@@ -1026,9 +1053,9 @@ p {
 }
 
 .offcanvas-header {
-  width: 100%;
+  width: 100% ;
   /* Takes full width of Offcanvas */
-  /* max-width: 250px; Ensures it stays within Offcanvas limits */
+  /* max-width: 250px;  */
   display: flex;
   justify-content: space-between;
   /* Space between span and button group */
@@ -1070,6 +1097,7 @@ p {
   align-items: center;
   justify-content: center;
   padding: 0.3rem;
+
   /* Adjust padding */
 }
 
@@ -1328,13 +1356,27 @@ p {
   top: 35px;
 }
 
+#todo-table-desc{
+  width: 150px;
+}
+
+.todo-details-container{
+  border-bottom: 1px solid #ddd;
+}
+
 /* Media Queries for Responsiveness */
 @media (max-width: 1024px) {
   #projectFolder-title {
     margin-left: -65% !important;
     top: -80px;
   }
-
+  #todo-table-desc{
+  white-space: nowrap;
+  overflow: hidden;        
+  text-overflow: ellipsis;
+  display: block;
+  width: 100px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1357,6 +1399,10 @@ p {
     /* Space between sidebar and content */
     /* height: 610px; */
     padding-left: 10px;
+  }
+
+  .page-title h2{
+    font-size: 1.2rem;
   }
 
   #addbtn {
@@ -1525,6 +1571,10 @@ p {
 
 /* Styles for screens between 426px and 767px */
 @media (min-width: 426px) and (max-width: 767px) {
+  .panel-right {
+    width: calc(100%);
+  }
+
   .container-content {
     flex-direction: column;
     /* Stack the sidebar and content */
@@ -1642,6 +1692,10 @@ p {
 }
 
 @media (max-width: 425px) {
+  .panel-right {
+    width: 100%;
+  }
+
   .projectFolder-sidebar {
     display: none;
   }
@@ -1697,6 +1751,31 @@ p {
   .addFile-dd-icon{
     width: 1.5rem;
   }
+
+  /* #todo-filters{
+    display: none !important;
+  } */
+   .filter-type{
+    font-size: .75rem !important;
+   }
+   #todo-filter-item{
+    margin-right: 5px !important;
+    font-size: .7rem;
+   }
+   #release-filters{
+    margin-top: 6.75rem;
+   }
+   .filter-dropdown{
+    padding: 5px;
+   }
+   .filter-label{
+    font-size: .750rem !important;
+   }
+
+   .tableWrapper{
+    min-height: 100%;
+   }
+
 
   /* Mobile Nav Menu */
   .sidebar-toggle-btn {

@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import axiosInstance from "../../../../../axiosInstance.js";
-import Swal from "sweetalert2";
-import { useNavigate, useParams } from "react-router-dom";
+// import Swal from "sweetalert2";
+import { useParams } from "react-router-dom";
 import Select from 'react-select';
-import check from "../../../../assets/images/check.png";
+// import check from "../../../../assets/images/check.png";
 import StickyHeader from "../../../SideBar/StickyHeader";
 import '../ProjectStyles.css'
 import { FaBookmark, FaCircleInfo  } from "react-icons/fa6";
 import { FaRegCalendar, FaCaretDown, FaListAlt  } from "react-icons/fa";
 import { GrStatusGoodSmall, GrSort } from "react-icons/gr";
-import { RiEdit2Fill, RiAddLargeFill } from "react-icons/ri";
+import { RiEdit2Fill } from "react-icons/ri";
 import { BiSolidCommentAdd } from "react-icons/bi";
-import { MdCompress, MdExpand  } from "react-icons/md";
+import { MdCompress, MdExpand} from "react-icons/md";
 import { GoAlertFill } from "react-icons/go";
 import { TbSortAscending2, TbSortDescending2 } from "react-icons/tb";
 
@@ -21,6 +21,8 @@ import SidebarOffcanvas from '../MobileSidebar';
 import useWindowWidth from './windowWidthHook.jsx'
 
 import { sortSelect, prioSelect, statusSelect, typeSelect} from '../ProjectFolderPages/ProjectSettingsPages/dummyTopicSettings';
+
+import { ToastContainer, Toast } from 'react-bootstrap';
 
 function ProjectTopics() {
   const windowWidthHook = useWindowWidth();
@@ -38,7 +40,7 @@ function ProjectTopics() {
   const [filteredTopics, setFilteredTopics] = useState([]);  
   const dropdownRef = useRef(null);
 
-  const [menuOpen, setMenuOpen] = useState(false);
+  // const [menuOpen, setMenuOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0); 
 
   const [showCanvas, setShowCanvas] = useState(false);
@@ -51,17 +53,29 @@ function ProjectTopics() {
   const [availableEmails, setAvailableEmails] = useState([]);
   const [recipients, setRecipients] = useState([])
 
-  const handleMenuToggle = () => {
-    setMenuOpen(!menuOpen);
-  };
+  // const handleMenuToggle = () => {
+  //   setMenuOpen(!menuOpen);
+  // };
 
-  const handleMenuOptionClick = (option) => {
-    setMenuOpen(false);
-    Swal.fire(`Function to: ${option}`);
-  };
+  // const handleMenuOptionClick = (option) => {
+  //   setMenuOpen(false);
+  //   Swal.fire(`Function to: ${option}`);
+  // };
 
   const handleCloseCanvas = () => setShowCanvas(false);
   const handleShowCanvas = () => setShowCanvas(true);
+
+    // Custom toast messages
+  const [toastPosition, setToastPosition] = useState('bottom-end')
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [showDeleteSuccessToast, setShowDeleteSuccessToast] = useState(false);
+  const [showDeleteErrorToast, setShowDeleteErrorToast] = useState(false);  
+  
+  const openSuccessToast = () => setShowSuccessToast(!showSuccessToast);
+  const openErrorToast = () => setShowErrorToast(!showErrorToast);
+  const openDeleteSuccessToast = () => setShowDeleteSuccessToast(!showDeleteSuccessToast);
+  const openDeleteErrorToast = () => setShowDeleteErrorToast(!showDeleteErrorToast); 
 
   useEffect(() => {
     // Fetch project details and populate fields
@@ -287,53 +301,17 @@ useEffect(() => {
     const formData = new FormData(e.target); // Automatically gathers form inputs
     const topicData = Object.fromEntries(formData);
     topicData.assigneeList = recipients.map((recipient) => recipient.value);
-    Swal.fire({
-      title: 'Confirm topic creation',
-      showCancelButton: true,
-      confirmButtonColor: '#eb6314',
-      cancelButtonColor: '#00000000',
-      cancelTextColor: '#000000',
-      confirmButtonText: 'Create Topic',
-      customClass: {
-        container: 'custom-container',
-        confirmButton: 'custom-confirm-button',
-        cancelButton: 'custom-cancel-button',
-        title: 'custom-swal-title',
-      },
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          await axiosInstance.post(`/create-topic/${projectId}`, topicData);
-          Swal.fire({
-            title: 'Success!',
-            text: `Topic has been created.`,
-            imageUrl: check,
-            imageWidth: 100,
-            imageHeight: 100,
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#0ABAA6',
-            customClass: {
-              confirmButton: 'custom-success-confirm-button',
-              title: 'custom-swal-title',
-            },
-          });
-          setRefreshKey((prevKey) => prevKey + 1);
-        } catch (error) {
-          Swal.fire({
-            title: 'Error!',
-            text: error,
-            icon: 'error',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#EC221F',
-            customClass: {
-              confirmButton: 'custom-error-confirm-button',
-              title: 'custom-swal-title',
-            },
-          });
-        }
-      }
-    });
+  
+    try {
+      await axiosInstance.post(`/create-topic/${projectId}`, topicData);
+      openSuccessToast();
+      setShowCanvas(false);
+      setRefreshKey((prevKey) => prevKey + 1);
+    } catch (error) {
+      openErrorToast();
+    }
   };
+  
 
   const handleCompress = () => {
     setIsCompressed((prev) => !prev);
@@ -412,17 +390,6 @@ useEffect(() => {
                               onChange={(selectedOption) => handleSort(selectedOption.value)}
                               required
                               />
-                              {/* <select
-                                onChange={(e) => handleSort(e.target.value)}
-                                value={isSorted}
-                                className="form-select"
-                                id="topic-sort"
-                              >
-                                <option value="modifiedOn">Sort by Modified On</option>
-                                <option value="name">Sort by Topic Title</option>
-                                <option value="assignee">Sort by Assignee</option>
-                                <option value="creator">Sort by Creator</option>
-                              </select> */}
                               <button className="btn btn-icon ml-2" onClick={toggleSortDirection}>
                                 {sortDirection === 'asc' ? <TbSortAscending2/> : <TbSortDescending2/>}
                               </button>
@@ -626,6 +593,54 @@ useEffect(() => {
                     </div>
                 </div>
           </div>
+
+          {/* Create Topic Messages */}
+        <ToastContainer className="p-3" position={toastPosition}>
+          <Toast className="success-toast-container" show={showSuccessToast} onClose={openSuccessToast} delay={5000} autohide>
+            <Toast.Header className='success-toast-header justify-content-between'>
+           <span> Project Topic Created Successfully! </span>   
+            </Toast.Header>
+            <Toast.Body className="success-toast-body">
+              Review the details, share with your team, and proceed with the discussion on the topic.
+            </Toast.Body>
+          </Toast>
+        </ToastContainer>
+
+        <ToastContainer className="p-3" position={toastPosition}>
+          <Toast className="error-toast-container" show={showErrorToast} onClose={openErrorToast} delay={5000} autohide>
+            <Toast.Header className='error-toast-header justify-content-between'>
+            <span> Topic Creation Unsuccessful </span>
+            </Toast.Header>
+            <Toast.Body className="error-toast-body">
+              Please review the error details, check your configurations, and try again.
+            </Toast.Body>
+          </Toast>
+        </ToastContainer>
+          {/* End of Create Topic Messages */}
+
+          {/* Delete Toast Messages */}
+        <ToastContainer className="p-3" position={toastPosition}>
+          <Toast className="success-toast-container" show={showDeleteSuccessToast} onClose={openDeleteSuccessToast} delay={5000} autohide>
+            <Toast.Header className='success-toast-header justify-content-between'>
+              <span > Topic Deleted Successfully! </span>
+            </Toast.Header>
+            <Toast.Body className="success-toast-body">
+            The changes have been applied, and the topic is no longer available.
+            </Toast.Body>
+          </Toast> 
+        </ToastContainer>
+
+        <ToastContainer className="p-3" position={toastPosition}>
+        <Toast className="error-toast-container" show={showDeleteErrorToast} onClose={openDeleteErrorToast} delay={5000} autohide>
+          <Toast.Header className='error-toast-header justify-content-between'>
+            <span > Topic Deletion Unsuccessful </span>
+          </Toast.Header>
+          <Toast.Body className="error-toast-body">
+            Please review the error details, check your configurations, and try again.
+          </Toast.Body>
+        </Toast>
+        </ToastContainer>
+          {/* End of Delete Toast Messages */}
 
       </div>
       </div>

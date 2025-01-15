@@ -9,7 +9,7 @@ import '../ProjectStyles.css'
 import {  FiEdit, FiMoreVertical } from "react-icons/fi";
 import { FaCaretDown } from "react-icons/fa";
 import { TbBoxOff, TbCubePlus  } from "react-icons/tb";
-import { RiAddLargeFill } from "react-icons/ri";
+// import { RiAddLargeFill } from "react-icons/ri";
 import ProjectSidebar from '../ProjectFolderSidebar';
 
 import SidebarOffcanvas from '../MobileSidebar';
@@ -42,6 +42,19 @@ function ProjectReleases() {
   const [recipients, setRecipients] = useState([]);
   const [isNoteAdded, setIsNoteAdded] = useState(false);
   const [releaseNote, setReleaseNote] = useState("");
+
+  // Custom toast messages
+  const [toastPosition, setToastPosition] = useState('bottom-end')
+
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [showDeleteSuccessToast, setShowDeleteSuccessToast] = useState(false);
+  const [showDeleteErrorToast, setShowDeleteErrorToast] = useState(false);  
+
+  const openSuccessToast = () => setShowSuccessToast(!showSuccessToast);
+  const openErrorToast = () => setShowErrorToast(!showErrorToast);
+  const openDeleteSuccessToast = () => setShowDeleteSuccessToast(!showDeleteSuccessToast);
+  const openDeleteErrorToast = () => setShowDeleteErrorToast(!showDeleteErrorToast); 
   
   const [filteredReleases, setFilteredReleases] = useState([]);
   const dropdownRef = useRef(null);
@@ -223,7 +236,7 @@ function ProjectReleases() {
 
   // Render dropdown options
   const renderDropdown = (filter) => (
-    <div className="filter-dropdown" ref={dropdownRef}>
+    <div className="filter-dropdown" id="release-filters" ref={dropdownRef}>
       {filter.options.map((option, index) => (
         <div key={index} className="dropdown-item">
           <input
@@ -266,6 +279,7 @@ function ProjectReleases() {
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 
@@ -352,12 +366,13 @@ function ProjectReleases() {
         recipients: recipientList,
         releaseNote,
       });
-      alert("The new release has been added successfully.");
+      // alert("The new release has been added successfully.");
+      openSuccessToast();
       setRefreshKey((prevKey) => prevKey + 1);
       handleClose();
     } catch (error) {
       console.error(error);
-      alert("Failed to add the release. Please try again.");
+      // alert("Failed to add the release. Please try again.");
     }
   };
 
@@ -487,19 +502,7 @@ function ProjectReleases() {
       if (result.isConfirmed) {
         try {
           await axiosInstance.delete(`/delete-release/${projectId}/${id}`);
-          Swal.fire({
-            title: 'Success!',
-            text: `Release has been deleted.`,
-            imageUrl: check,
-            imageWidth: 100,
-            imageHeight: 100,
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#0ABAA6',
-            customClass: {
-              confirmButton: 'custom-success-confirm-button',
-              title: 'custom-swal-title',
-            },
-          });
+          openDeleteSuccessToast();
           setRefreshKey((prevKey) => prevKey + 1);
         } catch (error) {
           Swal.fire({
@@ -692,6 +695,72 @@ function ProjectReleases() {
           </Button>
         </Modal.Footer>
       </Modal>
+
+          {/* Create Release Messages */}
+        <ToastContainer
+          className="p-3"
+          position={toastPosition}
+          style={{ zIndex: 1046, position: 'fixed', maxWidth: '300px' }}
+        >
+        <Toast show={showSuccessToast} onClose={openSuccessToast} style={{backgroundColor: "#fec19db8"}} delay={5000} autohide>
+          <Toast.Header className='justify-content-between' style={{backgroundColor: "#ee8a50b8"}}>
+            <small > Project Release Created Successfully! </small>
+          </Toast.Header>
+          <Toast.Body style={{fontSize: '.785rem'}}>
+            Review the details, share with your team, and proceed with deployment or distribution.
+          </Toast.Body>
+        </Toast>
+        </ToastContainer>
+
+        <ToastContainer
+          className="p-3"
+          position={toastPosition}
+          style={{ zIndex: 1046, position: 'fixed', maxWidth: '300px' }}
+        >
+        <Toast show={showErrorToast} onClose={openErrorToast} style={{backgroundColor: "#e87d7d"}} delay={5000} autohide>
+          <Toast.Header className='justify-content-between' style={{backgroundColor: "#e65e5e"}}>
+            <small > Release Creation Unsuccessful </small>
+          </Toast.Header>
+          <Toast.Body style={{fontSize: '.785rem'}}>
+            Please review the error details, check your configurations, and try again.
+          </Toast.Body>
+        </Toast>
+        </ToastContainer>
+          {/* End of Create Release Messages */}
+
+          {/* Delete Toast Messages */}
+        <ToastContainer
+          className="p-3"
+          position={toastPosition}
+          style={{ zIndex: 1046, position: 'fixed', maxWidth: '300px' }}
+        >
+        <Toast show={showDeleteSuccessToast} onClose={openDeleteSuccessToast} style={{backgroundColor: "#fec19db8"}} delay={5000} autohide>
+          <Toast.Header className='justify-content-between' style={{backgroundColor: "#ee8a50b8"}}>
+            <small > Release Deleted Successfully! </small>
+          </Toast.Header>
+          <Toast.Body style={{fontSize: '.785rem'}}>
+           The changes have been applied, and the item is no longer available.
+          </Toast.Body>
+        </Toast> 
+        </ToastContainer>
+
+        <ToastContainer
+          className="p-3"
+          position={toastPosition}
+          style={{ zIndex: 1046, position: 'fixed', maxWidth: '300px' }}
+        >
+        <Toast show={showDeleteErrorToast} onClose={openDeleteErrorToast} style={{backgroundColor: "#e87d7d"}} delay={5000} autohide>
+          <Toast.Header className='justify-content-between' style={{backgroundColor: "#e65e5e"}}>
+            <small > Release Deletion Unsuccessful </small>
+          </Toast.Header>
+          <Toast.Body style={{fontSize: '.785rem'}}>
+            Please review the error details, check your configurations, and try again.
+          </Toast.Body>
+        </Toast>
+        </ToastContainer>
+          {/* End of Delete Toast Messages */}
+
+        
       </div>
     </div>
   );
