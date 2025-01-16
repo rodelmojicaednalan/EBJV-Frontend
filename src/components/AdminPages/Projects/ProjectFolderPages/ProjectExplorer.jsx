@@ -18,6 +18,7 @@ import { FaThList, FaFolderPlus, FaEdit, FaGoogleDrive, FaChevronLeft } from 're
 import { MdFolderOff } from "react-icons/md";
 import { RiAddLargeFill } from "react-icons/ri";
 import { AiOutlineFileAdd } from "react-icons/ai";
+import { BsQrCode } from "react-icons/bs";
 
 import { Modal, Button, ToastContainer, Toast } from 'react-bootstrap';
 import ProjectSidebar from '../ProjectFolderSidebar';
@@ -26,6 +27,11 @@ import Offcanvas from 'react-bootstrap/Offcanvas';
 import useWindowWidth from './windowWidthHook.jsx'
 
 import useDrivePicker from 'react-google-drive-picker';
+
+// import * as htmlToImage from "html-to-image";
+// import QRCode from 'react-qr-code';
+// import '../../../../QRCodeStyle.css'
+import QrCodeGenerator from '../../../../QrCodeGenerator.jsx';
 
 function ProjectExplorer() {
   const [openPicker, data, authResponse] = useDrivePicker();
@@ -49,6 +55,11 @@ function ProjectExplorer() {
   const [availableEmails, setAvailableEmails] = useState([]);
   const [recipients, setRecipients] = useState([]);
   const [releaseNote, setReleaseNote] = useState("")
+
+  const [isGenerateQRCodeModalOpen, setIsGenerateQRCodeModalOpen] = useState(false);
+
+  const handleOpenQRCodeModal = () => setIsGenerateQRCodeModalOpen(true);
+  const handleCloseQRCodeModal = () => setIsGenerateQRCodeModalOpen(false);
 
   const handleOpenShareModal = () => setIsShareModalOpen(true);
   const handleCloseShareModal = () => setIsShareModalOpen(false);
@@ -178,6 +189,7 @@ function ProjectExplorer() {
           `/project/${projectId}`
         );
         const {
+          id,
           project_name,
           owner,
           files,
@@ -191,6 +203,7 @@ function ProjectExplorer() {
         setExistingFiles(project_file);
 
         const formattedFiles = files.map((file) => ({
+          projectId: id,
           fileName: file.fileName, // Assuming the file object has this key
           fileSize: `${(file.fileSize / (1024 * 1024)).toFixed(
             2
@@ -542,7 +555,7 @@ function ProjectExplorer() {
       Swal.close();
     }
   };
-  
+  // console.log(selectedRow?.projectId || '')
 
   return (
     <div className="container">
@@ -910,7 +923,7 @@ function ProjectExplorer() {
               {selectedRow?.fileName?.endsWith('.ifc') && (
               <button className="btn mr-4 ml-1"
                       onClick={() =>
-                        navigate(`/ifc-viewer/${projectId}`, {
+                        navigate(`/ifc-viewer/${projectId}/${selectedRow.fileName}`, {
                           state: {
                             fileUrl: selectedRow.fileName
                           },
@@ -920,8 +933,9 @@ function ProjectExplorer() {
                 View 
               </button>
               )}
-              <button className="btn mr-1" onClick={handleOpenShareModal}><IoMdPersonAdd size={20}/></button>
-              <button className="btn mr-1" onClick={() => downloadFile(selectedRow.fileName)} ><IoMdDownload size={20}/></button>
+              <button className="btn" onClick={handleOpenShareModal}><IoMdPersonAdd size={20}/></button>
+              <button className="btn" onClick={() => downloadFile(selectedRow.fileName)} ><IoMdDownload size={20}/></button>
+              <button className="btn" onClick={handleOpenQRCodeModal}><BsQrCode size={20}/></button>
               {/* <button className="btn " onClick={handleOCMenuToggle}><BiDotsVertical size={20}/></button>  
               {offcanvasMenuOpen && (
                         <div className="dropdown-menu" id="offcanvas-dropdown" ref={menuRef}>
@@ -957,6 +971,36 @@ function ProjectExplorer() {
         )}
         </Offcanvas.Body>
       </Offcanvas>
+
+
+      <Modal 
+        show={isGenerateQRCodeModalOpen} 
+        onHide={() => setIsGenerateQRCodeModalOpen(false)} 
+        centered
+      >
+        <Modal.Header>
+          <Modal.Title>Generate QR Code</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <QrCodeGenerator 
+             fileName={selectedRow?.fileName || ''}
+             projectId={selectedRow?.projectId || ''}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            id="closeAdd"
+            variant="secondary"
+            onClick={() => setIsGenerateQRCodeModalOpen(false)}
+          >
+            Close
+          </Button>
+          {/* <Button id="saveAdd" variant="primary" onClick={QrCodeGenerator.downloadQRCode}>
+            Download
+          </Button> */}
+        </Modal.Footer>
+      </Modal>
+
 
         <div
         className="position-relative toast-block"

@@ -234,7 +234,7 @@ function Projects() {
               width="25"
               height="25"
               onClick={() =>
-                navigate(`/ifc-viewer/${row.id}`, {
+                navigate(`/ifc-viewer/${row.id}/${row.project_file[0]}`, {
                   state: {
                     fileUrl: row.project_file.filter(
                       (item) => item !== ''

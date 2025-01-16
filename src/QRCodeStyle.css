@@ -1,0 +1,64 @@
+.qrcode__container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    /* height: 100vh; */
+  }
+  
+  .qrcode__container--parent {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    flex-direction: column;
+  }
+  
+  .qrcode__input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-top: 20px;
+  }
+  .qrcode__input > input {
+    color: #6a6976;
+  }
+  
+  
+  .qrcode__input input {
+    width: 100%;
+    padding: 10px;
+    font-size: 12px;
+    outline: none;
+    resize: none;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 15px;
+  }
+  
+  .qrcode__input button, 
+  .qrcode__download button {
+    display: inline-block;
+    padding: 7px;
+    cursor: pointer;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+  
+  .qrcode__download {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    margin-top: 20px;
+  }
+  
+  .qrcode__download button {
+    margin-top: 10px;
+  }
