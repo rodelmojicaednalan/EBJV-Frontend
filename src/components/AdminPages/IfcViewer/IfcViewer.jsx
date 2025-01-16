@@ -255,7 +255,7 @@ function IfcViewer() {
 
   return (
     <div className="container" ref={containerRef}>
-      <StickyHeader />
+      {/* <StickyHeader /> */}
 
       <div className="col-lg-12 col-md-6 custom-content-container margin-top">
         <TopBar

@@ -60,8 +60,9 @@ function Layout() {
   
     // Check if the route matches project-folder or ifc-viewer
     const isProjectFolder = /^\/project-folder\/[a-zA-Z0-9]+/.test(location.pathname);
+    const isIfcViewer = /^\/ifc-viewer\/[a-zA-Z0-9]+\/[a-zA-Z0-9._-]+$/.test(location.pathname);
 
-   return isProjectFolder; 
+    return isProjectFolder || isIfcViewer;
   };
 //  console.log(location);
   return (
@@ -74,7 +75,8 @@ function Layout() {
         <Route path="/" element={<Login />} />
         <Route path="/userlist" element={<ProtectedRoute element={<UsersList />} allowedRoles={['Admin']} />} />
         <Route path="/uploaded-ifc-file" element={<ProtectedRoute element={<IfcUploadPage />} allowedRoles={['Admin']} />} />
-        <Route path="/ifc-viewer/:projectId/:fileName"element={<ProtectedRoute element={<IfcViewer />} allowedRoles={['Admin', 'Client']} /> }/>
+        <Route path="/ifc-viewer/:projectId/:fileName"element={<IfcViewer/>}/>
+        {/* <Route path="/ifc-viewer/:projectId/:fileName"element={<ProtectedRoute element={<IfcViewer />} allowedRoles={['Admin', 'Client']} /> }/> */}
         <Route path="/forgot-password"  element={<ForgotPassword />}/>
         <Route path="/reset-password/:passwordToken" name="reset-password"  element={<ResetPassword />}/>
         <Route path="/open-email"  element={<CheckEmail />}/>
