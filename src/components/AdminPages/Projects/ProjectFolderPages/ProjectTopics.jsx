@@ -7,7 +7,7 @@ import Select from 'react-select';
 import StickyHeader from "../../../SideBar/StickyHeader";
 import '../ProjectStyles.css'
 import { FaBookmark, FaCircleInfo  } from "react-icons/fa6";
-import { FaRegCalendar, FaCaretDown, FaListAlt  } from "react-icons/fa";
+import { FaRegCalendar, FaCaretDown, FaListAlt, FaTrash  } from "react-icons/fa";
 import { GrStatusGoodSmall, GrSort } from "react-icons/gr";
 import { RiEdit2Fill } from "react-icons/ri";
 import { BiSolidCommentAdd } from "react-icons/bi";
@@ -565,6 +565,7 @@ useEffect(() => {
                                   </div>
                                   {!isCompressed && (
                                   <div className="topic-config">
+                                    <div className="d-flex justify-content-between">
                                     <ul className="flex-row">
                                       <li className="mr-2">
                                         {iconMappings.priority[topic.priority.toLowerCase()] || iconMappings.priority.normal} {topic.priority}  
@@ -579,6 +580,15 @@ useEffect(() => {
                                         {iconMappings.deadline}  {topic.topicDue}  
                                       </li>
                                     </ul>
+                                    <ul className="flex-row" id="topic-card-btn-grp">
+                                       <li>
+                                        <button className="btn btn-sm "> <RiEdit2Fill size={14}/> </button>
+                                      </li>
+                                      <li>
+                                        <button className="btn btn-sm "> <FaTrash size={14}/> </button>
+                                      </li>
+                                    </ul>
+                                    </div>
                                   </div>
                                   )}
                                 </div>

@@ -178,6 +178,12 @@
   z-index: 9999 !important;
   top: 45px;
 }
+#release-dropdown-menu{
+  flex-direction: unset;
+  margin-left: -140px; 
+  top: -10px;
+  z-index: 1 !important;
+}
 
 .dropdown-menu button {
   border: none;
@@ -246,9 +252,10 @@
 #modal-todoType {
   background-color: transparent;
   padding: .450rem;
+  width: 100%;
 }
 
-#releaseAddModal {
+#releaseAddModal, #releaseEditModal {
   width: 400px;
 }
 
@@ -447,6 +454,11 @@ p {
 }
 
 /* Project Topics */
+#topic-card-btn-grp{
+  position:relative;
+  display: flex;
+  gap: 0;
+}
 .offcanvas-overlay {
   position: fixed;
   top: 0;
@@ -1021,11 +1033,12 @@ p {
   border: none;
 }
 
-#explorer-offcanvas {
+#explorer-offcanvas, #release-offcanvas {
   width: 250px !important;
   padding: .875rem;
   background-color: #f3f3f7;
 }
+
 
 #offcanvas-dropdown {
   margin: 4rem 0 0 4rem;
@@ -1062,6 +1075,70 @@ p {
   align-items: center;
   /* Align vertically */
   padding: 2px 1px 5px 1px;
+  flex: 0 0 auto;
+  flex-flow: row nowrap;
+}
+
+.offcanvas-title{
+  flex: 1 0;
+}
+
+.offcanvas-filters{
+  display: flex;
+  flex: 1 0 auto;
+  flex-flow: column nowrap;
+}
+.offcanvas-filters > div {
+  display: flex;
+  flex-flow: column nowrap;
+  width: 100%;
+}
+
+.offcanvas-footer{
+  align-items: center;
+  border-top: .0625rem solid #d0d0d7;
+  display: flex;
+  flex: 0 0 auto;
+  flex-flow: row nowrap;
+  justify-content: flex-end;
+  padding: 1rem;
+  width: 100%;
+}
+
+.releaseFilter-offcanvas-body{
+  height: 680px;
+  overflow-y: auto;
+}
+.offcanvas-filter-dropdown{
+  position: fixed;
+  background-color: #f3f3f7;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  width: 200px;
+  border: 1px solid #212a3183;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+  margin-top: 15px;
+}
+.offcanvas-dropdown-item{
+  cursor: pointer;
+  display: flex;
+  padding: 0.5rem;
+  align-items: center;
+  justify-content: start;
+  margin-bottom:.5rem;
+}
+
+.offcanvas-dropdown-item > input {
+  width: 20% !important;
+}
+
+.offcanvas-filters .filter-type {
+  display: flex;
+  flex-flow: column nowrap;
+  width: 100%;
+  padding: .5rem;
 }
 
 .offcanvas-button-group {
@@ -1379,6 +1456,10 @@ p {
   }
 }
 
+.filter-btn-icon{
+  display: none;
+}
+
 @media (max-width: 768px) {
 
   .container-content {
@@ -1481,6 +1562,14 @@ p {
   .projectFolder-display {
     width: 100%;
     /* height: 610px; */
+  }
+
+  #release-filters{
+    top: 15px;
+    display: none !important;
+  }
+  .filter-btn-icon{
+    display: unset;
   }
 
   /* #prio-due-div {
@@ -1692,6 +1781,13 @@ p {
 }
 
 @media (max-width: 425px) {
+  .releaseFilter-offcanvas-body {
+    height: 355px; 
+    overflow-y: auto;
+}
+.reset-filter-btn{
+  font-size: .785rem;
+}
   .panel-right {
     width: 100%;
   }

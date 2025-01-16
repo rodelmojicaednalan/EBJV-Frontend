@@ -695,7 +695,7 @@ function ProjectExplorer() {
 
                 <div className={`project-display ${viewType}`} >
                   {viewType === 'grid' ? (
-                    <div className="grid-view" >
+                    <div className="grid-view"  onClick={handleRowClick}>
                       {explorerTable.map((row, index) => (
                         <div key={index} className="grid-item">
                           <h5>{row.fileName}</h5>

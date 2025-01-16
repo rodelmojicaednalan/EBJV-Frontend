@@ -7,13 +7,15 @@ import StickyHeader from "../../../SideBar/StickyHeader";
 import DataTable from "react-data-table-component";
 import '../ProjectStyles.css'
 import {  FiEdit, FiMoreVertical } from "react-icons/fi";
-import { FaCaretDown } from "react-icons/fa";
+import { FaCaretDown, FaFilter  } from "react-icons/fa";
 import { TbBoxOff, TbCubePlus  } from "react-icons/tb";
 // import { RiAddLargeFill } from "react-icons/ri";
 import ProjectSidebar from '../ProjectFolderSidebar';
+import { LiaTimesSolid } from "react-icons/lia";
 
 import SidebarOffcanvas from '../MobileSidebar';
 import useWindowWidth from './windowWidthHook.jsx'
+import Offcanvas from 'react-bootstrap/Offcanvas';
 
 import { Modal, Button, ToastContainer, Toast } from 'react-bootstrap';
 import Select from 'react-select';
@@ -27,6 +29,7 @@ function ProjectReleases() {
   const [refreshKey, setRefreshKey] = useState(0); 
 
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [activeOffcanvasDropdown, setActiveOffcanvasDropdown] = useState(null);
   const [openDropdownId, setOpenDropdownId] = useState(null);
 
   const [availableUsers, setAvailableUsers] = useState([]);
@@ -37,11 +40,13 @@ function ProjectReleases() {
   // Modal variable states 
   const [availableEmails, setAvailableEmails] = useState([]);
   const [showAddReleaseModal, setShowAddReleaseModal] = useState(false);
+  const [showEditReleaseModal, setShowEditReleaseModal] = useState(false);
   const [releaseName, setReleaseName] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [recipients, setRecipients] = useState([]);
   const [isNoteAdded, setIsNoteAdded] = useState(false);
   const [releaseNote, setReleaseNote] = useState("");
+  const [isUnsavedChanges, setIsUnsavedChanges] = useState(false);
 
   // Custom toast messages
   const [toastPosition, setToastPosition] = useState('bottom-end')
@@ -55,9 +60,14 @@ function ProjectReleases() {
   const openErrorToast = () => setShowErrorToast(!showErrorToast);
   const openDeleteSuccessToast = () => setShowDeleteSuccessToast(!showDeleteSuccessToast);
   const openDeleteErrorToast = () => setShowDeleteErrorToast(!showDeleteErrorToast); 
+
+    const [showCanvas, setShowCanvas] = useState(false);
+    const handleCloseCanvas = () => setShowCanvas(false);
+    const handleShowCanvas = () => setShowCanvas(true);
   
   const [filteredReleases, setFilteredReleases] = useState([]);
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef({});
+  const offcanvasDropdownRef = useRef(null);
 
   const toggleDropdown = (id) => {
     console.log("Toggling dropdown for ID:", id);
@@ -156,7 +166,7 @@ function ProjectReleases() {
       // console.log(userOptions);
       const groupOptions = projectGroups;
       const statusOptions = Array.from(new Set(releasesTable.map((release) => release.releaseStatus)));
-      const dueDateOptions = ["Today", "This Week", "Last Month"];
+      const dueDateOptions = ["Today", "This Week", "Next Week", "Last Month"];
 
       const filters = [
         { type: "Owner", options: ownershipOptions },
@@ -202,8 +212,16 @@ function ProjectReleases() {
               if (selectedOptions.includes("This Week")) {
                 const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
                 const endOfWeek = new Date(startOfWeek);
-                endOfWeek.setDate(startOfWeek.getDate() + 6);
+                endOfWeek.setDate(startOfWeek.getDate() + 7 );
                 return dueDate >= startOfWeek && dueDate <= endOfWeek;
+              }
+              if (selectedOptions.includes("Next Week")){
+                const nextWeekStart = new Date(today);
+                nextWeekStart.setDate(today.getDate() + (7 - today.getDay()));
+                const nextWeekEnd = new Date(nextWeekStart);
+                nextWeekEnd.setDate(nextWeekStart.getDate() + 6);
+
+                return dueDate >= nextWeekStart && dueDate <= nextWeekEnd;
               }
               if (selectedOptions.includes("Last Month")) {
                 const lastMonth = new Date();
@@ -236,7 +254,7 @@ function ProjectReleases() {
 
   // Render dropdown options
   const renderDropdown = (filter) => (
-    <div className="filter-dropdown" id="release-filters" ref={dropdownRef}>
+    <div className="filter-dropdown" id="release-filters" ref={(el) => (dropdownRef.current[filter.type] = el)}>
       {filter.options.map((option, index) => (
         <div key={index} className="dropdown-item">
           <input
@@ -251,14 +269,58 @@ function ProjectReleases() {
     </div>
   );
 
-  // Close dropdown when clicking outside
+  const renderOffcanvasDropdown = (filter) => (
+    <div className="offcanvas-filter-dropdown" id="offcanvas-release-filters" ref={offcanvasDropdownRef} >
+      {filter.options.map((option, index) => (
+        <div key={index} className="offcanvas-dropdown-item">
+          <input
+            type="checkbox"
+            id={`offcanvas-${filter.type}-${index}`}
+            checked={selectedFilters[filter.type]?.includes(option) || false}
+            onChange={() => handleCheckboxChange(filter.type, option)}
+          />
+          <label className="filter-label" htmlFor={`${filter.type}-${index}`}>{option}</label>
+        </div>
+      ))}
+    </div>
+  );
+
+  // test 
   useEffect(() => {
     const handleOutsideClick = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      const isClickInsideAnyDropdown = Object.values(dropdownRef.current).some(
+        (ref) => ref && ref.contains(event.target)
+      );
+      if (!isClickInsideAnyDropdown) {
         setActiveDropdown(null);
       }
     };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
 
+  // Close dropdown when clicking outside
+  // useEffect(() => {
+  //   const handleOutsideClick = (event) => {
+  //     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+  //       setActiveDropdown(null);
+  //     }
+  //   };
+  //   document.addEventListener("mousedown", handleOutsideClick);
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleOutsideClick);
+  //   };
+  // }, []);
+
+  // offcanvas dropdown click events 
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (offcanvasDropdownRef.current && !offcanvasDropdownRef.current.contains(event.target)) {
+        setActiveOffcanvasDropdown(null);
+      }
+    };
     document.addEventListener("mousedown", handleOutsideClick);
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick);
@@ -336,9 +398,12 @@ function ProjectReleases() {
             <FiMoreVertical size={24} color="#6A6976" />
           </button>
           {openDropdownId === row.id && (
-            <div className="dropdown-menu" style={{marginLeft: "-110px", top: '-30px'}}  ref={menuRef}>
+            <div id="release-dropdown-menu" className="dropdown-menu"  ref={menuRef}>
               <button onClick={() => alert(`Send clicked for ${row.name}`)}>
                 Send
+              </button>
+              <button onClick={handleShowEdit}>
+                Edit
               </button>
               <button onClick={() => handleDeleteRelease(row.id)}>
                 Delete
@@ -366,13 +431,13 @@ function ProjectReleases() {
         recipients: recipientList,
         releaseNote,
       });
-      // alert("The new release has been added successfully.");
+
       openSuccessToast();
       setRefreshKey((prevKey) => prevKey + 1);
       handleClose();
     } catch (error) {
       console.error(error);
-      // alert("Failed to add the release. Please try again.");
+      openErrorToast();
     }
   };
 
@@ -386,101 +451,7 @@ function ProjectReleases() {
   };
 
   const handleShow = () => setShowAddReleaseModal(true);
-
-
-  // const handleAddNewRelease = async () => {
-  //   Swal.fire({
-  //     title: 'Add New Release',
-  //     html: `
-  //       <div style="text-align: left;">
-  //         <label for="release-name" style="display: block; margin-bottom: 5px;">Release Name</label>
-  //         <input type="text" id="release-name" class="swal2-input" placeholder="Enter release name" style="margin-bottom: 15px; width:100%;">
-          
-  //         <label for="due-date" style="display: block; margin-bottom: 5px;">Due Date</label>
-  //         <input type="date" id="due-date" class="swal2-input" placeholder="Select due date" style="margin-bottom: 15px; width:100%;">
-          
-  //         <label for="recipients" style="display: block; margin-bottom: 5px;">Recipients</label>
-  //         <input type="text" id="recipients" class="swal2-input" placeholder="Enter recipients (comma-separated)" style="width:100%;">
-          
-  //         <div id="group-container" style="margin-top: 10px;">
-  //           <button id="add-releaseNote-btn" type="button" class="btn btn-primary" style="margin-bottom: 10px;">Add a note?</button>
-  //         </div>
-  //       </div>
-  //     `,
-  //     confirmButtonText: 'Add Release',
-  //     showCancelButton: true,
-  //     customClass: {
-  //       confirmButton: "btn btn-success rel-btn-success",
-  //       cancelButton: "btn btn-danger rel-btn-danger"
-  //     },
-  //     didOpen: () => {
-  //       const addNoteBtn = document.getElementById('add-releaseNote-btn');
-  //       const groupContainer = document.getElementById('group-container');
-  
-  //       // Replace button with a text input when clicked
-  //       addNoteBtn.addEventListener('click', () => {
-  //         if (!document.getElementById('release-note')) {
-  //           const textArea = document.createElement('textarea');
-  //           textArea.id = 'release-note';
-  //           textArea.className = 'swal2-input';
-  //           textArea.placeholder = 'Write a note...';
-  //           textArea.style = `
-  //             margin-bottom: 10px; width: 100%; 
-  //             white-space: pre-wrap; word-wrap: break-word;
-  //             background-color: #FFF; color: black;
-  //           `;
-  //           groupContainer.appendChild(textArea);
-  //           addNoteBtn.disabled = true; // Disable button after note addition
-  //         }
-  //       });
-  //     },
-  //     preConfirm: () => {
-  //       const releaseName = document.getElementById('release-name').value.trim();
-  //       const dueDate = document.getElementById('due-date').value.trim();
-  //       const recipients = document.getElementById('recipients').value.trim();
-  //       const releaseNote = document.getElementById('release-note')
-  //         ? document.getElementById('release-note').value.trim()
-  //         : null;
-
-  //       if (!releaseName || !dueDate || !recipients) {
-  //         Swal.showValidationMessage('Please fill in all required fields.');
-  //         return null;
-  //       }
-  
-  //       const recipientList = recipients.split(',').map((email) => email.trim());
-  //       const invalidEmails = recipientList.filter(
-  //         (email) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-  //       );
-  
-  //       if (invalidEmails.length > 0) {
-  //         Swal.showValidationMessage(
-  //           `Invalid email(s): ${invalidEmails.join(', ')}`
-  //         );
-  //         return null;
-  //       }
-  
-  //       return { releaseName, dueDate, recipients: recipientList, releaseNote };
-  //     },
-  //   }).then(async(result) => {
-  //     if (result.isConfirmed) {
-  //       const { releaseName, dueDate, recipients, releaseNote } = result.value;
-  
-  //       try {
-  //         await axiosInstance.post(`/create-release/${projectId}`, {
-  //           releaseName,
-  //           dueDate,
-  //           recipients,
-  //           releaseNote,
-  //         });
-  //       Swal.fire('Success!', 'The new release has been added.', 'success');
-  //       setRefreshKey((prevKey) => prevKey + 1);
-  //       } catch (error){
-  //         Swal.fire('Error!', 'Failed to add the release. Try again.', 'error');
-  //       console.error(error);
-  //       }
-  //     }
-  //   });
-  // };
+  const handleShowEdit = () => setShowEditReleaseModal(true);
 
   const handleDeleteRelease = async (id) => {
     Swal.fire({
@@ -521,6 +492,34 @@ function ProjectReleases() {
     });
   };
 
+const [openSecondaryFilter, setOpenSecondaryFilter] = useState(false);
+  const handleSecondaryFilterToggle = () => {
+    setOpenSecondaryFilter((prevState) =>!prevState);
+    handleShowCanvas();
+  };
+const handleEditRelease = async (id) => {
+  if (!releaseName || !dueDate || recipients.length === 0) {
+    alert("Please fill in all required fields.");
+    return;
+  }
+
+  const recipientList = recipients.map((recipient) => recipient.value);
+
+  try {
+    await axiosInstance.post(`/edit-release/${projectId}/${id}`, {
+      releaseName,
+      dueDate,
+      recipients: recipientList,
+      releaseNote,
+    });
+    openSuccessToast();
+    setRefreshKey((prevKey) => prevKey + 1);
+    handleClose();
+  } catch (error) {
+    console.error(error);
+  }
+}
+
   return (
     <div className="container">
       <StickyHeader />
@@ -556,21 +555,71 @@ function ProjectReleases() {
                           <h2>Releases</h2>
                         </div>
                         <div className="button-group d-flex">
-                          <button id="addbtn"className="btn btn-primary add-btn" title="Add New Release"   onClick={handleAddNewRelease}>
+                          <button id="addbtn"className="btn btn-primary add-btn" title="Add New Release"   onClick={handleShow}>
                               New
                           </button>
                         </div>
                       </div>
                       <div className="release-filters">
                         <div className="filter-container">
-                        <div className="filters d-flex">
+                        <div className="filters d-flex" id="release-filters">
                         {filters.map((filter) => (
                           <div key={filter.type} className="filter-type mr-3" onClick={() => setActiveDropdown(filter.type)}>
                             {filter.type} <FaCaretDown />
                             {activeDropdown === filter.type && renderDropdown(filter)}
-                          </div>
+                          </div> 
                         ))}
                         </div>
+                        <div className="d-flex float-end mb-2">
+                            <button className="btn float-end filter-btn-icon" onClick={handleSecondaryFilterToggle} > <FaFilter/> </button>
+                        </div>
+                        {openSecondaryFilter && (
+                          <Offcanvas 
+                          show={showCanvas} 
+                          onHide={handleCloseCanvas} 
+                          placement="end" 
+                          className="offcanvas"
+                          id="release-offcanvas"
+                        >
+                        <Offcanvas.Header className="offcanvas-head">
+                          <Offcanvas.Title>
+                          <div className="offcanvas-header d-flex justify-content-between align-items-center">
+                            <div className="file-title">
+                                <h5> Filters </h5>
+                            </div>
+                            <div className="offcanvas-button-group">
+                              <button
+                                className="offcanvas-btn"
+                                title="Close"
+                                onClick={handleCloseCanvas}
+                              >
+                                <LiaTimesSolid size={18} />
+                              </button>
+                            </div>
+                          </div>
+                          </Offcanvas.Title>
+                        </Offcanvas.Header>
+                          <Offcanvas.Body className="offcanvas-body">
+                            <div className="releaseFilter-offcanvas-body">
+                              <div className="offcanvas-filters">
+                              {filters.map((filter) => (
+                                <div key={filter.type} className="filter-type mr-3" onClick={() => setActiveOffcanvasDropdown(filter.type)}>
+                                  <span>  {filter.type} <FaCaretDown  className="float-end"/> </span>   
+                                  {activeOffcanvasDropdown === filter.type && renderOffcanvasDropdown(filter)}
+                                </div> 
+                              ))}
+                              </div>
+                            </div>
+                           <div className="offcanvas-footer d-xl-none">
+                            <div className="d-flex justify-content-center">
+                              <button className="btn reset-filter-btn" onClick={() => setSelectedFilters([])}>
+                                  Reset Filters
+                              </button>
+                            </div>  
+                          </div> 
+                          </Offcanvas.Body>
+                        </Offcanvas>
+                        )}
                         </div>
                       </div>  
                       <DataTable
@@ -602,6 +651,7 @@ function ProjectReleases() {
                     </div>
                 </div>
         </div>
+        {/* Add Release Modal */}
         <Modal id="releaseAddModal" show={showAddReleaseModal} onHide={() => setShowAddReleaseModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Add New Release</Modal.Title>
@@ -625,7 +675,7 @@ function ProjectReleases() {
 
         <div className="modal-form" style={{ marginBottom: "15px" }}>
           <label htmlFor="modal-dueDate" style={{ marginBottom: "5px", display: "block" }}>
-            Enter release name:
+            Enter due date:
           </label>
           <input
                type="date"
@@ -686,7 +736,7 @@ function ProjectReleases() {
           <Button
             id="closeAdd"
             variant="secondary"
-            onClick={() => setShowAddReleaseModal(false)}
+            onClick={handleClose}
           >
             Close
           </Button>
@@ -695,7 +745,104 @@ function ProjectReleases() {
           </Button>
         </Modal.Footer>
       </Modal>
+      {/* End of Add Release Modal */}
 
+
+      {/* Edit Release Modal */}
+      <Modal id="releaseEditModal" show={showEditReleaseModal} onHide={() => setShowEditReleaseModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Release</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form onSubmit={(e) => e.preventDefault()}>
+            <div className="mb-3">
+          <div className="modal-form" style={{ marginBottom: "15px" }}>
+          <label htmlFor="modal-releaseName" style={{ marginBottom: "5px", display: "block" }}>
+            Enter new release name:
+          </label>
+          <input
+               type="text"
+               id="modal-releaseName"
+               placeholder="Edit..."
+               value={releaseName}
+               onChange={(e) => setReleaseName(e.target.value)}
+               required
+          />
+        </div>
+
+        <div className="modal-form" style={{ marginBottom: "15px" }}>
+          <label htmlFor="modal-dueDate" style={{ marginBottom: "5px", display: "block" }}>
+            Enter new due date:
+          </label>
+          <input
+               type="date"
+               id="modal-dueDate"
+               value={dueDate}
+               onChange={(e) => setDueDate(e.target.value)}
+               required
+          />
+        </div>
+
+          <div className="modal-form" style={{ marginBottom: "15px" }}>
+          <label htmlFor="recipients" style={{ marginBottom: "5px", display: "block" }}>
+            Choose recipient(s):
+          </label>
+          <Select
+            id="recipients"
+            options={availableEmails}
+            isMulti
+            onChange={(selectedOptions) => setRecipients(selectedOptions)}
+            className="basic-multi-select"
+            classNamePrefix="select"
+          />
+        </div>
+
+        {isNoteAdded ? (
+        <div className="modal-form" style={{ marginBottom: "15px" }}>
+          <label htmlFor="release-note" style={{ marginBottom: "5px", display: "block" }}>
+            Write New Note/Message
+          </label>
+          <textarea
+            id="release-note"
+            placeholder="Write a note..."
+            value={releaseNote}
+            onChange={(e) => setReleaseNote(e.target.value)}
+            style={{
+              width: "100%",
+              height: "80px",
+              padding: "8px",
+              resize: "none",
+              backgroundColor: "#FFF",
+              color: "black",
+            }}
+          ></textarea>
+        </div>
+          ) : (
+            <Button
+                variant="text"
+                onClick={() => setIsNoteAdded(true)}
+                className="p-0"
+              >
+                Add a note?
+              </Button>
+            )}
+            </div>
+          </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            id="closeAdd"
+            variant="secondary"
+            onClick={() => setShowEditReleaseModal(false)}
+          >
+            Close
+          </Button>
+          <Button id="saveAdd" variant="primary" onClick={handleEditRelease}>
+            Edit
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      {/* End of Edit Release Modal */}
           {/* Create Release Messages */}
         <ToastContainer
           className="p-3"
