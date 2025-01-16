@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import React, { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import * as OBC from '@thatopen/components';
 import * as BUI from '@thatopen/ui';
 import * as CUIT from '../../tables';
@@ -37,13 +37,15 @@ import {
 BUI.Manager.init();
 
 function IfcViewer() {
+  const { fileName } = useParams()
   const navigate = useNavigate();
   const containerRef = useRef(null);
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
   const [cameraControls, setCameraControls] = useState(false);
 
-  const fileUrl = location.state?.fileUrl;
+  // const fileUrl = location.state?.fileUrl;
+  const fileUrl = fileName;
   // const []+
 
   // const handleFileSelect = (event) => {
