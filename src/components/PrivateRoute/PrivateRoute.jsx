@@ -9,7 +9,8 @@ const ProtectedRoute = ({ element, allowedRoles }) => {
 
   if (!userRole) {
     // Redirect to login page if not authenticated
-    return <Navigate to="/" state={{ from: location }} />;
+    // return <Navigate to="/" state={{ from: location }} />;
+    return <Navigate to="/access-request" state={{ from: location.pathname + location.search }} replace />
   }
 
   if (!allowedRoles.includes(userRole)) {

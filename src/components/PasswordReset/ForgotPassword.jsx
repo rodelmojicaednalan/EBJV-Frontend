@@ -31,6 +31,7 @@ function ForgotPassword() {
     }
 
   };
+  
   const handleHideAlert = async (e) => {
     setIsEmailNotFound(false);
     setMessage("");

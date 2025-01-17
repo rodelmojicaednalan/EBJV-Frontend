@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Login.css';
 import rme_login_image from '../../assets/images/rme_login_image.png';
 import axiosInstance from '../../../axiosInstance.js';
-import Swal from 'sweetalert2'
-import close from "../../assets/images/close.png";
+// import Swal from 'sweetalert2'
+// import close from "../../assets/images/close.png";
 
 function Login() {
     const [username, setUsername] = useState('');
@@ -13,6 +13,7 @@ function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState({value: "" , isShow : false});
     const navigate = useNavigate();
+    const location = useLocation();
 
     const login = async (event) => {
         event.preventDefault();
@@ -29,51 +30,34 @@ function Login() {
             document.cookie = `refreshToken=${refreshToken}; Path=/; `;
 
             localStorage.setItem('loginSuccess', 'true');
-            if (roleName === 'Admin') {
-                // console.log(user, accessToken, refreshToken, roleName);
-                navigate('/projects');
-            } else {
-                navigate('/projects');
-            }
-        } catch (error) {
-            console.error('Login error:', error);
 
-            setError({
-                value : "Invalid login ,Please check your credentials ",
-                isShow : true 
-            });
-            // Swal.fire({
-            //     title: 'Invalid username or password!',
-            //     text: 'Please check your credentials',
-            //     imageUrl: close,
-            //     imageWidth: 100,
-            //     imageHeight: 100,
-            //     confirmButtonText: "OK",
-            //     confirmButtonColor: "#EC221F",
-            //     customClass: {
-            //         confirmButton: "custom-error-confirm-button",
-            //         title: "custom-swal-title",
-            //     },
-            // })
-            return;
-        }
+        //     if (roleName === 'Admin') {
+        //         // console.log(user, accessToken, refreshToken, roleName);
+        //         navigate('/projects');
+        //     } else {
+        //         navigate('/projects');
+        //     }
+
+        // } catch (error) {
+        //     console.error('Login error:', error);
+        //     setError({
+        //         value : "Invalid login ,Please check your credentials ",
+        //         isShow : true 
+        //     });
+        //     return;
+        // }
+        const redirectTo =
+        location.state?.from || localStorage.getItem('originalUrl') || '/projects';
+
+        // Clear the stored URL
+        localStorage.removeItem('originalUrl');
+
+        navigate(redirectTo);
+      } catch (error) {
+        console.error('Login error:', error);
+        alert('Invalid login, please try again.');
+      }
     };
-
-    // useEffect(() => {
-    //     const fetchBranches = async () => {
-    //         try {
-    //             const response = await axiosInstance.get('/branchLogin');
-    //             setBranches(response.data);
-    //         } catch (error) {
-    //             console.error('Error fetching branches:', error);
-    //         }
-    //     };
-
-    //     fetchBranches();
-    // }, []);
-
-
-
 
     return (
         <div className="d-flex align-items-center justify-content-center custom-login">
@@ -135,25 +119,6 @@ function Login() {
                                 /> &nbsp; 
                                 <label htmlFor="showPassword">Show Password</label>
                                 <a style={{cursor: "pointer"}} className='float-end' onClick={()=>navigate("/forgot-password")}>Forgot Password?</a>
-                            </div>
-                            <div className='d-flex'>
-                                {/* <div className="d-flex mb-3 mr-3">
-                                    <h6>
-                                        <select
-                                            id="branch"
-                                            className="form-control-sm"
-                                            value={selectedBranch}
-                                            onChange={(e) => setSelectedBranch(e.target.value)}
-                                        >
-                                            <option value="">Branch</option>
-                                            {branches.map((branch) => (
-                                                <option key={branch.id} value={branch.branch_name}>
-                                                    {branch.branch_name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </h6>
-                                </div> */}
                             </div>
                             <div className='d-flex justify-content-left mt-1'>
                                 <button type="submit" className="mt-2 custom-btn">Login</button>

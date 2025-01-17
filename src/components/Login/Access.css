@@ -1,0 +1,124 @@
+/* Access Request Page Style */
+.access-request-page, .request-form-page{
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #f3f3ff;
+}
+.access-request-card, .request-access-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* justify-content: center; */
+    background-color: white;
+    padding: 2rem;
+    /* width: 60vw; */
+    max-width: 500px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.2);
+}
+.access-request-card-body{
+    width: 100%;
+    padding: 1.2rem;
+}
+.access-request-card-header{
+    /* font-size: 24px; */
+    font-weight: bold;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.access-request-card-header h2, .form-title{
+    font-size: 1.6rem;
+    text-align: center;
+}
+
+.access-request-card p{
+    word-wrap: normal; /* or use overflow-wrap: normal; */
+    overflow-wrap: break-word;
+    white-space: normal;   /* wrap,for compatibility */
+    word-break: break-word;
+    /* text-align: justify; */
+}
+
+.access-request-card-footer{
+    margin-top: 20px;
+    font-size: .785rem;
+    font-weight: 500;
+    font-style: italic;
+}
+
+.access-btn-group{
+    display: flex;   
+    flex-direction: row;
+    justify-content:space-evenly;
+}
+
+.login-btn, .req-acc-btn{
+    padding: 8px 12px;
+    border: none;
+}
+.login-btn:hover {
+    background-color: #fd6b17;
+}
+.req-acc-btn:hover{
+    background-color: #8d8f95;
+}
+
+.access-request-page-footer{
+    bottom: 1rem;
+    position: fixed;
+    font-size: .875rem;
+    font-weight: 700;
+    text-align: center;
+    color: #8d8f95;
+}
+/* End of Access Request Page Style */
+
+
+/* Request Access Form Style */
+.form-logo{
+    align-items: center;
+    justify-content: center;
+    width:100px;
+    height: auto;
+}
+.request-form-header{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.form-title{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    
+}
+.request-access-form-body{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 1.2rem;
+}
+.form-body{
+    width: 100%;
+}
+.form-group-multiple{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.request-footer-span{
+    display: flex;
+    flex-direction: column;
+}
+  /* End of Request Access Form Style */

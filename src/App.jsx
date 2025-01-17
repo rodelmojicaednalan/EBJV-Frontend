@@ -42,6 +42,11 @@ import IfcViewer from './components/AdminPages/IfcViewer/IfcViewer';
 import ProjectMap from './components/AdminPages/Projects/ProjectFolderPages/ProjectMap';
 
 import QrCodeGenerator from './QrCodeGenerator';
+
+import AccessRequest from './components/Login/AccessRequest';
+import RequestAccessForm from './components/Login/RequestAccessForm';
+import WaitInstructions from './components/Login/WaitInstructions';
+
 function Layout() {
   const location = useLocation();
   const userRole = getCookie('role_name');
@@ -53,7 +58,7 @@ function Layout() {
   
   // Function to check if the route should hide the sidebar
   const shouldHideSidebar = () => {
-    const noSidebarPaths = ['/', '/not-authorized', '/forgot-password', '/open-email'];
+    const noSidebarPaths = ['/', '/not-authorized', '/forgot-password', '/open-email', '/access-request', '/request-access-form', '/wait-instructions'];
   
     // Check static no-sidebar paths
     if (noSidebarPaths.includes(location.pathname)) return true;
@@ -73,10 +78,13 @@ function Layout() {
       <Routes>
         <Route path="/qr-code-generator" element={<QrCodeGenerator/>} />
         <Route path="/" element={<Login />} />
+        <Route path="/access-request" element={<AccessRequest />} />
+        <Route path="/request-access-form" element={<RequestAccessForm />} />
+        <Route path="/wait-instructions" element={<WaitInstructions/>} />
         <Route path="/userlist" element={<ProtectedRoute element={<UsersList />} allowedRoles={['Admin']} />} />
         <Route path="/uploaded-ifc-file" element={<ProtectedRoute element={<IfcUploadPage />} allowedRoles={['Admin']} />} />
-        <Route path="/ifc-viewer/:projectId/:fileName"element={<IfcViewer/>}/>
-        {/* <Route path="/ifc-viewer/:projectId/:fileName"element={<ProtectedRoute element={<IfcViewer />} allowedRoles={['Admin', 'Client']} /> }/> */}
+        {/* <Route path="/ifc-viewer/:projectId/:fileName"element={<IfcViewer/>}/> */}
+        <Route path="/ifc-viewer/:projectId/:fileName"element={<ProtectedRoute element={<IfcViewer />} allowedRoles={['Admin', 'Client']} /> }/>
         <Route path="/forgot-password"  element={<ForgotPassword />}/>
         <Route path="/reset-password/:passwordToken" name="reset-password"  element={<ResetPassword />}/>
         <Route path="/open-email"  element={<CheckEmail />}/>
