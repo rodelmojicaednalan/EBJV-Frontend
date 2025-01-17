@@ -23,6 +23,7 @@ button {
 
 /* Override the active and focus states */
 .btn-primary:focus,
+.btn-primary:hover,
 .btn-primary:active,
 .btn-primary.active,
 .btn-primary:focus-visible {
