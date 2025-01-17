@@ -443,7 +443,6 @@
 .top-bar {
   height: 50px;
   background-color: #ffffff;
-  border: 1px solid #505050;
   display: flex;
   align-items: center;
   z-index: 10;
@@ -451,9 +450,11 @@
 
 .top-bar-content {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   width: 100%;
+  padding: 0 10px;
+  color: black !important;
 }
 
 .top-bar-button {
@@ -464,7 +465,7 @@
   background: none;
   cursor: pointer;
   font-size: 14px;
-  color: #007bff;
+  color: black;
 }
 
 .top-bar-button:hover {
@@ -572,4 +573,60 @@
 
 .tab-panel-content::-webkit-scrollbar-track {
   background-color: #f1f1f1;
+}
+
+bim-panel {
+  border-radius: 0 !important;
+}
+
+.container {
+  padding: 0 0 0 0 !important;
+}
+
+.icon-group {
+  display: flex;
+  gap: 10px;
+}
+
+.hamburger-menu {
+  display: none;
+  cursor: pointer;
+  font-size: 24px;
+  padding: 10px;
+  position: relative;
+}
+
+.icon-group-modal {
+  display: none;
+  position: absolute;
+  top: 60px;
+  right: 10px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.icon-group-modal.active {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .icon-group {
+    display: none;
+  }
+
+  .hamburger-menu {
+    display: block;
+  }
+}
+
+bim-grid {
+  display: grid;
+  height: 100vh;
+  width: 100%;
 }

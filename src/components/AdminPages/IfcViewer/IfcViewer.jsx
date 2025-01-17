@@ -1,6 +1,10 @@
 /* eslint-disable react/prop-types */
 import React, { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+} from 'react-router-dom';
 import * as OBC from '@thatopen/components';
 import * as BUI from '@thatopen/ui';
 import * as CUIT from '../../tables';
@@ -37,12 +41,15 @@ import {
 BUI.Manager.init();
 
 function IfcViewer() {
-  const { fileName } = useParams()
+  const { fileName } = useParams();
   const navigate = useNavigate();
   const containerRef = useRef(null);
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
   const [cameraControls, setCameraControls] = useState(false);
+  const [isPanelOpen, setIsPanelOpen] = useState(true);
+
+  console.log(isPanelOpen);
 
   // const fileUrl = location.state?.fileUrl;
   const fileUrl = fileName;
@@ -216,21 +223,25 @@ function IfcViewer() {
               : 'Expand';
           };
 
+          const togglePanel = () => {
+            setIsPanelOpen((isPanelOpen) => !isPanelOpen);
+          };
+
           return BUI.html`
-           <bim-panel label="Classifications Tree">
-            <bim-panel-section label="Classifications">
-              ${classificationsTree}
-            </bim-panel-section>
-            <bim-panel-section label="Element Data">
-              <div style="display: flex; gap: 0.5rem;">
-                <bim-button @click=${expandTable} label=${
+          <bim-panel label="Classifications Tree">
+          <bim-panel-section label="Classifications">
+          ${classificationsTree}
+          </bim-panel-section>
+          <bim-panel-section label="Element Data">
+          <div style="display: flex; gap: 0.5rem;">
+          <bim-button @click=${expandTable} label=${
             propertiesTable.expanded ? 'Collapse' : 'Expand'
           }></bim-button> 
-              </div> 
-              <bim-text-input @input=${onTextInput} placeholder="Search Property" debounce="250"></bim-text-input>
-              ${propertiesTable}
-            </bim-panel-section>
-           </bim-panel> 
+          </div> 
+          <bim-text-input @input=${onTextInput} placeholder="Search Property" debounce="250"></bim-text-input>
+          ${propertiesTable}
+          </bim-panel-section>
+          </bim-panel> 
           `;
         });
 
@@ -238,9 +249,11 @@ function IfcViewer() {
         app.layouts = {
           main: {
             template: `
-              "panel viewport"
-              / 23rem 1fr
+              "panel"
+              "viewport"
+              / 1fr
             `,
+            rows: '50% 50%',
             elements: { panel, viewport },
           },
         };
@@ -253,13 +266,13 @@ function IfcViewer() {
 
       initializeIfcViewer();
     }
-  }, []);
+  }, [isPanelOpen]);
 
   return (
     <div className="container" ref={containerRef}>
       {/* <StickyHeader /> */}
 
-      <div className="col-lg-12 col-md-6 custom-content-container margin-top">
+      <div className="col-lg-12 custom-content-container margin-top">
         <TopBar
           hanldeCameraControls={hanldeCameraControls}
           cameraControls={cameraControls}
@@ -278,30 +291,71 @@ function TopBar({
   cameraControls,
   handleBack,
 }) {
+  const [isModalOpen, setModalOpen] = useState(false);
+
+  const toggleModal = () => {
+    setModalOpen((prev) => !prev);
+  };
+
   return (
     <div className="top-bar">
       <div className="top-bar-content">
         <button className="top-bar-button" onClick={handleBack}>
           <FiArrowLeft /> Back
         </button>
-        <div className="icon-group">
+
+        {/* Hamburger Menu for Mobile */}
+        <div className="hamburger-menu" onClick={toggleModal}>
+          ☰
+        </div>
+
+        {/* Modal for Icons */}
+        <div
+          className={`icon-group-modal ${
+            isModalOpen ? 'active' : ''
+          }`}
+        >
           <div onClick={hanldeCameraControls}>
-            <FiRotateCw /> <FiChevronDown size={15} />
+            <FiRotateCw />
+            {/* <FiChevronDown size={15} /> */}
           </div>
-          {cameraControls && (
-            <div style={{ position: 'absolute', top: '50px' }}>
-              sample dropdwon
-            </div>
-          )}
-          <FiMousePointer className="active-icon" />
+          {/* <FiMousePointer className="active-icon" /> */}
+          <FiMousePointer />
           <FiSquare />
           <FiMaximize />
           <FiCrop />
           <FiScissors />
           <FiCamera />
           <FiCheckSquare />
-          <FiEye className="active-icon" />
-          <span className="reset-model">Reset model</span>
+          <FiEye />
+          {/* <span className="reset-model">Reset model</span> */}
+          <FiHelpCircle />
+          <FiSettings />
+          <FiColumns />
+        </div>
+
+        {/* Icon Group for Larger Screens */}
+        <div className="icon-group">
+          <div
+            onClick={hanldeCameraControls}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <FiRotateCw />
+            {/* <FiChevronDown size={15} /> */}
+          </div>
+          <FiMousePointer />
+          <FiSquare />
+          <FiMaximize />
+          <FiCrop />
+          <FiScissors />
+          <FiCamera />
+          <FiCheckSquare />
+          <FiEye />
+          {/* <span className="reset-model">Reset model</span> */}
           <FiHelpCircle />
           <FiSettings />
           <FiColumns />
