@@ -123,6 +123,9 @@ input[type=checkbox]#showPassword:checked:before {
     width: auto;
     height: fit-content;    
 }
+.forgot-password-btn{
+    color: #26303A;
+}
 
 label {
     font-size: 20px;
@@ -143,6 +146,7 @@ form label{
     text-transform: capitalize;
     margin-top: 15px !important;
     border: none !important;
+    width: 100%;
 }
 
 .custom-btn:hover {

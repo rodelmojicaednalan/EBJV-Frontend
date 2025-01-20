@@ -544,7 +544,7 @@ useEffect(() => {
                               </div>
                             )}
                           </div>
-                          <button id="addbtn"className="btn btn-primary add-btn" title="Add New Release" onClick={handleAddNewToDo}>
+                          <button id="addbtn"className="btn btn-primary add-btn" title="Add New Release" onClick={handleShow}>
                               New
                           </button>
                         </div>

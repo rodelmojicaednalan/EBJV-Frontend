@@ -8,8 +8,8 @@ import { Modal, Button, ToastContainer, Toast } from 'react-bootstrap';
 
 const RequestAccessForm = () => {
   const navigate = useNavigate();
-  const [name, setName] = useState("");
-  const [sex, setSex] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [contact, setContact] = useState("");
   const [reason, setReason] = useState("");
@@ -25,8 +25,8 @@ const RequestAccessForm = () => {
   const handleSubmitRequestForm = async () => {
     try {
       await axiosInstance.post("/request-access", {
-        name,
-        sex,
+        firstName,
+        lastName,
         email,
         contact,
         reason,
@@ -65,26 +65,26 @@ const RequestAccessForm = () => {
             <div className="form-body">
               <div className="form-group-multiple mb-3">
                 <div className="form-group-item">
-                  <label htmlFor="requestName">Name:</label>
+                  <label htmlFor="firstName">Name:</label>
                   <input
                     type="text"
                     className="form-control"
-                    id="requestName"
-                    placeholder="John Smith"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    id="firstName"
+                    placeholder="John Michael"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
                     required
                   />
                 </div>
                 <div className="form-group-item">
-                  <label htmlFor="formSex">Sex:</label>
+                  <label htmlFor="lastName">Surname:</label>
                   <input
                     type="text"
                     className="form-control"
-                    id="formSex"
-                    placeholder="Male"
-                    value={sex}
-                    onChange={(e) => setSex(e.target.value)}
+                    id="lastName"
+                    placeholder="Smith"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
                     required
                   />
                 </div>

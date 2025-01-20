@@ -15,6 +15,7 @@ import { IoSearchSharp, IoPersonAddSharp  } from "react-icons/io5";
 import { BiDotsVertical } from "react-icons/bi";
 import { FaCaretDown } from "react-icons/fa";
 import { MdGroupOff, MdGroupAdd, MdDeleteSweep   } from "react-icons/md";
+import { ImPlus } from "react-icons/im";
 
 import ProjectSidebar from '../ProjectFolderSidebar';
 import SidebarOffcanvas from '../MobileSidebar';
@@ -278,7 +279,7 @@ function ProjectContributors() {
       sortable: false,
     },
     {
-      name: "Last Accessed",
+      name: "Last Login",
       key: 'lastAccessed',
       selector: (row) => row.lastAccessed,
       sortable: true,
@@ -693,7 +694,7 @@ useEffect(() => {
                         </div>
                         <div className="button-group d-flex">
                             <button id="addbtn" className="btn btn-primary add-btn" title="Add" onClick={handleInviteToProject}>
-                              Add People to Project
+                              <ImPlus/>
                             </button>
                           </div>
                       </div>
@@ -785,8 +786,7 @@ useEffect(() => {
                                               ref={inviteBoxRef}
                                               style={{
                                                 position: "absolute",
-                                                left: 0,
-                                                top: "40px",
+                                                right: "10px",
                                                 backgroundColor: "white",
                                                 border: "1px solid #ccc",
                                                 padding: "10px",
@@ -806,7 +806,7 @@ useEffect(() => {
                                               />
                                               <button
                                                 className="btn btn-primary"
-                                                id="addbtn"
+                                                id="addToGroupbtn"
                                                 onClick={() => handleInviteToGroup(selectedGroup.groupId)}
                                                 style={{ marginTop: "10px", width: "100%" }}
                                               >

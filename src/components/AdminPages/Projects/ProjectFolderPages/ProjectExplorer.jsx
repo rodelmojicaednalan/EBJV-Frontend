@@ -180,8 +180,6 @@ function ProjectExplorer() {
   };
   
   
-  
-
     // Fetch project details and populate fields
     const fetchProjectDetails = async () => {
       try {
@@ -708,9 +706,9 @@ function ProjectExplorer() {
 
                 <div className={`project-display ${viewType}`} >
                   {viewType === 'grid' ? (
-                    <div className="grid-view"  onClick={handleRowClick}>
+                    <div className="grid-view"  >
                       {explorerTable.map((row, index) => (
-                        <div key={index} className="grid-item">
+                        <div key={index} className="grid-item" onClick={() => handleRowClick(row)}>
                           <h5>{row.fileName}</h5>
                           <p>Owner: {row.fileOwner}</p>
                           <p>Modified: {row.lastModified}</p>

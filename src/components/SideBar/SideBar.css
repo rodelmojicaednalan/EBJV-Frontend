@@ -175,6 +175,15 @@
     width: 18px !important;
   }
 
+  .profile {
+    position: relative;
+    right: -160px;
+    margin: 0 !important;
+}
+.profile div {
+  display: none !important;
+}
+
 }
 
 
@@ -246,7 +255,7 @@
     display: flex;
     justify-content: center;
     position: fixed;
-    top: 2px !important;
+    top: 4px !important;
     right: 10px !important;
     padding: 3px 20px 3px 15px !important;
     cursor: pointer;
@@ -365,7 +374,7 @@
     display: flex;
     justify-content: center;
     position: fixed;
-    top: 2px !important;
+    top: 8px !important;
     right: 10px !important;
     padding: 3px 20px 3px 15px !important;
     cursor: pointer;
@@ -436,10 +445,10 @@
   .profile div{
     visibility: hidden;
   }
-  .profile{
+  /* .profile{
     position: relative;
     left: 250px;
-  }
+  } */
 }
 
 

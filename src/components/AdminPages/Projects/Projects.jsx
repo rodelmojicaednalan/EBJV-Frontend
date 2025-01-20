@@ -201,15 +201,15 @@ function Projects() {
   const columns = [
     {
       name: 'Project Name',
-      width: '40%',
+      width: '50%',
       selector: (row) => row.project_name,
       sortable: true,
     },
     {
       name: 'Project Owner',
-      width: '35%',
       selector: (row) => row.project_owner,
       sortable: true,
+      hide: 'md'
     },
 
     {
@@ -217,9 +217,10 @@ function Projects() {
       selector: (row) => (
         <div>
           <img
+            className="project-folder-icon"
             src={view_icon}
             title="Open Project Folder"
-            alt="view"
+            alt="Open Project Folder"
             width="25"
             height="25"
             onClick={() => handleViewProjectFolder(row.id)}
@@ -276,7 +277,7 @@ function Projects() {
       <StickyHeader />
       <BackToTopButton/>
       <div className="row">
-        <div className="col-lg-12 col-md-6 custom-content-container">
+        <div className="col-lg-12 col-md-6 custom-content-container" id="projectList-container">
           <h3 className="title-page">Projects</h3>
           <div className="top-filter">
             <input
@@ -293,7 +294,7 @@ function Projects() {
               id='add-new-project-btn'
             >
               {/* <i className="fa fa-plus"></i>  */}
-              Add New Project
+              Add Project
             </button>
               )}
           </div>

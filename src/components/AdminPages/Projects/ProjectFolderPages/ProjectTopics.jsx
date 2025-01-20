@@ -44,6 +44,8 @@ function ProjectTopics() {
   const [refreshKey, setRefreshKey] = useState(0); 
 
   const [showCanvas, setShowCanvas] = useState(false);
+  const [showEditCanvas, setShowEditCanvas] = useState(false);
+  const [topicToEdit, setTopicToEdit] = useState(null);
 
   const [isCompressed, setIsCompressed] = useState(false);
   const [showSortOptions, setShowSortOptions] = useState(false);
@@ -311,7 +313,31 @@ useEffect(() => {
       openErrorToast();
     }
   };
+
+  const handleEditTopic = (topic) => {
+    setShowCanvas(true);
+    setTopicToEdit(topic);
+    // console.log(topic)
+  }
+
+  const handleUpdateTopic = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const updatedData = Object.fromEntries(formData);
   
+    try {
+      await axiosInstance.put(`/update-topic/${topicToEdit.id}`, updatedData);
+      openSuccessToast("Topic updated successfully!");
+      setShowCanvas(false);
+      setTopicToEdit(null); // Clear the selected topic
+      setRefreshKey((prevKey) => prevKey + 1); // Refresh the list
+    } catch (error) {
+      openErrorToast("Failed to update topic!");
+    }
+  };
+  
+
+
 
   const handleCompress = () => {
     setIsCompressed((prev) => !prev);
@@ -337,6 +363,8 @@ useEffect(() => {
     }
     return 0;
   });
+
+  // console.log(topicToEdit)
 
     return (
       <div className="container">
@@ -428,17 +456,18 @@ useEffect(() => {
 
                       <Offcanvas 
                         show={showCanvas} 
-                        onHide={handleCloseCanvas} 
+                        onHide={() => setShowCanvas(false)} 
                         placement="end" 
                         backdrop="static"
                         className="offcanvas"
+                        id="topic-offcanvas"
                       >
                         <Offcanvas.Header closeButton className="offcanvas-head">
-                          <Offcanvas.Title>Add New Topic</Offcanvas.Title>
+                          <Offcanvas.Title>{topicToEdit ? "Edit Topic" : "Add New Topic"}</Offcanvas.Title>
                         </Offcanvas.Header>
                         <Offcanvas.Body className="offcanvas-body">
                           {/* Form Starts Here */}
-                          <form onSubmit={handleCreateTopic}>
+                          <form onSubmit={topicToEdit ? handleUpdateTopic: handleCreateTopic}>
                             <div className="form-group mb-3">
                               <label htmlFor="topicName">Topic Name <small>(Required)</small></label>
                               <input
@@ -447,6 +476,7 @@ useEffect(() => {
                                 name="topicName"
                                 className="form-control"
                                 placeholder="Enter topic name"
+                                defaultValue={topicToEdit?.name || ""}
                                 required
                               />
                             </div>
@@ -458,6 +488,7 @@ useEffect(() => {
                                 name="topicDesc"
                                 className="form-control"
                                 placeholder="Enter topic description"
+                                defaultValue={topicToEdit?.description || ""}
                               />
                             </div>
                             <div className="form-group mb-3">
@@ -470,6 +501,7 @@ useEffect(() => {
                                 name="assigneeList"
                                 className="basic-multi-select"
                                 classNamePrefix="select"
+                                defaultValue={topicToEdit?.assigneeList || []}
                               />
                             </div>
                             <div className="form-group mb-3">
@@ -515,6 +547,7 @@ useEffect(() => {
                                 id="deadline"
                                 name="topicDue"
                                 className="form-control"
+                                // defaultValue={topicToEdit?.topicDue || ""}
                                 required
                               />
                             </div>
@@ -541,9 +574,8 @@ useEffect(() => {
                       <div className="topic-cards-box mt-2 d-flex">
                         {sortedTopics.map((topic) => (
                           <div key={topic.id}  className={`container-fluid topic-card ${isCompressed ? 'compressed' : ''}`}
-                          style={{
-                            marginTop: isCompressed ? '0' : '20px',
-                          }}>
+                               style={{ marginTop: isCompressed ? '0' : '20px' }}
+                          >
                             <div className="topic-time d-none d-md-flex ">
                               <span className="text-muted">{topic.modifiedOn}</span>
                             </div>
@@ -565,27 +597,27 @@ useEffect(() => {
                                   </div>
                                   {!isCompressed && (
                                   <div className="topic-config">
-                                    <div className="d-flex justify-content-between">
-                                    <ul className="flex-row">
+                                    <div className="d-flex justify-content-between" id="topic-card-icons">
+                                    <ul className="flex-row" id="topic-card-detail-grp">
                                       <li className="mr-2">
-                                        {iconMappings.priority[topic.priority.toLowerCase()] || iconMappings.priority.normal} {topic.priority}  
+                                        {iconMappings.priority[topic.priority.toLowerCase()] || iconMappings.priority.normal} <label> {topic.priority} </label>  
                                       </li>
                                       <li className="mr-2">
-                                        {iconMappings.status[topic.status.toLowerCase()] || iconMappings.status.new} {topic.status}    
+                                        {iconMappings.status[topic.status.toLowerCase()] || iconMappings.status.new} <label> {topic.status} </label>   
                                       </li>
                                       <li className="mr-2">
-                                        {iconMappings.type[topic.type.toLowerCase()] || iconMappings.type.undefined} {topic.type}    
+                                        {iconMappings.type[topic.type.toLowerCase()] || iconMappings.type.undefined} <label> {topic.type} </label>   
                                       </li>
                                       <li className="mr-2">
-                                        {iconMappings.deadline}  {topic.topicDue}  
+                                        {iconMappings.deadline}  <label> {topic.topicDue} </label>  
                                       </li>
                                     </ul>
                                     <ul className="flex-row" id="topic-card-btn-grp">
                                        <li>
-                                        <button className="btn btn-sm "> <RiEdit2Fill size={14}/> </button>
+                                        <button className="btn btn-sm edit-topic-btn" onClick={() => handleEditTopic(topic)}> <RiEdit2Fill size={14}/> </button>
                                       </li>
                                       <li>
-                                        <button className="btn btn-sm "> <FaTrash size={14}/> </button>
+                                        <button className="btn btn-sm delete-topic-btn"> <FaTrash size={14}/> </button>
                                       </li>
                                     </ul>
                                     </div>

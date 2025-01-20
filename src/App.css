@@ -600,20 +600,20 @@ input[type="date"] {
   }
   #search-bar {
     padding: 6px 12px !important;
-    border: none;
-    border-radius: 30px;
-    background-color: #fdffff;
-    color: #626262;
+    /* border: none; */
+    /* border-radius: 30px; */
+    /* background-color: #fdffff; */
+    /* color: #626262; */
     cursor: text;
-    width: 100%;
+    width: 50%;
     border: 1px solid #dfdfdf;
-    margin-left: 0 !important;
+    /* margin-left: 0 !important; */
     margin-bottom: 10px;
   }
   .top-filter {
     padding: 0px 10px 20px 0px !important;
     width: 100% !important;
-    margin-bottom: -50px;
+    margin-bottom: -40px;
   }
   .top-filter select {
     width: 100%;
@@ -846,36 +846,6 @@ input[type="date"] {
     overflow-x: hidden;
     max-width: 100% !important;
   }
-  .resources-card {
-    flex: 1 1 calc(100% - 20px); /* Show 1 per row for mobile */
-  }
-  .upload-section h2 {
-    font-size: 18px;
-  }
-  .upload-section p {
-    font-size: 12px;
-  }
-
-  .upload-box {
-    padding: 20px;
-  }
-
-  .file-input {
-    font-size: 12px;
-    padding: 6px;
-  }
-
-  .recently-uploaded h3 {
-    font-size: 14px;
-  }
-
-  .file-item {
-    flex: 0 1 80px;
-  }
-
-  .file-item img {
-    width: 35px;
-  }
 
   .file-item p {
     font-size: 10px;
@@ -883,42 +853,13 @@ input[type="date"] {
   .add-user-btn {
     margin-right: 0;
   }
-  .edit-resource-btn {
-    margin-right: 0;
-    margin-top: -20px;
-  }
-  .add-resource-btn {
-    margin-right: 0;
-  }
   .top-filter {
     padding: 0px 10px 20px 8px !important;
     width: 100% !important;
-    margin-bottom: 0;
-  }
-  #ticketTemplate {
-    width: 200px;
+    /* margin-bottom: 0; */
   }
   .date-input {
     width: 135px;
-  }
-  .manage-ticket-btn-2 {
-    position: relative !important;
-    right: 0 !important;
-    top: 0 !important;
-    margin: 0 0 10px 0;
-  }
-  .manage-ticket-btn {
-    position: relative !important;
-    right: 0 !important;
-    margin: 0 0 10px 0;
-
-    top: 0 !important;
-  }
-  .template-selection .ticket-category {
-    display: flex;
-    flex-direction: column;
-
-    margin-top: 0;
   }
   .title-page {
     margin-left: 8px;
@@ -940,10 +881,6 @@ input[type="date"] {
     padding: 0px 5px 5px 5px;
     overflow-x: hidden;
   }
-  .publish-btn {
-    margin-top: -40px;
-    margin-right: 0px;
-  }
 
   .add-user-btn {
     margin-right: 0;
@@ -958,33 +895,12 @@ input[type="date"] {
   .top-filter {
     padding: 0px 10px 20px 8px !important;
     width: 100% !important;
-    margin-bottom: 0;
-  }
-  #ticketTemplate {
-    width: 200px;
+    /* margin-bottom: 0; */
   }
   .date-input {
     width: 120px;
   }
-  .manage-ticket-btn-2 {
-    position: relative !important;
-    right: 0 !important;
-    top: 0 !important;
-    margin: 0 0 10px 0;
-  }
-  .manage-ticket-btn {
-    position: relative !important;
-    right: 0 !important;
-    margin: 0 0 10px 0;
 
-    top: 0 !important;
-  }
-  .template-selection .ticket-category {
-    display: flex;
-    flex-direction: column;
-
-    margin-top: 0;
-  }
   .title-page {
     margin-left: 8px;
   }
@@ -1091,7 +1007,12 @@ input[type="date"] {
     width: 750px;
     overflow-x: auto;
   }
-
+  #search-bar {
+    padding: 6px 12px !important;
+    width: 50%;
+    margin-bottom: 10px;
+    border-radius: 30px;
+  } 
 }
 @media (max-width: 1366px) and (min-width: 1025px) {
  
@@ -1275,9 +1196,9 @@ input[type="date"] {
 }
 /* Styles for iPad Pro, iPad Air, and Surface Pro 7 */
 @media (min-width: 768px) and (max-width: 1024px) {
-  #add-new-project-btn{
+  /* #add-new-project-btn{
     float: inline-start !important;
-  }
+  } */
   #profile-wrapper{
     bottom: -8vw !important;
   }
@@ -1354,13 +1275,13 @@ input[type="date"] {
     font-size: 12px !important;
     color: #000;
   }
-
+/* 
   #search-bar {
     padding: 6px 12px !important;
     width: 100%;
     margin-bottom: 10px;
     border-radius: 30px;
-  }
+  } */
 
   .top-filter {
     padding: 0 10px 20px;

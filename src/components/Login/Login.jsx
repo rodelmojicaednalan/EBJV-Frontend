@@ -118,10 +118,13 @@ function Login() {
                                     onChange={() => setShowPassword(!showPassword)}
                                 /> &nbsp; 
                                 <label htmlFor="showPassword">Show Password</label>
-                                <a style={{cursor: "pointer"}} className='float-end' onClick={()=>navigate("/forgot-password")}>Forgot Password?</a>
+                                <a style={{cursor: "pointer"}} className='forgot-password-btn float-end' onClick={()=>navigate("/forgot-password")}>Forgot Password?</a>
                             </div>
                             <div className='d-flex justify-content-left mt-1'>
                                 <button type="submit" className="mt-2 custom-btn">Login</button>
+                            </div>
+                            <div className="request-btn mt-3 d-flex justify-content-center">
+                            <a style={{cursor: "pointer"}} onClick={()=>navigate("/request-access-form")}>Don&apos;t have an account? <strong> Send a request </strong></a>
                             </div>
                         </form>
                     </div>
