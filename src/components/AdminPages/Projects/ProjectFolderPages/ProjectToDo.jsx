@@ -480,6 +480,36 @@ useEffect(() => {
 
   const handleShow = () => setShowAddTodoModal(true);
 
+
+  const handleDeleteToDo = async (id) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'You won’t be able to revert this!',
+      showCancelButton: true,
+      icon: 'warning',
+      confirmButtonColor: '#EC221F',
+      cancelButtonColor: '#00000000',
+      cancelTextColor: '#000000',
+      confirmButtonText: 'Yes, delete it!',
+      customClass: {
+        container: 'custom-container',
+        confirmButton: 'custom-confirm-button',
+        cancelButton: 'custom-cancel-button',
+        title: 'custom-swal-title',
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axiosInstance.delete(`/delete-todo/${projectId}/${id}`);
+          openDeleteSuccessToast();
+          setRefreshKey((prevKey) => prevKey + 1);
+        } catch (error) {
+          openDeleteErrorToast();
+        }
+      }
+    });
+  };
+
     return (
     <div className="container">
       <StickyHeader />
@@ -797,7 +827,7 @@ useEffect(() => {
                 <div className="offcanvas-button-group2 mb-3 flex-wrap">
                       <label htmlFor="buttons">  </label>
                       <button className="btn mr-1" ><FaFileExcel size={18}/></button>
-                      <button className="btn mr-1" ><FaTrash size={18}/></button>
+                      <button className="btn mr-1" onClick={() => handleDeleteToDo(selectedRow.id)}><FaTrash size={18}/></button>
 
                   </div>
                 {selectedRow && (

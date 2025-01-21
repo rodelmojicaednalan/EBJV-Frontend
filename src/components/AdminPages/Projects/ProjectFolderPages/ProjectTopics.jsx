@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axiosInstance from "../../../../../axiosInstance.js";
-// import Swal from "sweetalert2";
+import Swal from "sweetalert2";
 import { useParams } from "react-router-dom";
 import Select from 'react-select';
 // import check from "../../../../assets/images/check.png";
@@ -44,7 +44,7 @@ function ProjectTopics() {
   const [refreshKey, setRefreshKey] = useState(0); 
 
   const [showCanvas, setShowCanvas] = useState(false);
-  const [showEditCanvas, setShowEditCanvas] = useState(false);
+  // const [showEditCanvas, setShowEditCanvas] = useState(false);
   const [topicToEdit, setTopicToEdit] = useState(null);
 
   const [isCompressed, setIsCompressed] = useState(false);
@@ -335,9 +335,36 @@ useEffect(() => {
       openErrorToast("Failed to update topic!");
     }
   };
+
+  const handleDeleteTopic = async (id) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'You won’t be able to revert this!',
+      showCancelButton: true,
+      icon: 'warning',
+      confirmButtonColor: '#EC221F',
+      cancelButtonColor: '#00000000',
+      cancelTextColor: '#000000',
+      confirmButtonText: 'Yes, delete it!',
+      customClass: {
+        container: 'custom-container',
+        confirmButton: 'custom-confirm-button',
+        cancelButton: 'custom-cancel-button',
+        title: 'custom-swal-title',
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axiosInstance.delete(`/delete-topic/${projectId}/${id}`);
+          openDeleteSuccessToast();
+          setRefreshKey((prevKey) => prevKey + 1);
+        } catch (error) {
+          openDeleteErrorToast();
+        }
+      }
+    });
+  };
   
-
-
 
   const handleCompress = () => {
     setIsCompressed((prev) => !prev);
@@ -617,7 +644,7 @@ useEffect(() => {
                                         <button className="btn btn-sm edit-topic-btn" onClick={() => handleEditTopic(topic)}> <RiEdit2Fill size={14}/> </button>
                                       </li>
                                       <li>
-                                        <button className="btn btn-sm delete-topic-btn"> <FaTrash size={14}/> </button>
+                                        <button className="btn btn-sm delete-topic-btn" onClick={() => handleDeleteTopic(topic.id)} > <FaTrash size={14}/> </button>
                                       </li>
                                     </ul>
                                     </div>

@@ -204,9 +204,25 @@ const [totalFileSize, setTotalFileSize] = useState(0);
         confirmButton: "btn btn-success contrib-btn-success",
         cancelButton: "btn"
       },
-    }).then((result) => {
+    }).then(async(result) => {
       if (result.isConfirmed) {
-        Swal.fire('Success!', 'You have deleted the project.', 'success');
+        try {
+          await axiosInstance.delete(`/delete-project/${projectId}`);
+          Swal.fire('Success!', 'You have deleted the project.', 'success');
+          navigate("/projects")
+        } catch (error) {
+          Swal.fire({
+            title: 'Error!',
+            text: error,
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#EC221F',
+            customClass: {
+              confirmButton: 'custom-error-confirm-button',
+              title: 'custom-swal-title',
+            },
+          });
+        }
       }
     });
   };
@@ -313,7 +329,7 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                                   <label> Project Thumbnail: </label>
                                   <div className="project-img-settings">
                                   <img 
-                                    src={`https://ebjv-api.olongapobataanzambalesads.com/uploads/project-thumbnails/${projectThumbnail}` || upload_icon }
+                                    src={`https://ebjv-api.olongapobataanzambalesads.com/uploads/project-thumbnails/${projectThumbnail}`}
                                     alt="" 
                                     style={{ height: "36px", width: "36px" }} 
                                   />
