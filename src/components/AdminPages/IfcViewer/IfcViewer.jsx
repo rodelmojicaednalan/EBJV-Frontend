@@ -60,6 +60,21 @@ function IfcViewer() {
   //   handleIfcUpload(file);
   // };
 
+  const togglePanel = () => {
+    const panelDiv = document.querySelector('.asd');
+    const app = document.querySelector('bim-grid');
+
+    if (panelDiv.classList.contains('hidden')) {
+      panelDiv.classList.remove('hidden');
+      app.style.gridTemplate = `"viewport panel" / 1fr 23rem`;
+    } else {
+      panelDiv.classList.add('hidden');
+      app.style.gridTemplate = `"viewport"`;
+    }
+
+    setIsPanelOpen((prevState) => !prevState);
+  };
+
   const hanldeCameraControls = () => {
     setCameraControls(!cameraControls);
   };
@@ -223,12 +238,8 @@ function IfcViewer() {
               : 'Expand';
           };
 
-          const togglePanel = () => {
-            setIsPanelOpen((isPanelOpen) => !isPanelOpen);
-          };
-
           return BUI.html`
-          <bim-panel label="Classifications Tree">
+          <bim-panel class="asd" label="Classifications Tree">
           <bim-panel-section label="Classifications">
           ${classificationsTree}
           </bim-panel-section>
@@ -249,11 +260,9 @@ function IfcViewer() {
         app.layouts = {
           main: {
             template: `
-              "panel"
-              "viewport"
-              / 1fr
+              "viewport panel"
+              / 1fr 23rem
             `,
-            rows: '50% 50%',
             elements: { panel, viewport },
           },
         };
@@ -266,17 +275,21 @@ function IfcViewer() {
 
       initializeIfcViewer();
     }
-  }, [isPanelOpen]);
+  }, []);
 
   return (
     <div className="container" ref={containerRef}>
       {/* <StickyHeader /> */}
 
-      <div className="col-lg-12 custom-content-container margin-top">
+      <div
+        className={`col-lg-12 custom-content-container margin-top  `}
+      >
         <TopBar
           hanldeCameraControls={hanldeCameraControls}
           cameraControls={cameraControls}
           handleBack={handleBack}
+          handleTogglePanel={togglePanel}
+          isPanelOpen={isPanelOpen}
         />
         {isLoading && <Loader />}
       </div>
@@ -290,6 +303,8 @@ function TopBar({
   hanldeCameraControls,
   cameraControls,
   handleBack,
+  handleTogglePanel,
+  isPanelOpen,
 }) {
   const [isModalOpen, setModalOpen] = useState(false);
 
@@ -298,69 +313,87 @@ function TopBar({
   };
 
   return (
-    <div className="top-bar">
+    <div className="top-bar m-2">
       <div className="top-bar-content">
         <button className="top-bar-button" onClick={handleBack}>
           <FiArrowLeft /> Back
         </button>
 
-        {/* Hamburger Menu for Mobile */}
-        <div className="hamburger-menu" onClick={toggleModal}>
-          ☰
-        </div>
-
-        {/* Modal for Icons */}
-        <div
-          className={`icon-group-modal ${
-            isModalOpen ? 'active' : ''
-          }`}
-        >
-          <div onClick={hanldeCameraControls}>
-            <FiRotateCw />
-            {/* <FiChevronDown size={15} /> */}
-          </div>
-          {/* <FiMousePointer className="active-icon" /> */}
-          <FiMousePointer />
-          <FiSquare />
-          <FiMaximize />
-          <FiCrop />
-          <FiScissors />
-          <FiCamera />
-          <FiCheckSquare />
-          <FiEye />
-          {/* <span className="reset-model">Reset model</span> */}
-          <FiHelpCircle />
-          <FiSettings />
-          <FiColumns />
-        </div>
-
-        {/* Icon Group for Larger Screens */}
-        <div className="icon-group">
-          <div
-            onClick={hanldeCameraControls}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
+        <div className="top-bar-right">
+          <button
+            className="btn btn-secondary"
+            onClick={handleTogglePanel}
           >
-            <FiRotateCw />
-            {/* <FiChevronDown size={15} /> */}
-          </div>
-          <FiMousePointer />
-          <FiSquare />
-          <FiMaximize />
-          <FiCrop />
-          <FiScissors />
-          <FiCamera />
-          <FiCheckSquare />
-          <FiEye />
-          {/* <span className="reset-model">Reset model</span> */}
-          <FiHelpCircle />
-          <FiSettings />
-          <FiColumns />
+            {`${isPanelOpen ? 'Hide' : 'Open'}`} Classification Tree
+          </button>
+          <Tools
+            hanldeCameraControls={hanldeCameraControls}
+            toggleModal={toggleModal}
+            isModalOpen={isModalOpen}
+          />
         </div>
       </div>
     </div>
+  );
+}
+
+function Tools({ hanldeCameraControls, toggleModal, isModalOpen }) {
+  return (
+    <>
+      {/* Hamburger Menu for Mobile */}
+      <div className="hamburger-menu" onClick={toggleModal}>
+        ☰
+      </div>
+
+      {/* Modal for Icons */}
+      <div
+        className={`icon-group-modal ${isModalOpen ? 'active' : ''}`}
+      >
+        <div onClick={hanldeCameraControls}>
+          <FiRotateCw />
+          {/* <FiChevronDown size={15} /> */}
+        </div>
+        {/* <FiMousePointer className="active-icon" /> */}
+        <FiMousePointer />
+        <FiSquare />
+        <FiMaximize />
+        <FiCrop />
+        <FiScissors />
+        <FiCamera />
+        <FiCheckSquare />
+        <FiEye />
+        {/* <span className="reset-model">Reset model</span> */}
+        <FiHelpCircle />
+        <FiSettings />
+        <FiColumns />
+      </div>
+
+      {/* Icon Group for Larger Screens */}
+      <div className="icon-group">
+        <div
+          onClick={hanldeCameraControls}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <FiRotateCw />
+          {/* <FiChevronDown size={15} /> */}
+        </div>
+        <FiMousePointer />
+        <FiSquare />
+        <FiMaximize />
+        <FiCrop />
+        <FiScissors />
+        <FiCamera />
+        <FiCheckSquare />
+        <FiEye />
+        {/* <span className="reset-model">Reset model</span> */}
+        <FiHelpCircle />
+        <FiSettings />
+        <FiColumns />
+      </div>
+    </>
   );
 }

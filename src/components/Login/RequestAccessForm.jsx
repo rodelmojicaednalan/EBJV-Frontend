@@ -3,40 +3,71 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Access.css';
 import axiosInstance from '../../../axiosInstance';
+import Select from 'react-select';
 
-import { Modal, Button, ToastContainer, Toast } from 'react-bootstrap';
+import {
+  Modal,
+  Button,
+  ToastContainer,
+  Toast,
+} from 'react-bootstrap';
 
 const RequestAccessForm = () => {
   const navigate = useNavigate();
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [contact, setContact] = useState("");
-  const [reason, setReason] = useState("");
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [contact, setContact] = useState('');
+  const [reason, setReason] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
+  const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [projects, setProjects] = useState([]);
+  const [selectedprojectName, setSelectedprojectName] =
+    useState(null);
+
+  const projectOptions = projects.map((projectName) => ({
+    value: projectName,
+    label: projectName,
+  }));
 
   useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await axiosInstance.get('/projects');
+        const p = response.data.data
+          .slice()
+          .map((project) => project.project_name);
+
+        setProjects(p);
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      }
+    };
+
+    fetchProjects();
     localStorage.removeItem('originalUrl'); // Clear stored URL
   }, []);
 
   const handleSubmitRequestForm = async () => {
     try {
-      await axiosInstance.post("/request-access", {
+      await axiosInstance.post('/request-access', {
         firstName,
         lastName,
         email,
+        project: selectedprojectName,
         contact,
         reason,
       });
-      setToastMessage("Request sent successfully. Redirecting...");
+      setToastMessage('Request sent successfully. Redirecting...');
       setIsError(false);
       setShowToast(true);
-      setTimeout(() => navigate("/wait-instructions"), 3000);
+      setTimeout(() => navigate('/wait-instructions'), 3000);
     } catch (error) {
-      setToastMessage("Oops! There seems to be an error. Please try again!");
+      setToastMessage(
+        'Oops! There seems to be an error. Please try again!'
+      );
       setIsError(true);
       setShowToast(true);
       console.log(error);
@@ -90,7 +121,9 @@ const RequestAccessForm = () => {
                 </div>
               </div>
               <div className="form-group">
-                <label htmlFor="formEmailAddress">Email address:</label>
+                <label htmlFor="formEmailAddress">
+                  Email address:
+                </label>
                 <input
                   type="email"
                   className="form-control"
@@ -99,6 +132,26 @@ const RequestAccessForm = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                />
+              </div>
+              <div className="mb-3">
+                <label
+                  htmlFor="projectLocation"
+                  className="form-label"
+                >
+                  Project
+                </label>
+                <Select
+                  id="projectLocation"
+                  options={projectOptions}
+                  onChange={(selectedOptions) =>
+                    setSelectedprojectName(
+                      selectedOptions?.value || null
+                    )
+                  }
+                  name="location"
+                  className="basic-single"
+                  classNamePrefix="select"
                 />
               </div>
               <div className="form-group">
@@ -115,7 +168,9 @@ const RequestAccessForm = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="formReason">Reason for requesting access:</label>
+                <label htmlFor="formReason">
+                  Reason for requesting access:
+                </label>
                 <textarea
                   className="form-control"
                   id="formReason"
@@ -129,7 +184,10 @@ const RequestAccessForm = () => {
           </div>
           <div className="access-btn-group">
             <div className="access-btn-group-item">
-              <button type="submit" className="btn btn-primary login-btn">
+              <button
+                type="submit"
+                className="btn btn-primary login-btn"
+              >
                 Submit
               </button>
             </div>
@@ -145,7 +203,9 @@ const RequestAccessForm = () => {
         <Modal.Header closeButton>
           <Modal.Title>Confirm Submission</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Please check the details before you submit.</Modal.Body>
+        <Modal.Body>
+          Please check the details before you submit.
+        </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleModalClose}>
             Review
@@ -161,7 +221,10 @@ const RequestAccessForm = () => {
         <Toast
           show={showToast}
           onClose={() => setShowToast(false)}
-          style={{ backgroundColor: isError ? "#b04a4a" : "#4ab063", color: "#fff" }}
+          style={{
+            backgroundColor: isError ? '#b04a4a' : '#4ab063',
+            color: '#fff',
+          }}
           delay={3000}
           autohide
         >

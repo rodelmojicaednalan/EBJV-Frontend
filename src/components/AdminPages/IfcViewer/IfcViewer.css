@@ -630,3 +630,21 @@ bim-grid {
   height: 100vh;
   width: 100%;
 }
+
+.hidden {
+  display: none !important;
+}
+
+.top-bar-right {
+  display: flex;
+  gap: 15px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hide-button {
+  border: none;
+  background-color: rgb(234, 234, 234);
+  width: auto;
+  color: black;
+}
