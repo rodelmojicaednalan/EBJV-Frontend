@@ -83,7 +83,7 @@
   /* margin-left: 20px; */
   position: absolute;
   left: 50px;
-  top: 20px;
+  top: 10px;
   z-index: 11;
   color: #ffffff;
   cursor: pointer;
@@ -358,7 +358,7 @@
   .toggle-btn {
     display: flex;
     position: fixed;
-    top: 0px;
+    top: -10px;
     left: 20px;
     z-index: 10;
     color: #fff;
