@@ -326,11 +326,11 @@ function TopBar({
           >
             {`${isPanelOpen ? 'Hide' : 'Open'}`} Classification Tree
           </button>
-          <Tools
+          {/* <Tools
             hanldeCameraControls={hanldeCameraControls}
             toggleModal={toggleModal}
             isModalOpen={isModalOpen}
-          />
+          /> */}
         </div>
       </div>
     </div>
