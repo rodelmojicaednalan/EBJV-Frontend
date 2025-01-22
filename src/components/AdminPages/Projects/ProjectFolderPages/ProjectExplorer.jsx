@@ -26,7 +26,7 @@ import SidebarOffcanvas from '../MobileSidebar';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import useWindowWidth from './windowWidthHook.jsx'
 
-import useDrivePicker from 'react-google-drive-picker';
+// import useDrivePicker from 'react-google-drive-picker';
 
 // import * as htmlToImage from "html-to-image";
 // import QRCode from 'react-qr-code';
@@ -34,7 +34,7 @@ import useDrivePicker from 'react-google-drive-picker';
 import QrCodeGenerator from '../../../../QrCodeGenerator.jsx';
 
 function ProjectExplorer() {
-  const [openPicker, data, authResponse] = useDrivePicker();
+  // const [openPicker, data, authResponse] = useDrivePicker();
 
   const windowWidthHook = useWindowWidth();
   const isMobile = windowWidthHook <= 425;
@@ -49,7 +49,7 @@ function ProjectExplorer() {
   const [offcanvasMenuOpen, setOffcanvasMenuOpen] = useState(false);
 
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
-  const [showAddFolderSubMenu, setShowAddFolderSubMenu] = useState(false);
+  // const [showAddFolderSubMenu, setShowAddFolderSubMenu] = useState(false);
 
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [availableEmails, setAvailableEmails] = useState([]);
@@ -106,78 +106,78 @@ function ProjectExplorer() {
     handleShowCanvas(); // Show the Offcanvas
   };
 
-  const handleOpenPicker = () => {
-    openPicker({
-      clientId: '1043565058642-l6jbl5nq0i519h8dctpoo0i1ru2vp5s6.apps.googleusercontent.com',
-      developerKey: "AIzaSyCeFx5pGWMSp1kGmkFdCj5BTU8bCqP-ORo",
-      viewId:"FOLDERS",
-      showUploadView: true,
-      showUploadFolders: true,
-      supportDrives: true,
-      multiselect: false,
-      callbackFunction: (response) => {
-        if (response.action === "picked") {
-          const folderId = response.docs[0]?.id; // Get the selected folder ID
-          console.log("Selected Folder ID:", folderId);
-          fetchFolderContents(folderId); // Call a function to fetch folder contents
-        } else {
-          console.log("No folder selected.");
-        }
-      },
-      onError: (error) => {
-        console.error("Picker Error: ", error);
-      },
-    });
-  }
+  // const handleOpenPicker = () => {
+  //   openPicker({
+  //     clientId: '1043565058642-l6jbl5nq0i519h8dctpoo0i1ru2vp5s6.apps.googleusercontent.com',
+  //     developerKey: "AIzaSyCeFx5pGWMSp1kGmkFdCj5BTU8bCqP-ORo",
+  //     viewId:"FOLDERS",
+  //     showUploadView: true,
+  //     showUploadFolders: true,
+  //     supportDrives: true,
+  //     multiselect: false,
+  //     callbackFunction: (response) => {
+  //       if (response.action === "picked") {
+  //         const folderId = response.docs[0]?.id; // Get the selected folder ID
+  //         console.log("Selected Folder ID:", folderId);
+  //         fetchFolderContents(folderId); // Call a function to fetch folder contents
+  //       } else {
+  //         console.log("No folder selected.");
+  //       }
+  //     },
+  //     onError: (error) => {
+  //       console.error("Picker Error: ", error);
+  //     },
+  //   });
+  // }
 
-  useEffect(() => {
-    if (data && data.folders) {
-      data.folders.map((i) => console.log(i)); 
-    }
-  }, [data]);
+  // useEffect(() => {
+  //   if (data && data.folders) {
+  //     data.folders.map((i) => console.log(i)); 
+  //   }
+  // }, [data]);
 
-  const fetchFolderContents = async (folderId) => {
-    const accessToken = authResponse.access_token; // Assuming you get this from the Picker's authResponse
-    const apiUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&fields=files(id,name,mimeType)`;
+  // const fetchFolderContents = async (folderId) => {
+  //   const accessToken = authResponse.access_token; // Assuming you get this from the Picker's authResponse
+  //   const apiUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&fields=files(id,name,mimeType)`;
   
-    try {
-      const response = await fetch(apiUrl, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      const data = await response.json();
-      console.log("Folder Contents:", data.files);
+  //   try {
+  //     const response = await fetch(apiUrl, {
+  //       headers: {
+  //         Authorization: `Bearer ${accessToken}`,
+  //       },
+  //     });
+  //     const data = await response.json();
+  //     console.log("Folder Contents:", data.files);
   
-      // Example: Copy a file
-      if (data.files.length > 0) {
-        copyFile(data.files[0].id, "New File Name", folderId, accessToken);
-      }
-    } catch (error) {
-      console.error("Error fetching folder contents:", error);
-    }
-  };
+  //     // Example: Copy a file
+  //     if (data.files.length > 0) {
+  //       copyFile(data.files[0].id, "New File Name", folderId, accessToken);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching folder contents:", error);
+  //   }
+  // };
 
-  const copyFile = async (fileId, newName, parentFolderId, accessToken) => {
-    const apiUrl = `https://www.googleapis.com/drive/v3/files/${fileId}/copy`;
-    try {
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: newName,
-          parents: [parentFolderId], // Copy into the same folder
-        }),
-      });
-      const data = await response.json();
-      console.log("File copied:", data);
-    } catch (error) {
-      console.error("Error copying file:", error);
-    }
-  };
+  // const copyFile = async (fileId, newName, parentFolderId, accessToken) => {
+  //   const apiUrl = `https://www.googleapis.com/drive/v3/files/${fileId}/copy`;
+  //   try {
+  //     const response = await fetch(apiUrl, {
+  //       method: "POST",
+  //       headers: {
+  //         Authorization: `Bearer ${accessToken}`,
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         name: newName,
+  //         parents: [parentFolderId], // Copy into the same folder
+  //       }),
+  //     });
+  //     const data = await response.json();
+  //     console.log("File copied:", data);
+  //   } catch (error) {
+  //     console.error("Error copying file:", error);
+  //   }
+  // };
   
   
     // Fetch project details and populate fields
@@ -588,11 +588,9 @@ function ProjectExplorer() {
             </button>
             {isAddMenuOpen && (
               <div className="addFile-dropdown" ref={menuRef}>
-                <div className="addFile-dd-item" 
+                {/* <div className="addFile-dd-item" 
                 onMouseEnter={() => setShowAddFolderSubMenu(true)}
-                onMouseLeave={() => setShowAddFolderSubMenu(false)}
-                /*onClick={() => handleOpenPicker()}*/ 
-                /*onClick={() => setShowAddFolderModal(true)}*/>
+                onMouseLeave={() => setShowAddFolderSubMenu(false)}>
                   <FaChevronLeft className="submenu-indicator"/>
                   <FaFolderPlus className="addFile-dd-icon" />
                   <span>Create folder</span>
@@ -609,8 +607,8 @@ function ProjectExplorer() {
                       </div>
                     </div>
                   )}
-                </div>
-                <div className="addFile-dd-divider" />
+                </div> */}
+                {/* <div className="addFile-dd-divider" /> */}
                 <div className="addFile-dd-item" onClick={() => setShowAddModal(true)}>
                   <AiOutlineFileAdd className="addFile-dd-icon" />
                   <span>Upload files</span>
@@ -791,7 +789,7 @@ function ProjectExplorer() {
         </Modal.Footer>
       </Modal>
 
-      <Modal show={showAddFolderModal} onHide={() => setShowAddFolderModal(false)}>
+      {/* <Modal show={showAddFolderModal} onHide={() => setShowAddFolderModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Create Folder</Modal.Title>
         </Modal.Header>
@@ -827,7 +825,7 @@ function ProjectExplorer() {
             Create
           </Button>
         </Modal.Footer>
-      </Modal>
+      </Modal> */}
 
       <Modal show={isShareModalOpen} onHide={() => setIsShareModalOpen(false)} centered>
         <Modal.Header closeButton>
@@ -933,7 +931,9 @@ function ProjectExplorer() {
               )}
               <button className="btn" onClick={handleOpenShareModal}><IoMdPersonAdd size={20}/></button>
               <button className="btn" onClick={() => downloadFile(selectedRow.fileName)} ><IoMdDownload size={20}/></button>
+              {selectedRow?.fileName?.endsWith('.ifc') && (
               <button className="btn" onClick={handleOpenQRCodeModal}><BsQrCode size={20}/></button>
+              )}
               {/* <button className="btn " onClick={handleOCMenuToggle}><BiDotsVertical size={20}/></button>  
               {offcanvasMenuOpen && (
                         <div className="dropdown-menu" id="offcanvas-dropdown" ref={menuRef}>

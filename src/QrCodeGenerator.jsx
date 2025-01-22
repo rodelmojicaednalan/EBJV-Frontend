@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import * as htmlToImage from "html-to-image";
 import QRCode from 'react-qr-code'
 import './QRCodeStyle.css'
+// eslint-disable-next-line react/prop-types
 function QrCodeGenerator({fileName, projectId }) {
   const [url, setUrl] = useState("");
   const [qrIsVisible, setQrIsVisible] = useState(false);

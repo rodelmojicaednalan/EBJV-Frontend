@@ -11,15 +11,20 @@ import StickyHeader from "../../../SideBar/StickyHeader";
 import '../ProjectStyles.css'
 
 // import { RiAddLargeFill } from "react-icons/ri";
-import { IoSearchSharp, IoPersonAddSharp  } from "react-icons/io5";
-import { BiDotsVertical } from "react-icons/bi";
-import { FaCaretDown } from "react-icons/fa";
+import { IoSearchSharp, IoPersonAddSharp, IoPersonRemoveSharp  } from "react-icons/io5";
+import { BiDotsVertical, BiSolidEditAlt } from "react-icons/bi";
+import { LiaTimesSolid } from "react-icons/lia";
+import { FaCaretDown, FaFile, FaFileExcel, FaTrash } from "react-icons/fa";
 import { MdGroupOff, MdGroupAdd, MdDeleteSweep   } from "react-icons/md";
 import { ImPlus } from "react-icons/im";
+import { HiMiniUserGroup } from "react-icons/hi2";
 
 import ProjectSidebar from '../ProjectFolderSidebar';
 import SidebarOffcanvas from '../MobileSidebar';
 import useWindowWidth from './windowWidthHook.jsx'
+import Offcanvas from 'react-bootstrap/Offcanvas';
+import { ToastContainer, Toast } from 'react-bootstrap';
+
 function ProjectContributors() {
   const windowWidthHook = useWindowWidth();
   const isMobile = windowWidthHook <= 425;
@@ -53,6 +58,31 @@ function ProjectContributors() {
       
   const [filteredContributors, setFilteredContributors] = useState([]);
   const filterRef = useRef(null);
+
+  const [toastPosition, setToastPosition] = useState('bottom-end')
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [showDeleteSuccessToast, setShowDeleteSuccessToast] = useState(false);
+  const [showDeleteErrorToast, setShowDeleteErrorToast] = useState(false);  
+    
+  const openSuccessToast = () => setShowSuccessToast(!showSuccessToast);
+  const openErrorToast = () => setShowErrorToast(!showErrorToast);
+  const openDeleteSuccessToast = () => setShowDeleteSuccessToast(!showDeleteSuccessToast);
+  const openDeleteErrorToast = () => setShowDeleteErrorToast(!showDeleteErrorToast); 
+
+  //  Row Click Related Variables
+      const [showCanvas, setShowCanvas] = useState(false);
+      const handleCloseCanvas = () => setShowCanvas(false);
+      const handleShowCanvas = () => setShowCanvas(true);
+    
+      const [selectedRow, setSelectedRow] = useState(null); // State to hold the selected row details
+    
+    // Handle row click
+      const handleRowClick = (row) => {
+        setSelectedRow(row); // Set the clicked row's data
+        handleShowCanvas(); // Show the Offcanvas
+      };
+      console.log(selectedRow)
 
   // search people hide function
   const handleSearch = (event) => {
@@ -135,6 +165,7 @@ function ProjectContributors() {
         setOwnerName(owner);
     
         const formattedContributors = contributors.map((contributor) => ({
+          contId: contributor.id,
           contName: contributor.name,
           contEmployer: contributor.employer,
           contRole: contributor.role,
@@ -223,7 +254,6 @@ function ProjectContributors() {
       fetchAvailableUsers();
     }, [projectId, refreshKey]);
     
-
     
   const handleExportToCSV = () => {
     // Filter out the checkbox column (no selector property)
@@ -423,36 +453,73 @@ function ProjectContributors() {
       if (result.isConfirmed) {
         try {
           await axiosInstance.delete(`/delete-group/${projectId}/${id}`);
-          Swal.fire({
-            title: 'Success!',
-            text: `Group has been deleted.`,
-            imageUrl: check,
-            imageWidth: 100,
-            imageHeight: 100,
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#0ABAA6',
-            customClass: {
-              confirmButton: 'custom-success-confirm-button',
-              title: 'custom-swal-title',
-            },
-          });
+          openDeleteSuccessToast()
           setRefreshKey((prevKey) => prevKey + 1);
         } catch (error) {
-          Swal.fire({
-            title: 'Error!',
-            text: error,
-            icon: 'error',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#EC221F',
-            customClass: {
-              confirmButton: 'custom-error-confirm-button',
-              title: 'custom-swal-title',
-            },
-          });
+          openDeleteErrorToast()
         }
       }
     });
   };
+
+  const handleRemoveContributor = async (contId) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'You will be removing this user from the project.',
+      showCancelButton: true,
+      icon: 'warning',
+      confirmButtonColor: '#EC221F',
+      cancelButtonColor: '#00000000',
+      cancelTextColor: '#000000',
+      confirmButtonText: 'Confirm',
+      customClass: {
+        container: 'custom-container',
+        confirmButton: 'custom-confirm-button',
+        cancelButton: 'custom-cancel-button',
+        title: 'custom-swal-title',
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axiosInstance.delete(`/remove-contributor/${projectId}/${contId}`);
+          openDeleteSuccessToast()
+          setRefreshKey((prevKey) => prevKey + 1);
+        } catch (error) {
+          openDeleteErrorToast()
+        }
+      }
+    });
+  };
+
+  const handleRemoveFromGroup = async (contId, groupId) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'You will be removing this user from the group.',
+      showCancelButton: true,
+      icon: 'warning',
+      confirmButtonColor: '#EC221F',
+      cancelButtonColor: '#00000000',
+      cancelTextColor: '#000000',
+      confirmButtonText: 'Confirm',
+      customClass: {
+        container: 'custom-container',
+        confirmButton: 'custom-confirm-button',
+        cancelButton: 'custom-cancel-button',
+        title: 'custom-swal-title',
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axiosInstance.delete(`/remove-groupMember/${projectId}/${contId}/${groupId}`);
+          openDeleteSuccessToast();
+          setRefreshKey((prevKey) => prevKey + 1);
+        } catch (error) {
+          openDeleteErrorToast();
+        }
+      }
+    });
+  };
+  
 
   const handleInviteToProject = () => {
     Swal.fire({
@@ -519,10 +586,10 @@ function ProjectContributors() {
     
           await axiosInstance.post(endpoint, payload);
     
-          Swal.fire('Success!', 'Contributors invited successfully.', 'success');
+          openSuccessToast()
           setRefreshKey((prevKey) => prevKey + 1);
         } catch (error) {
-          Swal.fire('Error!', 'Failed to invite contributors. Try again.', 'error');
+          openErrorToast()
           console.error(error);
         }
       }
@@ -624,6 +691,7 @@ useEffect(() => {
     try {
       const response = await axiosInstance.get(`/group-contributors/${projectId}/${groupId}`);
       const groupcontributors = response.data.contributors.map((contributor) => ({
+        contId: contributor.id,
         contName: contributor.name,
         contEmployer: contributor.employer,
         contEmail: contributor.email,
@@ -640,7 +708,6 @@ useEffect(() => {
           : "No login record", // Fallback when there's no valid date or the login record is "No login record"
       }));
       setContributors(groupcontributors);
-      //console.log(groupcontributors)
     } catch (error) {
       console.error("Error fetching contributors for group:", error);
     }
@@ -651,7 +718,6 @@ useEffect(() => {
     if (group) {
       setSelectedGroup(group);
       fetchContributorsByGroup(group.groupId);
-      //console.table(selectedGroup)
     }
   };
   
@@ -905,6 +971,7 @@ useEffect(() => {
                                   id="explorer-table"
                                   columns={contTableColumn}
                                   data={filteredContributors}
+                                  onRowClicked={handleRowClick}
                                   responsive
                                   noDataComponent={
                                     <div className="noData mt-4">
@@ -926,6 +993,159 @@ useEffect(() => {
                     </div>
                 </div>
           </div>
+
+          {/* Create Topic Messages */}
+              <ToastContainer className="p-3" position={toastPosition}>
+                <Toast className="success-toast-container" show={showSuccessToast} onClose={openSuccessToast} delay={5000} autohide>
+                  <Toast.Header className='success-toast-header justify-content-between'>
+                 <span> Contributor Added Successfully! </span>   
+                  </Toast.Header>
+                  <Toast.Body className="success-toast-body">
+                    Let us welcome our new contributor to this project!.
+                  </Toast.Body>
+                </Toast>
+              </ToastContainer>
+      
+              <ToastContainer className="p-3" position={toastPosition}>
+                <Toast className="error-toast-container" show={showErrorToast} onClose={openErrorToast} delay={5000} autohide>
+                  <Toast.Header className='error-toast-header justify-content-between'>
+                  <span> Adding Contributor was Unsuccessful </span>
+                  </Toast.Header>
+                  <Toast.Body className="error-toast-body">
+                    Please review the error details, check your configurations, and try again.
+                  </Toast.Body>
+                </Toast>
+              </ToastContainer>
+                {/* End of Create Topic Messages */}
+      
+                {/* Delete Toast Messages */}
+              <ToastContainer className="p-3" position={toastPosition}>
+                <Toast className="success-toast-container" show={showDeleteSuccessToast} onClose={openDeleteSuccessToast} delay={5000} autohide>
+                  <Toast.Header className='success-toast-header justify-content-between'>
+                    <span > Contributor removed Successfully! </span>
+                  </Toast.Header>
+                  <Toast.Body className="success-toast-body">
+                  The changes have been applied, and the contributor is no longer a part of this project .
+                  </Toast.Body>
+                </Toast> 
+              </ToastContainer>
+      
+              <ToastContainer className="p-3" position={toastPosition}>
+              <Toast className="error-toast-container" show={showDeleteErrorToast} onClose={openDeleteErrorToast} delay={5000} autohide>
+                <Toast.Header className='error-toast-header justify-content-between'>
+                  <span > Contributor Removal Unsuccessful </span>
+                </Toast.Header>
+                <Toast.Body className="error-toast-body">
+                  Please review the error details, check your configurations, and try again.
+                </Toast.Body>
+              </Toast>
+              </ToastContainer>
+                {/* End of Delete Toast Messages */}
+
+              {/* Row Click Offcanvas */}
+              <Offcanvas 
+                show={showCanvas} 
+                onHide={handleCloseCanvas} 
+                placement="end" 
+                //backdrop="static"
+                className="offcanvas"
+                id="explorer-offcanvas"
+              >
+              <Offcanvas.Header className="offcanvas-head">
+                <Offcanvas.Title>
+                <div className="offcanvas-header d-flex justify-content-between align-items-center">
+                <div className="offcanvas-title-description d-flex"
+                  style={{flexDirection: 'column'}}>
+                  <h5 className="offcanvas-title "
+                    style={{fontSize: '1rem', fontWeight: 'bold', margin: '0'}}>
+                      {selectedRow?.contName}
+                  </h5>
+                </div>
+                  <div className="offcanvas-button-group">
+                    <button className="offcanvas-btn" title="Edit">
+                      <BiSolidEditAlt size={18} />
+                    </button>
+                    <button
+                      className="offcanvas-btn"
+                      title="Close"
+                      onClick={handleCloseCanvas}
+                    >
+                      <LiaTimesSolid size={18} />
+                    </button>
+                  </div>
+                </div>
+                </Offcanvas.Title>
+              </Offcanvas.Header>
+                <Offcanvas.Body className="offcanvas-body">
+                <div className="offcanvas-button-group2 mb-3 flex-wrap">
+                      <label htmlFor="buttons">  </label>
+                      {/* <button className="btn mr-1" ><FaFileExcel size={18}/></button> */}
+                      <button
+                        className="btn mr-1"
+                        onClick={() => {
+                          const groupsWithContributor = groups.filter(group =>
+                            group.members.some(member => member.name === selectedRow?.contName)
+                          );
+
+                          if (groupsWithContributor.length > 0) {
+                            console.log(groupsWithContributor)
+                            // Remove from the first group found (or adapt for specific group selection)
+                            handleRemoveFromGroup(selectedRow.contId, groupsWithContributor[0].groupId);
+                          } else {
+                            handleRemoveContributor(selectedRow.contId);
+                          }
+                        }}
+                      >
+                        <IoPersonRemoveSharp size={18} />
+                      </button>
+
+
+                  </div>
+                {selectedRow && (
+                  <div className="todo-details-container" style={{fontSize: "12px"}}>
+                    <p><strong>Details: </strong></p>
+                    <label style={{margin: "0", fontWeight: "300"}}>Email:</label>
+                        <p>{selectedRow.contEmail}</p>
+                      <label style={{margin: "0", fontWeight: "300"}}>Employer:</label>
+                        <p>{selectedRow.contEmployer || "N/A"}</p>
+                      <label style={{margin: "0", fontWeight: "300"}}>Role:</label>
+                        <p>{selectedRow.contRole} </p>
+                      <label style={{margin: "0", fontWeight: "300"}}>Status</label>
+                        <p>{selectedRow.contStatus} </p>
+                        <label style={{margin: "0", fontWeight: "300"}}>Last Login</label>
+                        <p>{selectedRow.lastAccessed}</p>
+
+                  </div>
+                )}
+                  <div className="todo-attachments-container">
+                    <label style={{margin: "0", fontWeight: "300"}}>Groups:</label>
+                    <div className="todo-attachments-list">
+                      <div className="todo-attachment">
+                      {groups.filter(group => 
+                        group.members && group.members.some(member => member.name === selectedRow?.contName)
+                      ).length > 0 ? (
+                        groups.filter(group => 
+                          group.members && group.members.some(member => member.name === selectedRow?.contName)
+                        ).map(group => (
+                          <div key={group.groupId} className="todo-attachment">
+                            <HiMiniUserGroup size={18} />
+                            <span className="ms-2">
+                              {group.groupName}
+                            </span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="todo-attachment">
+                          <span>No groups assigned</span>
+                        </div>
+                      )}
+                      </div>
+                    </div>
+                  </div>
+                </Offcanvas.Body>
+              </Offcanvas>
+                {/* End of Row Click Offcanvas */}
+
 
       </div>
       </div>

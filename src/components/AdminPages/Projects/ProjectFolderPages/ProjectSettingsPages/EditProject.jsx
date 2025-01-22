@@ -289,7 +289,7 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                         <h2>Edit Project Details</h2>
                       </div>
                       <div className="button-group d-flex">
-                        <button id="addbtn"className="btn btn-primary add-btn" title="Save" form="updateProjectForm">
+                        <button className="btn btn-primary add-btn" title="Save" form="updateProjectForm">
                           Save Changes
                         </button>
                       </div>

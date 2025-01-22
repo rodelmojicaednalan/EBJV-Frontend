@@ -89,6 +89,11 @@
   cursor: pointer;
 }
 
+.toggle-menu-icon{
+  width: 3rem;
+  height: auto;
+  color: #eb6314;
+}
 /* mobile responsiveness */
 
 @media (max-width: 480px) {
@@ -449,18 +454,6 @@
     position: relative;
     left: 250px;
   } */
-}
-
-
-.bar {
-  height: 5px;
-  /* Height of the hamburger bars */
-  width: 30px;
-  /* Width of the hamburger bars */
-  background-color: #eb6314;
-  /* Color of the bars */
-  margin: 3px 0;
-  /* Space between the bars */
 }
 
 .logo {

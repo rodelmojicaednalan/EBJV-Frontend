@@ -135,7 +135,7 @@ useEffect(() => {
           description: toDo.toDoDesc,
           ownership: toDo.is_owner,
           ownerUserName: toDo.owner,
-          assignee: JSON.parse(toDo.toDoAssignee), //.replace(/"/g, " ", /[]]/g, " "),
+          assignee: JSON.parse(toDo.toDoAssignee).join(", "), //.replace(/"/g, " ", /[]]/g, " "),
           createdOn: new Intl.DateTimeFormat('en-US', {
             month: 'short',
             day: '2-digit',
@@ -240,7 +240,7 @@ useEffect(() => {
             case "Owner":
               return selectedOptions.includes(todo.ownership ? "Created by Me" : "Shared with Me");
             case "Users":
-              return selectedOptions.includes(todo.ownerUserName);
+              return selectedOptions.includes(todo.assignee);
             case "Groups":
               return selectedOptions.includes(todo.group);
             case "Status":

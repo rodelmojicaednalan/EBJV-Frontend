@@ -98,7 +98,7 @@ const Sidebar = ({ projectId }) => {
           </div>
         </li>
         {/* Data Group */}
-        <li className="nav-item-group">
+        {/* <li className="nav-item-group">
           <div id="nav-group">
             <div
               className="big-nav-wrapper"
@@ -194,7 +194,28 @@ const Sidebar = ({ projectId }) => {
               </ul>
             )}
           </div>
-        </li>
+        </li> */}
+         <li
+              className={`nav-item-group ${
+                isActive(
+                  `/project-folder/${projectId}/data/project-explorer`
+                )
+                  ? 'active'
+                  : ''
+              }`}
+            >
+              <div
+                id="nav-item"
+                onClick={() =>
+                  navigate(
+                    `/project-folder/${projectId}/data/project-explorer`
+                  )
+                }
+              >
+                <FaFolderTree id="nav-icons" size={20} />
+                <span id="nav-label">File Explorer</span>
+              </div>
+            </li>
 
         {/* Activity */}
         {userRole === 'Admin' && (
@@ -222,7 +243,7 @@ const Sidebar = ({ projectId }) => {
             </li>
 
             {/* Topics */}
-            <li
+            {/* <li
               className={`nav-item-group ${
                 isActive(
                   `/project-folder/${projectId}/project-topics`
@@ -242,10 +263,10 @@ const Sidebar = ({ projectId }) => {
                 <FaCommentAlt id="nav-icons" size={20} />
                 <span id="nav-label">Topics</span>
               </div>
-            </li>
+            </li> */}
 
             {/* ToDo */}
-            <li
+            {/* <li
               className={`nav-item-group ${
                 isActive(`/project-folder/${projectId}/project-ToDos`)
                   ? 'active'
@@ -263,7 +284,7 @@ const Sidebar = ({ projectId }) => {
                 <FaClipboardCheck id="nav-icons" size={20} />
                 <span id="nav-label">ToDo</span>
               </div>
-            </li>
+            </li> */}
 
             {/* Project Contributors */}
             <li
@@ -284,7 +305,7 @@ const Sidebar = ({ projectId }) => {
                 }
               >
                 <IoPeopleSharp id="nav-icons" size={20} />
-                <span id="nav-label">Project Contributors</span>
+                <span id="nav-label">Project Members</span>
               </div>
             </li>
 
@@ -349,10 +370,10 @@ const Sidebar = ({ projectId }) => {
                         }
                       >
                         <BiSolidEdit id="nav-icons" size={20} />
-                        <span id="nav-label">Edit Project</span>
+                        <span id="nav-label">Project Details</span>
                       </div>
                     </li>
-                    <li
+                    {/* <li
                       className={`nav-item-subgroup ${
                         isActive(
                           `/project-folder/${projectId}/settings/topic-settings`
@@ -372,7 +393,7 @@ const Sidebar = ({ projectId }) => {
                         <HiCog id="nav-icons" size={20} />
                         <span id="nav-label">Topic Settings</span>
                       </div>
-                    </li>
+                    </li> */}
                     <li
                       className={`nav-item-subgroup ${
                         isActive(

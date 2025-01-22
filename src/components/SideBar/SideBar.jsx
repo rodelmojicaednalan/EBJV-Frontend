@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../Authentication/authContext";
 import axiosInstance from "../../../axiosInstance.js";
 import Swal from "sweetalert2";
+import { BiMenu, BiMenuAltRight } from "react-icons/bi";
 
 function Navbar({ role }) {
   const navigate = useNavigate();
@@ -84,14 +85,16 @@ function Navbar({ role }) {
   return (
     <>
       <div onClick={toggleMenu} className="toggle-btn">
+        {/* <div className="bar"></div>
         <div className="bar"></div>
-        <div className="bar"></div>
-        <div className="bar"></div>
+        <div className="bar"></div> */}
+        { !openMenu ? (<BiMenu className="toggle-menu-icon"/> ) : (<BiMenuAltRight className="toggle-menu-icon" />)}
       </div>
+
+     
 
       <IconContext.Provider value={{ color: "#fff" }}>
         <div className="sidebar-nav" ref={menuRef}>
- 
           {openMenu ? (
             <div>
               <nav className="nav-menu active">
