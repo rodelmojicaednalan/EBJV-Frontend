@@ -92,7 +92,7 @@ const SidebarOffcanvas = ({ projectId }) => {
           position: "fixed",
           top: '10px',
           right: "15px",
-          zIndex: show ? 1 : 1050,
+          zIndex: show ? 1 : 2,
           opacity: show ? 0 : 1,
           transition: "opacity 0.3s ease",
           color: '#eb6314',
