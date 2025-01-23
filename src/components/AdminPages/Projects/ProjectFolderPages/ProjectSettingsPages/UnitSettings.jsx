@@ -12,8 +12,11 @@ import '../../ProjectStyles.css'
 import { FiChevronLeft } from 'react-icons/fi';
 
 import ProjectSidebar from '../../ProjectFolderSidebar';
-
+import useWindowWidth from '../windowWidthHook.jsx'
+import SidebarOffcanvas from '../../MobileSidebar';
 function UnitSettings() {
+  const windowWidthHook = useWindowWidth();
+  const isMobile = windowWidthHook <= 425;
   const { projectId } = useParams();
   const [projectName, setProjectName] = useState("");
   const [ownerName, setOwnerName] = useState("")
@@ -43,13 +46,19 @@ function UnitSettings() {
 
     return (
       <div className="container">
-      <StickyHeader />
+      {/* <StickyHeader />
       <h3 className="title-page" id="projectFolder-title">
         {ownerName}'s {projectName} 
-      </h3>
+      </h3> */}
       <div className="container-content" id="project-folder-container">
       <div className="projectFolder-sidebar-container">
-      <ProjectSidebar projectId={projectId}/>
+      <div className="projectFolder-sidebar-container">
+     {isMobile ? (
+          <SidebarOffcanvas projectId={projectId} />
+        ) : (
+          <ProjectSidebar projectId={projectId} />
+        )}
+      </div>
       </div>
 
 

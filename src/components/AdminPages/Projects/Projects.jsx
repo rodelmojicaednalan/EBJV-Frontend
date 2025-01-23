@@ -274,11 +274,11 @@ function Projects() {
 
   return (
     <div className="container">
-      <StickyHeader />
-      <BackToTopButton/>
+      {/* <StickyHeader /> */}
+      {/* <BackToTopButton/> */}
       <div className="row">
         <div className="col-lg-12 col-md-6 custom-content-container" id="projectList-container">
-          <h3 className="title-page">Projects</h3>
+          {/* <h3 className="title-page">Projects</h3> */}
           <div className="top-filter">
             <input
               id="search-bar"

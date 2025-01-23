@@ -196,7 +196,7 @@ function UsersList() {
   const columns = [
     {
       name: "Name",
-      width: "30%",
+      // width: "40%",
       selector: (row) => (
         <div style={{ display: "flex", alignItems: "center" }}>
           <img
@@ -222,27 +222,29 @@ function UsersList() {
       ),
       sortable: true,
     },
-     {
-      name: "Email",
-      width: "25%",
-       selector: (row) => row.email || "N/A",
-       sortable: true,
-     },
+    //  {
+    //   name: "Email",
+    //   // width: "25%",
+    //    selector: (row) => row.email || "N/A",
+    //    sortable: true,
+    //  },
      {
        name: "Username",
-       width: "15%",
+      //  width: "15%",
        selector: (row) => row.username || "N/A",
        sortable: true,
+       hide: 'sm'
      },
     {
       name: "Role",
-      width: "15%",
+      // width: "15%",
       selector: (row) => row.roles?.map((r) => r.role_name).join(", ") || "N/A",
       sortable: true,
+      hide: 'sm'
     },
     {
       name: "Action",
-      width: "15%",
+      // width: "15%",
       selector: (row) => (
         <div>
           <img
@@ -294,10 +296,10 @@ function UsersList() {
 
   return (
     <div className="container">
-      <StickyHeader />
+      {/* <StickyHeader /> */}
       <div className="row">
         <div className="col-lg-12 col-md-6 custom-content-container">
-          <h3 className="title-page">Client Management</h3>
+          {/* <h3 className="title-page">Client Management</h3> */}
 
           <div className="top-filter">
             <input

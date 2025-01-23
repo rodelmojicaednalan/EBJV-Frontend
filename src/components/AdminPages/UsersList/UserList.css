@@ -167,8 +167,8 @@ span.user-email-row {
   margin-top: 50px;
 }
 
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   .container .custom-content-container {
     margin-top: 0px;
   }
-}
+} */

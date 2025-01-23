@@ -2,7 +2,8 @@
 import React from 'react';
 import {BrowserRouter, Routes, Route, useLocation, Navigate, useParams  } from 'react-router-dom';
 import Login from './components/Login/Login';
-import SideBar from './components/SideBar/SideBar';
+// import SideBar from './components/SideBar/SideBar';
+import SideBar from './components/SideBar/Navbar'
 import UsersList from './components/AdminPages/UsersList/UsersLIst';
 
 import Projects from './components/AdminPages/Projects/Projects';
@@ -64,10 +65,10 @@ function Layout() {
     if (noSidebarPaths.includes(location.pathname)) return true;
   
     // Check if the route matches project-folder or ifc-viewer
-    const isProjectFolder = /^\/project-folder\/[a-zA-Z0-9]+/.test(location.pathname);
+    // const isProjectFolder = /^\/project-folder\/[a-zA-Z0-9]+/.test(location.pathname);
     const isIfcViewer = /^\/ifc-viewer\/[a-zA-Z0-9]+\/[a-zA-Z0-9._-]+$/.test(location.pathname);
 
-    return isProjectFolder || isIfcViewer;
+    return isIfcViewer;
   };
 //  console.log(location);
   return (

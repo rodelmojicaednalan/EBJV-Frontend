@@ -280,7 +280,7 @@ form label{
 }
 @media (max-width: 992px) {
     .custom-login {
-        height: auto;
+        /* height: auto; */
         padding: 0 !important;
 
     }

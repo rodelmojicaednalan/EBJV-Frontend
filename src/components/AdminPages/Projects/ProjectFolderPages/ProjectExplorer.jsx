@@ -556,12 +556,12 @@ function ProjectExplorer() {
   // console.log(selectedRow?.projectId || '')
 
   return (
-    <div className="container">
-      <StickyHeader />
+    <div className="folderContainer">
+      {/* <StickyHeader /> */}
 
-      <h3 className="title-page" id="projectFolder-title">
+      {/* <h3 className="title-page" id="projectFolder-title" style={{zIndex: '99999'}}>
         {ownerName}&apos;s {projectName}
-      </h3>
+      </h3> */}
 
       <div
         className="container-content"
@@ -977,7 +977,7 @@ function ProjectExplorer() {
         centered
       >
         <Modal.Header>
-          <Modal.Title>Generate QR Code</Modal.Title>
+          <Modal.Title> Share QR Code </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <QrCodeGenerator 
@@ -999,13 +999,10 @@ function ProjectExplorer() {
         </Modal.Footer>
       </Modal>
 
-
+      {/* 
         <div
         className="position-relative toast-block"
         style={{ minHeight: '240px' }}> 
-        {/* <Button onClick={showToast} className="mb-2">
-          Toggle Toast <strong>with</strong> Animation
-        </Button> */}
         <ToastContainer
           className="p-3"
           position={toastPosition}
@@ -1020,7 +1017,8 @@ function ProjectExplorer() {
           </Toast.Body>
         </Toast>
         </ToastContainer>
-        </div>
+        </div> */}
+        
     </div>
   );
 }

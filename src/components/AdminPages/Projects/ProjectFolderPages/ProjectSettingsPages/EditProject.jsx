@@ -263,10 +263,10 @@ const [totalFileSize, setTotalFileSize] = useState(0);
 
   return (
     <div className="container">
-    <StickyHeader />
+    {/* <StickyHeader />
     <h3 className="title-page" id="projectFolder-title">
         {ownerName}'s {projectName} 
-      </h3>
+      </h3> */}
     <div className="container-content" id="project-folder-container">
     <div className="projectFolder-sidebar-container">
     {isMobile ? (

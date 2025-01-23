@@ -1,9 +1,24 @@
+.folderContainer{
+      flex: 1;
+      overflow-y: auto;
+      background-color: #f8f8fa;
+      padding: 0;
+      width: 100%;
+      height: auto;
+      /* display: flex;
+      align-items: center;
+      flex-direction: column; */
+}
+
+
 #project-folder-container {
   display: flex;
   flex-flow: row nowrap;
-  height: calc(100% - 2rem);
+  /* height: calc(100% - 2rem); */
+  height: auto;
   width: 100%;
-  position: absolute;
+  /* position: absolute; */
+  margin-top: 0;
 }
 
 #projectFolder-title {
@@ -82,7 +97,8 @@
 .projectFolder-sidebar {
   width: 13rem;
   background-color: inherit;
-  padding: 2.2rem 0 0 15px;
+  padding: 0 0 0 15px;
+  /* position: sticky !important; */
 
 }
 
@@ -99,15 +115,21 @@
 
 .projectFolder-sidebar-container {
   background-color: #FFF;
-  border-right: 1px solid #ddd;
-  border: 1px solid #fec19db8;
+  border-right: 1px solid #d0d0d7;
+  height: auto;
+  /* overflow-y: unset; */
+  /* padding: 0; */
+  /* position: fixed;  */
+  /* z-index: 1000;   */
+  /* border: 1px solid #fec19db8; */
+  /* box-shadow: 5px 0px 5px 1px rgba(165, 163, 163, 0.402); */
 }
 
 /* Main Content Styling */
 .projectFolder-display {
   flex-grow: 1;
   /* Takes the remaining space */
-  padding: 50px 0 0 0;
+  padding: .5rem 0 0 0;
   background-color: #f3f3f7;
   overflow-y: auto;
   /* In case content overflows */
@@ -119,7 +141,6 @@
 .moduleFluid {
   width: 100%;
   height: auto;
-  /*height: 600px;*/
 }
 
 #addFiles-btn {
@@ -383,9 +404,9 @@ p {
   background-color: #eb6314;
 }
 
-.btn:hover {
+/* .btn:hover {
   background-color: #ebebeb;
-}
+} */
 
 .btn-default {
   background-color: #FFF;
@@ -1851,6 +1872,10 @@ p {
 }
 
 @media (max-width: 425px) {
+  .projectFolder-sidebar-container{
+    border-right: none;
+    border: none;
+  }
   .releaseFilter-offcanvas-body {
     height: 355px; 
     overflow-y: auto;
@@ -1866,15 +1891,22 @@ p {
     display: none;
   }
 
-  #project-folder-container {
+  /* #project-folder-container {
     display: unset;
-  }
+  } */
 
   .projectFolder-display {
     width: 100%;
     height: unset;
   }
 
+  .page-title h2 {
+    display: none;
+  }
+
+  .project-content{
+    margin-top: 1rem;
+  }
   #explorer-buttons {
     display: none !important;
   }
@@ -1950,7 +1982,10 @@ p {
     border-radius: 5px;
     padding: 10px;
     font-size: 1.2rem;
-    color: white;
+  }
+
+  .sidebar-toggle-btn:focus{
+    background-color: #00000000 !important;
   }
 
   .mobile-nav-icon {
@@ -1994,6 +2029,15 @@ p {
     margin-left: 4px;
   }
 
+  .mobile-navmenu{
+    padding: 0;
+  }
+  .mobile-subnav{
+    padding-left: 1.2rem;
+  }
+  .mobile-navmenu li {
+    line-height: 2rem;
+  }
   /* End of Mobile Menu */
 
 }
