@@ -135,7 +135,7 @@
   /* In case content overflows */
   display: flex;
   flex-flow: column nowrap;
-  height: auto;
+  min-height: 87vh;
 }
 
 .moduleFluid {
@@ -1900,9 +1900,9 @@ p {
     height: unset;
   }
 
-  .page-title h2 {
+  /* .page-title h2 {
     display: none;
-  }
+  } */
 
   .project-content{
     margin-top: 1rem;

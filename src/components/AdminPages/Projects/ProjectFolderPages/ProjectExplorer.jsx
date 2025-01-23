@@ -556,7 +556,7 @@ function ProjectExplorer() {
   // console.log(selectedRow?.projectId || '')
 
   return (
-    <div className="folderContainer">
+    <div className="container">
       {/* <StickyHeader /> */}
 
       {/* <h3 className="title-page" id="projectFolder-title" style={{zIndex: '99999'}}>
