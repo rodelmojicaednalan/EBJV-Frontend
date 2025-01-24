@@ -67,8 +67,9 @@ function Layout() {
     // Check if the route matches project-folder or ifc-viewer
     // const isProjectFolder = /^\/project-folder\/[a-zA-Z0-9]+/.test(location.pathname);
     const isIfcViewer = /^\/ifc-viewer\/[a-zA-Z0-9]+\/[a-zA-Z0-9._-]+$/.test(location.pathname);
+    const isResetPassword = /^\/reset-password\/[a-zA-Z0-9]+$/.test(location.pathname);
 
-    return isIfcViewer;
+    return isIfcViewer || isResetPassword;
   };
 //  console.log(location);
   return (

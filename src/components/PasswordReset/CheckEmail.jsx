@@ -1,6 +1,6 @@
 import React from "react";
 import "./PasswordReset.css";
-import email_icon from "../../assets/images/email.png";
+import email_icon from "../../assets/images/ebjvMail.png";
 import { useLocation, useNavigate } from "react-router-dom";
 
 function CheckEmail() {

@@ -1,7 +1,7 @@
 // ForgotPassword.js
 import React, { useState } from "react";
 import "./PasswordReset.css";
-import password from "../../assets/images/password.png";
+import password from "../../assets/images/forgot-password.png";
 import axiosInstance from "../../../axiosInstance.js";
 import { useNavigate } from "react-router-dom";
 

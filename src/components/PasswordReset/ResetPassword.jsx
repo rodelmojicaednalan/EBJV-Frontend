@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./PasswordReset.css";
-import password_icon from "../../assets/images/password.png";
+import password_icon from "../../assets/images/resetPassword.png";
 import { useNavigate , useParams } from "react-router-dom";
 import axiosInstance from "../../../axiosInstance.js";
 
