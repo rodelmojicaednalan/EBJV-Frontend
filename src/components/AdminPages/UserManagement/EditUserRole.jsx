@@ -81,7 +81,7 @@ function EditUserRole() {
 
    return (
     <div className="container">
-      <StickyHeader/>
+      {/* <StickyHeader/> */}
        <a href="/user-management" className="back-btn">
         <h3 className="title-page">
           <FiChevronLeft className="icon-left" /> Update Role

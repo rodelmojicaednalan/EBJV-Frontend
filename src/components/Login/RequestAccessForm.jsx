@@ -194,9 +194,6 @@ const RequestAccessForm = () => {
           </div>
         </div>
       </form>
-      <div className="access-request-page-footer mt-5">
-        <p>© EBJV</p>
-      </div>
 
       {/* Confirmation Modal */}
       <Modal show={showModal} onHide={handleModalClose} centered>

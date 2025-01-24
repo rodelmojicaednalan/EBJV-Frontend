@@ -5,8 +5,7 @@ import "font-awesome/css/font-awesome.min.css";
 import view_icon from "../../../assets/images/view-details.png";
 import edit_icon from "../../../assets/images/edit-details.png";
 import delete_icon from "../../../assets/images/delete-log.png";
-import man from "../../../assets/images/man.png";
-import woman from "../../../assets/images/woman.png";
+import userIcon from "../../../assets/images/engineer.png"
 import check from "../../../assets/images/check.png";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "react-bootstrap";
@@ -201,7 +200,7 @@ function UsersList() {
         <div style={{ display: "flex", alignItems: "center" }}>
           <img
             className="profile-image"
-            src={row.sex === "Male" ? man : woman}
+            src={userIcon}
             alt={row.last_name}
             style={{
               width: "30px",
@@ -261,7 +260,7 @@ function UsersList() {
                 branch:
                   row.branches?.map((r) => r.branch_name).join(", ") || "N/A",
                 role: row.roles?.map((r) => r.role_name).join(", ") || "N/A",
-                profileImage: row.sex === "Male" ? man : woman,
+                profileImage: userIcon,
               })
             }
             style={{ cursor: "pointer" }}

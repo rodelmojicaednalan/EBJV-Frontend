@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 // other previous imports
 import * as htmlToImage from "html-to-image";
 import QRCode from 'react-qr-code'
@@ -11,6 +11,7 @@ function QrCodeGenerator({fileName, projectId }) {
   const qrCodeRef = useRef(null);
   const [position, setPosition] = useState('bottom-end');
  const [showCopy, setShowCopy] = useState(false);
+
 
  const toggleShowCopy = () => setShowCopy(!showCopy);
   useEffect(() => {
@@ -32,7 +33,7 @@ function QrCodeGenerator({fileName, projectId }) {
       .then(function (dataUrl) {
         const link = document.createElement("a");
         link.href = dataUrl;
-        link.download = `${Date.now()}_EVJV-QRCode.png`;
+        link.download = `${Date.now()}_EBJV-QRCode.png`;
         link.click();
       })
       .catch(function (error) {
@@ -52,8 +53,6 @@ function QrCodeGenerator({fileName, projectId }) {
         console.error("Error copying URL to clipboard:", error);
       });
   };
-
-  
 
   return (
     <div className="qrcode__container">

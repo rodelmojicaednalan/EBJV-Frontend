@@ -11,6 +11,7 @@ function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState({value: "" , isShow : false});
     const navigate = useNavigate();
     const location = useLocation();
@@ -29,23 +30,17 @@ function Login() {
             document.cookie = `accessToken=${accessToken}; Path=/;`;
             document.cookie = `refreshToken=${refreshToken}; Path=/; `;
 
+            if (rememberMe) {
+                document.cookie = `rememberUsername=${username}; Path=/; Secure;`;
+                document.cookie = `rememberPassword=${btoa(password)}; Path=/; Secure;`; // Encode the password
+              } else {
+                // Clear stored credentials if "Remember Me" is not checked
+                document.cookie = `rememberUsername=; Path=/; Max-Age=0;`;
+                document.cookie = `rememberPassword=; Path=/; Max-Age=0;`;
+              }
+
             localStorage.setItem('loginSuccess', 'true');
-
-        //     if (roleName === 'Admin') {
-        //         // console.log(user, accessToken, refreshToken, roleName);
-        //         navigate('/projects');
-        //     } else {
-        //         navigate('/projects');
-        //     }
-
-        // } catch (error) {
-        //     console.error('Login error:', error);
-        //     setError({
-        //         value : "Invalid login ,Please check your credentials ",
-        //         isShow : true 
-        //     });
-        //     return;
-        // }
+            
         const redirectTo =
         location.state?.from || localStorage.getItem('originalUrl') || '/projects';
 
@@ -58,6 +53,7 @@ function Login() {
         alert('Invalid login, please try again.');
       }
     };
+
 
     return (
         <div className="d-flex align-items-center justify-content-center custom-login">
@@ -111,6 +107,7 @@ function Login() {
                                 />
                             </div>
                             <div className="form-group group-field-password">
+                                <div>
                                 <input
                                     type="checkbox"
                                     id="showPassword"
@@ -118,6 +115,21 @@ function Login() {
                                     onChange={() => setShowPassword(!showPassword)}
                                 /> &nbsp; 
                                 <label htmlFor="showPassword">Show Password</label>
+                                </div>
+
+                                <div>
+                                <input
+                                    type="checkbox"
+                                    id="rememberMe"
+                                    checked={rememberMe}
+                                    onChange={() => setRememberMe(!rememberMe)}
+                                /> &nbsp; 
+                                <label htmlFor="rememberMe">Remember Me</label>
+                                </div>
+
+
+                            </div>
+                            <div className="form-group group-field-password mb-0">
                                 <a style={{cursor: "pointer"}} className='forgot-password-btn float-end' onClick={()=>navigate("/forgot-password")}>Forgot Password?</a>
                             </div>
                             <div className='d-flex justify-content-left mt-1'>

@@ -19,6 +19,7 @@ function NewNavBar() {
     const navigate = useNavigate();
     const location = useLocation();
     const isProjectFolderPath = location.pathname.includes('/project-folder');
+    const isRequestFormPath = location.pathname.includes('/request-access-form');
     const { logout } = useContext(AuthContext);
 
     const handleLogout = async () => {
@@ -64,13 +65,13 @@ function NewNavBar() {
             {/* <strong> EBJV </strong> */}
           </Navbar.Brand>
           
-          {!isProjectFolderPath && (
+          {!isProjectFolderPath && !isRequestFormPath &&(
           <Navbar.Toggle aria-controls="responsive-navbar-nav" className='mr-3' />
           )}
 
 
         <Navbar.Collapse id="responsive-navbar-nav">
-        {!isProjectFolderPath && (
+        {!isProjectFolderPath && !isRequestFormPath && (
           <Nav className="ml-auto">
             <Nav.Link 
                onClick={() => navigate('/userlist')}

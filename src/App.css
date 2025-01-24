@@ -508,9 +508,10 @@ input[type="date"] {
   display: flex;
   align-self: flex-start;
   margin-top: 0;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
   color: #eb6314;
-  margin-left: 85px;
+  /* margin-left: 85px; */
+  cursor: pointer;
 }
 
 

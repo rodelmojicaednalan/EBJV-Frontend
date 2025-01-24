@@ -3,13 +3,8 @@ import axiosInstance from "../../../../axiosInstance.js";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import check from "../../../assets/images/check.png";
-import Select from "react-select";
-import makeAnimated from "react-select/animated";
-import { FiChevronLeft } from "react-icons/fi";
-import StickyHeader from "../../SideBar/StickyHeader";
-
-const animatedComponents = makeAnimated();
-
+import { FaCircleArrowLeft } from "react-icons/fa6";
+import './EditUser.css'
 function AddNewUser() {
   const [last_name, setLastname] = useState("");
   const [first_name, setFirstname] = useState("");
@@ -18,12 +13,10 @@ function AddNewUser() {
   const [role_name, setRoleName] = useState("");
   const [role, setRoles] = useState([]);
   const [email, setEmail] = useState("");
-  const [sex, setSex] = useState("");
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     // Fetch roles
@@ -45,7 +38,6 @@ function AddNewUser() {
       !password ||
       !confirmPassword ||
       !email ||
-      !sex ||
       !username ||
       !role_name
     ) {
@@ -80,24 +72,20 @@ function AddNewUser() {
     }
 
     try {
-      const response = await axiosInstance.post("/addUser", {
+      await axiosInstance.post("/addUser", {
         last_name,
         first_name,
         password,
         email,
-        sex,
         username,
         role_name,
       });
-
-      // setSuccessMessage("User added successfully!");
       setError("");
       setLastname("");
       setFirstname("");
       setPassword("");
       setConfirmPassword("");
       setEmail("");
-      setSex("");
       setUsername("");
       setRoleName("");
       Swal.fire({
@@ -114,136 +102,136 @@ function AddNewUser() {
       });
     } catch (error) {
       setError("Failed to add user. Please try again.");
-      // setSuccessMessage("");
+
     }
   };
 
   return (
-    <div className="container">
-      <StickyHeader />
-      <a href="/userlist" className="back-btn">
-        <h3 className="title-page">
-          <FiChevronLeft className="icon-left" /> Add New User
+    <div className="addUser-form-page pb-5">
+      <a onClick={() => navigate("/userlist")} className="back-btn">
+        <h3 className="m-3">
+          <FaCircleArrowLeft size={30} className="icon-left" /> Go back
         </h3>
       </a>
+ 
+        <form onSubmit={addUser} className="">
+        <div className="addUser-form-container">
+        <div className="addUser-form-header">
+            <h4 className="addUser-form-title">Add User Form</h4>
+          </div>
 
-      <div className="container-content">
-        <form onSubmit={addUser} className="add-user-form">
-          <div
-            style={{
-              position: "relative",
-              textAlign: "center",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            {error && (
-              <div
-                className="alert alert-danger"
-                style={{
-                  position: "absolute",
-                  left: "25%",
-                  top: "-10px",
-                  width: "50%",
-                  padding: "4px",
-                }}
-              >
-                {error}
+          <div className="addUser-form-body">
+            <div className="form-body">
+                      
+            <div className="form-group">
+                <label htmlFor="roleName">Role:</label>
+                <div id="roleName" className="d-flex justify-content-around">
+                  {role.map((role) => (
+                    <div key={role.id} className="form-check">
+                      <input
+                        type="radio"
+                        id={`role-${role.id}`}
+                        name="roleName"
+                        value={role.role_name}
+                        checked={role_name === role.role_name}
+                        onChange={(e) => setRoleName(e.target.value)}
+                        className="form-check-input"
+                        required
+                      />
+                      <label htmlFor={`role-${role.id}`} className="form-check-label">
+                        {role.role_name}
+                      </label>
+                    </div>
+                  ))}
+                </div>
               </div>
-            )}
-          </div>
 
-          <div className="d-flex justify-content-between ml-5 mr-5 pt-4 mt-3 add-user-fields">
-            <div className="form-group">
-              <label>Last Name:</label>
-              <input
-                type="text"
-                className="form-control"
-                value={last_name}
-                onChange={(e) => setLastname(e.target.value)}
-              />
-            </div>
-            <div className="form-group">
-              <label>First Name:</label>
-              <input
-                type="text"
-                className="form-control"
-                value={first_name}
-                onChange={(e) => setFirstname(e.target.value)}
-              />
-            </div>
-            <div className="form-group">
-              <label>Sex:</label>
-              <br />
-              <select value={sex} onChange={(e) => setSex(e.target.value)}>
-                <option value="">Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-              </select>
-            </div>
-          </div>
-          <div className="d-flex justify-content-between ml-5 mr-5 add-user-fields">
-            <div className="form-group">
-              <label>Username:</label>
-              <input
-                type="text"
-                className="form-control"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </div>
-            <div className="form-group">
-              <label>Password:</label>
-              <input
-                type="password"
-                className="form-control"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <div className="form-group">
-              <label>Confirm Password:</label>
-              <input
-                type="password"
-                className="form-control"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="d-flex justify-content-between ml-5 add-user-fields">
+              <div className="form-group-multiple mb-3">
+                <div className="form-group">
+                  <label htmlFor="lastName">Surname:</label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    className="form-control"
+                    value={last_name}
+                    onChange={(e) => setLastname(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="firstName">First Name:</label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    className="form-control"
+                    value={first_name}
+                    onChange={(e) => setFirstname(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
 
-            <div className="form-group role-field">
-              <label>Role:</label>
-              <br />
-              <select
-                value={role_name}
-                onChange={(e) => setRoleName(e.target.value)}
-              >
-                <option value="">Select Role</option>
-                {role.map((role) => (
-                  <option key={role.id} value={role.role_name}>
-                    {role.role_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group mr-5">
-              <label>Email:</label>
-              <input
-                type="email"
-                className="form-control"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-          </div>
+              <div className="form-group-multiple mb-3">
+                <div className="form-group">
+                  <label htmlFor="userName">Username:</label>
+                  <input
+                    type="text"
+                    id="userName"
+                    className="form-control"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="email">Email:</label>
+                  <input
+                    type="email"
+                    id="email"
+                    className="form-control"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+              </div>
 
-          <button className="submit-btn mb-4 mt-5" type="submit">
-            SAVE
-          </button>
+              <div className="form-group-multiple mb-3">
+                <div className="form-group">
+                  <label htmlFor="password">Password:</label>
+                  <input
+                    type="password"
+                    id="password"
+                    className="form-control"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="confirmPassword">Confirm Password:</label>
+                  <input
+                    type="password"
+                    id="confirmPassword"
+                    className="form-control"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="access-btn-group">
+              <div className="access-btn-group-item">
+                <button
+                  type="submit"
+                  className="btn btn-primary login-btn"
+                >
+                  Add User
+                </button>
+              </div>
+            </div>
+
+          </div>
+          </div>
         </form>
-      </div>
     </div>
   );
 }

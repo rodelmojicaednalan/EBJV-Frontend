@@ -7,34 +7,6 @@
   font-size: 14px;
 }
 
-.manage-ticket-btn {
-  background-color: #eb6314 !important;
-  border-color: #eb6314 !important;
-  justify-content: center !important;
-  display: flex !important;
-  width: auto;
-  position: absolute;
-  right: 50px;
-  top: 15px;
-}
-
-.manage-ticket-btn-2 {
-  background-color: #eb6314 !important;
-  border-color: #eb6314 !important;
-  justify-content: center !important;
-  display: flex !important;
-  width: auto;
-  position: absolute;
-  right: 300px;
-  top: 15px;
-}
-
-.manage-ticket-btn:hover {
-  background-color: #c74a44;
-  border-color: #c74a44;
-  font-weight: 400;
-}
-
 .top-filter #filter {
   border: none;
   border-radius: 3px;

@@ -59,7 +59,7 @@ function Layout() {
   
   // Function to check if the route should hide the sidebar
   const shouldHideSidebar = () => {
-    const noSidebarPaths = ['/', '/not-authorized', '/forgot-password', '/open-email', '/access-request', '/request-access-form', '/wait-instructions'];
+    const noSidebarPaths = ['/', '/not-authorized', '/forgot-password', '/open-email', '/access-request',  '/wait-instructions'];
   
     // Check static no-sidebar paths
     if (noSidebarPaths.includes(location.pathname)) return true;
