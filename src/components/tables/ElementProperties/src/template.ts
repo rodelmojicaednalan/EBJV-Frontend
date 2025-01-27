@@ -1,14 +1,14 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import * as FRAGS from "@thatopen/fragments";
-import * as BUI from "@thatopen/ui";
-import * as OBC from "@thatopen/components";
-import * as WEBIFC from "web-ifc";
-import { createTasksRow } from "./tasks-row";
-import { createClassificationsRow } from "./classifications-row";
-import { createMaterialsRow } from "./materials-row";
-import { createPsetsRow } from "./psets-row";
-import { createQsetsRow } from "./qsets-row";
-import { createAttributesRow } from "./attributes-row";
+import * as FRAGS from '@thatopen/fragments';
+import * as BUI from '@thatopen/ui';
+import * as OBC from '@thatopen/components';
+import * as WEBIFC from 'web-ifc';
+import { createTasksRow } from './tasks-row';
+import { createClassificationsRow } from './classifications-row';
+import { createMaterialsRow } from './materials-row';
+import { createPsetsRow } from './psets-row';
+import { createQsetsRow } from './qsets-row';
+import { createAttributesRow } from './attributes-row';
 
 /**
  * UI State to render an element properties table
@@ -56,13 +56,13 @@ const processDefinedByRelations = async (
   model: FRAGS.FragmentsGroup,
   expressID: number,
   row: BUI.TableGroupData,
-  uiState: ElementPropertiesUI,
+  uiState: ElementPropertiesUI
 ) => {
   const indexer = components.get(OBC.IfcRelationsIndexer);
   const definedByRelations = indexer.getEntityRelations(
     model,
     expressID,
-    "IsDefinedBy",
+    'IsDefinedBy'
   );
 
   if (definedByRelations) {
@@ -88,13 +88,13 @@ const processAssociateRelations = async (
   components: OBC.Components,
   model: FRAGS.FragmentsGroup,
   expressID: number,
-  row: BUI.TableGroupData,
+  row: BUI.TableGroupData
 ) => {
   const indexer = components.get(OBC.IfcRelationsIndexer);
   const associateRelations = indexer.getEntityRelations(
     model,
     expressID,
-    "HasAssociations",
+    'HasAssociations'
   );
 
   if (associateRelations) {
@@ -120,9 +120,10 @@ const processAssociateRelations = async (
 
     const classificationsRow = await createClassificationsRow(
       model,
-      classifications,
+      classifications
     );
-    if (classificationsRow.children) addRowChildren(row, classificationsRow);
+    if (classificationsRow.children)
+      addRowChildren(row, classificationsRow);
 
     const materialsRow = await createMaterialsRow(model, materials);
     if (materialsRow.children) addRowChildren(row, materialsRow);
@@ -133,22 +134,27 @@ const processAssignmentRelations = async (
   components: OBC.Components,
   model: FRAGS.FragmentsGroup,
   expressID: number,
-  row: BUI.TableGroupData,
+  row: BUI.TableGroupData
 ) => {
   const indexer = components.get(OBC.IfcRelationsIndexer);
   const assignmentRelations = indexer.getEntityRelations(
     model,
     expressID,
-    "HasAssignments",
+    'HasAssignments'
   );
 
   if (assignmentRelations) {
     const taskAttrs: { [attribute: string]: any }[] = [];
     for (const assingmentID of assignmentRelations) {
       const attrs = await model.getProperties(assingmentID);
-      if (attrs && attrs.type === WEBIFC.IFCTASK) taskAttrs.push(attrs);
+      if (attrs && attrs.type === WEBIFC.IFCTASK)
+        taskAttrs.push(attrs);
     }
-    const tasksRow = await createTasksRow(components, model, taskAttrs);
+    const tasksRow = await createTasksRow(
+      components,
+      model,
+      taskAttrs
+    );
     if (tasksRow.children) addRowChildren(row, tasksRow);
   }
 };
@@ -157,13 +163,13 @@ const processContainerRelations = async (
   components: OBC.Components,
   model: FRAGS.FragmentsGroup,
   expressID: number,
-  row: BUI.TableGroupData,
+  row: BUI.TableGroupData
 ) => {
   const indexer = components.get(OBC.IfcRelationsIndexer);
   const contianerRelations = indexer.getEntityRelations(
     model,
     expressID,
-    "ContainedInStructure",
+    'ContainedInStructure'
   );
 
   if (contianerRelations && contianerRelations[0]) {
@@ -171,20 +177,21 @@ const processContainerRelations = async (
     const container = await model.getProperties(containerID);
     if (container) {
       const attributesRow = await createAttributesRow(container, {
-        groupName: "SpatialContainer",
+        groupName: 'SpatialContainer',
       });
       addRowChildren(row, attributesRow);
     }
   }
 };
 
-let processedElements: { [modelID: string]: Map<number, BUI.TableGroupData> } =
-  {};
+let processedElements: {
+  [modelID: string]: Map<number, BUI.TableGroupData>;
+} = {};
 
 const computeTableData = async (
   components: OBC.Components,
   fragmentIdMap: FRAGS.FragmentIdMap,
-  uiState: ElementPropertiesUI,
+  uiState: ElementPropertiesUI
 ) => {
   const indexer = components.get(OBC.IfcRelationsIndexer);
   const fragments = components.get(OBC.FragmentsManager);
@@ -198,7 +205,8 @@ const computeTableData = async (
     if (!model) continue;
     const modelRelations = indexer.relationMaps[model.uuid];
     if (!modelRelations) continue;
-    if (!(modelID in processedElements)) processedElements[modelID] = new Map();
+    if (!(modelID in processedElements))
+      processedElements[modelID] = new Map();
     const modelProcessings = processedElements[modelID];
     const expressIDs = modelIdMap[modelID];
     for (const expressID of expressIDs) {
@@ -209,6 +217,7 @@ const computeTableData = async (
       }
 
       const elementAttrs = await model.getProperties(expressID);
+      console.log('elementAttrs', elementAttrs);
       if (!elementAttrs) continue;
 
       elementRow = {
@@ -235,16 +244,26 @@ const computeTableData = async (
         model,
         expressID,
         elementRow,
-        uiState,
+        uiState
       );
-      await processAssociateRelations(components, model, expressID, elementRow);
+      await processAssociateRelations(
+        components,
+        model,
+        expressID,
+        elementRow
+      );
       await processAssignmentRelations(
         components,
         model,
         expressID,
-        elementRow,
+        elementRow
       );
-      await processContainerRelations(components, model, expressID, elementRow);
+      await processContainerRelations(
+        components,
+        model,
+        expressID,
+        elementRow
+      );
     }
   }
 
@@ -254,7 +273,9 @@ const computeTableData = async (
 /**
  * Heloooooooooo
  */
-export const elementPropertiesTemplate = (state: ElementPropertiesUI) => {
+export const elementPropertiesTemplate = (
+  state: ElementPropertiesUI
+) => {
   const _state = {
     emptySelectionWarning: true,
     ...state,
@@ -265,25 +286,27 @@ export const elementPropertiesTemplate = (state: ElementPropertiesUI) => {
   const onTableCreated = async (e?: Element) => {
     if (!e) return;
     const table = e as BUI.Table;
-    table.columns = [{ name: "Name", width: "12rem" }];
+    table.columns = [{ name: 'Name', width: '12rem' }];
     table.headersHidden = true;
     table.loadFunction = () =>
       computeTableData(components, fragmentIdMap, state);
     const loaded = await table.loadData(true);
-    if (loaded) table.dispatchEvent(new Event("datacomputed"));
+    if (loaded) table.dispatchEvent(new Event('datacomputed'));
   };
 
   const onCellCreated = ({
     detail,
   }: CustomEvent<BUI.CellCreatedEventDetail>) => {
     const { cell } = detail;
-    if (cell.column === "Name" && !("Value" in cell.rowData)) {
-      cell.style.gridColumn = "1 / -1";
+    if (cell.column === 'Name' && !('Value' in cell.rowData)) {
+      cell.style.gridColumn = '1 / -1';
     }
   };
 
   return BUI.html`
-    <bim-table @cellcreated=${onCellCreated} ${BUI.ref(onTableCreated)}>
+    <bim-table @cellcreated=${onCellCreated} ${BUI.ref(
+    onTableCreated
+  )}>
       ${
         emptySelectionWarning
           ? BUI.html`

@@ -637,9 +637,9 @@ bim-grid {
 
 .top-bar-right {
   display: flex;
-  gap: 15px;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
+  gap: 10px;
 }
 
 .hide-button {
@@ -647,4 +647,55 @@ bim-grid {
   background-color: rgb(234, 234, 234);
   width: auto;
   color: black;
+}
+
+.options-menu {
+  position: fixed;
+  min-width: 250px;
+  top: 50px;
+  right: 0px;
+  max-height: calc(100vh - 10px);
+}
+
+.phone-menu-toggler {
+  display: none;
+}
+
+/* .phone-menu-toggler {
+  position: fixed;
+  min-width: unset;
+ 
+  max-height: calc(100vh - 10px);
+} */
+
+
+@media (max-width: 480px) {
+  .options-menu {
+    visibility: hidden;
+    position: fixed;
+    min-width: 250px;
+    top: 50px;
+    right: 0px;
+    max-height: calc(100vh - 10px);
+  }
+}
+
+@media (max-width: 480px) {
+  .phone-menu-toggler {
+    visibility: visible;
+    display: block;
+    position: fixed;
+    top: 60px;
+    right: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .options-menu-visible {
+    visibility: visible;
+  }
+}
+
+.ml-5 {
+  margin-left: 5px;
 }

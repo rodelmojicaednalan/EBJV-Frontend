@@ -5,14 +5,20 @@ import {
   useNavigate,
   useParams,
 } from 'react-router-dom';
+
+// import Stats from 'stats.js';
 import * as OBC from '@thatopen/components';
 import * as BUI from '@thatopen/ui';
 import * as CUIT from '../../tables';
 import * as CUIB from '../../buttons';
 import * as OBF from '@thatopen/components-front';
+import * as OBCF from '@thatopen/components-front';
+import * as THREE from 'three';
+
 import axiosInstance from '../../../../axiosInstance';
 import StickyHeader from '../../SideBar/StickyHeader';
 import Loader from '../../Loaders/Loader';
+import Switch from './Switch';
 import './IfcViewer.css';
 
 import {
@@ -44,12 +50,11 @@ function IfcViewer() {
   const { fileName } = useParams();
   const navigate = useNavigate();
   const containerRef = useRef(null);
+  const measurementContainerRef = useRef(null);
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
   const [cameraControls, setCameraControls] = useState(false);
   const [isPanelOpen, setIsPanelOpen] = useState(true);
-
-  console.log(isPanelOpen);
 
   // const fileUrl = location.state?.fileUrl;
   const fileUrl = fileName;
@@ -65,8 +70,8 @@ function IfcViewer() {
     const app = document.querySelector('bim-grid');
 
     if (panelDiv.classList.contains('hidden')) {
-      panelDiv.classList.remove('hidden');
-      app.style.gridTemplate = `"viewport panel" / 1fr 23rem`;
+      panelDiv.classListNaNpxove('hidden');
+      app.style.gridTemplate = `"panel viewport" /368px 1fr`;
     } else {
       panelDiv.classList.add('hidden');
       app.style.gridTemplate = `"viewport"`;
@@ -96,30 +101,59 @@ function IfcViewer() {
         const worlds = components.get(OBC.Worlds);
         const world = worlds.create();
 
-        const sceneComponent = new OBC.SimpleScene(components);
-        sceneComponent.setup();
-        world.scene = sceneComponent;
-
-        const rendererComponent = new OBC.SimpleRenderer(
+        world.scene = new OBC.SimpleScene(components);
+        world.renderer = new OBCF.PostproductionRenderer(
           components,
           viewport
         );
-        world.renderer = rendererComponent;
-
-        const cameraComponent = new OBC.SimpleCamera(components);
-        world.camera = cameraComponent;
-
-        viewport.addEventListener('resize', () => {
-          rendererComponent.resize();
-          cameraComponent.updateAspect();
-        });
-
-        const fragmentIfcLoader = components.get(OBC.IfcLoader);
-
-        const viewerGrids = components.get(OBC.Grids);
-        viewerGrids.create(world);
+        world.camera = new OBC.SimpleCamera(components);
 
         components.init();
+
+        world.camera.controls.setLookAt(5, 5, 5, 0, 0, 0);
+
+        world.scene.setup();
+
+        const grids = components.get(OBC.Grids);
+        grids.create(world);
+
+        // const sceneComponent = new OBC.SimpleScene(components);
+        // sceneComponent.setup();
+        // world.scene = sceneComponent;
+
+        // const rendererComponent = new OBC.SimpleRenderer(
+        //   components,
+        //   viewport
+        // );
+        // world.renderer = rendererComponent;
+
+        // const cameraComponent = new OBC.SimpleCamera(components);
+        // world.camera = cameraComponent;
+
+        // viewport.addEventListener('resize', () => {
+        //   rendererComponent.resize();
+        //   cameraComponent.updateAspect();
+        // });
+
+        // const viewerGrids = components.get(OBC.Grids);
+        // viewerGrids.create(world);
+
+        const fragmentIfcLoader = components.get(OBC.IfcLoader);
+        // components.init();
+
+        const dimensions = components.get(OBCF.LengthMeasurement);
+        dimensions.world = world;
+        dimensions.enabled = true;
+        dimensions.snapDistance = 1;
+
+        containerRef.current.ondblclick = () => {
+          dimensions.create();
+        };
+        window.onkeydown = (event) => {
+          if (event.code === 'Delete' || event.code === 'Backspace') {
+            dimensions.delete();
+          }
+        };
 
         const ifcLoader = components.get(OBC.IfcLoader);
         await ifcLoader.setup();
@@ -201,6 +235,7 @@ function IfcViewer() {
               );
               model.name = 'example';
               world.scene.three.add(model);
+              world.meshes.add(model);
 
               const indexer = components.get(OBC.IfcRelationsIndexer);
               await indexer.process(model);
@@ -239,12 +274,12 @@ function IfcViewer() {
           };
 
           return BUI.html`
-          <bim-panel class="asd" label="Classifications Tree">
+          <bim-panel class="asd" label="Classifications Tree" class="options-menu">
           <bim-panel-section label="Classifications">
           ${classificationsTree}
           </bim-panel-section>
           <bim-panel-section label="Element Data">
-          <div style="display: flex; gap: 0.5rem;">
+          <div style="display: flex; gap: 8px;">
           <bim-button @click=${expandTable} label=${
             propertiesTable.expanded ? 'Collapse' : 'Expand'
           }></bim-button> 
@@ -256,12 +291,52 @@ function IfcViewer() {
           `;
         });
 
+        const measurementPanel = BUI.Component.create(() => {
+          return BUI.html`
+          <bim-panel active label="Length Measurement" class="options-menu">
+              <bim-panel-section collapsed label="Controls">
+                  <bim-label>Create dimension: Double click</bim-label>  
+                  <bim-label>Delete dimension: Delete</bim-label>  
+              </bim-panel-section>
+              
+              <bim-panel-section collapsed label="Others">
+                <bim-checkbox 
+                  checked 
+                  label="Dimensions enabled"
+                  @change="${(event) => {
+                    dimensions.enabled = event.target.value;
+                  }}}">  
+                </bim-checkbox>        
+                <bim-checkbox checked label="Dimensions visible" 
+                   @change="${(event) => {
+                     dimensions.visible = event.target.value;
+                   }}">  
+                </bim-checkbox>  
+                
+                <bim-color-input 
+                  label="Dimensions Color" color="#202932" 
+                   @input="${(event) => {
+                     dimensions.color.set(event.target.color);
+                   }}">
+                </bim-color-input>
+                
+                <bim-button label="Delete all"
+                  @click="${() => {
+                    dimensions.deleteAll();
+                  }}">
+                </bim-button>
+        
+              </bim-panel-section>
+            </bim-panel>
+            `;
+        });
+
         const app = document.createElement('bim-grid');
         app.layouts = {
           main: {
             template: `
-              "viewport panel"
-              / 1fr 23rem
+              "panel viewport"
+              /368px 1fr  
             `,
             elements: { panel, viewport },
           },
@@ -270,7 +345,33 @@ function IfcViewer() {
         app.layout = 'main';
 
         // Append the generated viewer and panel to the container
+        // document.body.append(measurementPanel);
         containerRef.current.appendChild(app);
+        measurementContainerRef.current.appendChild(measurementPanel);
+
+        const button = BUI.Component.create(() => {
+          return BUI.html`
+              <bim-button class="phone-menu-toggler" icon="solar:settings-bold"
+                @click="${() => {
+                  if (
+                    measurementPanel.classList.contains(
+                      'options-menu-visible'
+                    )
+                  ) {
+                    measurementPanel.classListNaNpxove(
+                      'options-menu-visible'
+                    );
+                  } else {
+                    measurementPanel.classList.add(
+                      'options-menu-visible'
+                    );
+                  }
+                }}">
+              </bim-button>
+            `;
+        });
+
+        measurementContainerRef.current.appendChild(button);
       };
 
       initializeIfcViewer();
@@ -278,19 +379,16 @@ function IfcViewer() {
   }, []);
 
   return (
-    <div className="container" ref={containerRef}>
-      {/* <StickyHeader /> */}
-
-      <div
-        className={`col-lg-12 custom-content-container margin-top  `}
-      >
-        <TopBar
-          hanldeCameraControls={hanldeCameraControls}
-          cameraControls={cameraControls}
-          handleBack={handleBack}
-          handleTogglePanel={togglePanel}
-          isPanelOpen={isPanelOpen}
-        />
+    <div className={`w-100`} ref={measurementContainerRef}>
+      <TopBar
+        hanldeCameraControls={hanldeCameraControls}
+        cameraControls={cameraControls}
+        handleBack={handleBack}
+        handleTogglePanel={togglePanel}
+        isPanelOpen={isPanelOpen}
+      />
+      <div className="container" ref={containerRef}>
+        {/* <StickyHeader /> */}
         {isLoading && <Loader />}
       </div>
     </div>
@@ -313,19 +411,17 @@ function TopBar({
   };
 
   return (
-    <div className="top-bar m-2">
+    <div className="top-bar">
       <div className="top-bar-content">
         <button className="top-bar-button" onClick={handleBack}>
           <FiArrowLeft /> Back
         </button>
 
         <div className="top-bar-right">
-          <button
-            className="btn btn-secondary"
-            onClick={handleTogglePanel}
-          >
-            {`${isPanelOpen ? 'Hide' : 'Open'}`} Classification Tree
-          </button>
+          <p style={{ marginBottom: '0rem', fontWeight: 'bold' }}>
+            Classification Tree
+          </p>
+          <Switch handleTogglePanel={handleTogglePanel} />
           {/* <Tools
             hanldeCameraControls={hanldeCameraControls}
             toggleModal={toggleModal}
