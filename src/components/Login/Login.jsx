@@ -107,7 +107,7 @@ function Login() {
                                 />
                             </div>
                             <div className="form-group group-field-password">
-                                <div className="d-flex">
+                                <div className="d-flex flex-row align-items-center">
                                 <input
                                     type="checkbox"
                                     id="showPassword"
@@ -117,7 +117,7 @@ function Login() {
                                 <label id="showPassLabel" htmlFor="showPassword">Show Password</label>
                                 </div>
 
-                                <div className="d-flex">
+                                <div className="d-flex flex-row align-items-center">
                                 <input
                                     type="checkbox"
                                     id="rememberMe"
