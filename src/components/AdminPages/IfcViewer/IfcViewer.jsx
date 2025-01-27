@@ -70,7 +70,7 @@ function IfcViewer() {
     const app = document.querySelector('bim-grid');
 
     if (panelDiv.classList.contains('hidden')) {
-      panelDiv.classListNaNpxove('hidden');
+      panelDiv.classList.remove('hidden');
       app.style.gridTemplate = `"panel viewport" /368px 1fr`;
     } else {
       panelDiv.classList.add('hidden');
@@ -358,7 +358,7 @@ function IfcViewer() {
                       'options-menu-visible'
                     )
                   ) {
-                    measurementPanel.classListNaNpxove(
+                    measurementPanel.classList.remove(
                       'options-menu-visible'
                     );
                   } else {
