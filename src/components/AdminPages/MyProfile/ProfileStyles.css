@@ -1,0 +1,144 @@
+.project-list {
+    list-style: none;
+    text-align: center;
+    padding: 0;
+    font-size: 14px;
+}
+.project-list li{
+    margin-bottom: 5px;
+}
+
+
+/* My Profile style */
+.custom-profile-container {
+    background-color: #f9fafc;
+    border: 2px solid #dfdfdf; 
+    /* border-radius: 20px; */
+    padding: 2.5rem;
+    /* height: auto; */
+    /* background-color: #f3f3fe; */
+    /* / margin-left: 20rem; / */
+    /* margin: 5rem; */
+    /* / margin-right: 4rem; / */
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: space-evenly;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* .profile-update {
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    padding: 20px;
+    margin-right: 20px;
+  } */
+  
+  /* .profile-update .profile-heading {
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    padding: 20px;
+    margin-right: 20px;
+  } */
+  
+  /* .profile-user {
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    padding: 20px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+  } */
+  
+
+  .profile-update,
+.profile-user {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 20px;
+  width: 100%;
+  max-width: 48%;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+ .profile-update  {
+  max-width: 60%;
+  }
+
+.profile-user{
+  max-width: 35%;
+    text-align: center;
+}
+
+  .profile-user img {
+    border-radius: 50%;
+    /* object-fit: cover; */
+    height: 120px;
+    width: 120px;
+    /* margin-top: -80px; */
+    margin-bottom: 20px;
+  }
+  
+  .profile-user h5 {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .profile-user h6 {
+    font-size: 14px;
+    color: #666;
+  }
+
+  .custom-profile-container .submit-btn, .view-all-btn {
+    background-color: #eb6314;
+    color: #ffffff;
+    font-size: 16px;
+    border: none;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 10px 20px;
+    transition: background-color 0.3s ease;
+  }
+
+  .submit-btn:hover {
+    background-color: #d55712;
+  }
+  
+  .custom-profile-container h2 {
+    font-size: 25px;
+    font-weight: 700;
+  }
+  
+  .custom-row {
+    display: flex;
+    flex-wrap: wrap;
+    /* justify-content: center; */
+    gap: 5px;
+  }
+  
+  .custom-row h3 {
+    line-height: 0px;
+    padding-left: 0;
+  }
+  
+  .custom-row p {
+    padding-left: 0;
+  }
+  @media (max-width: 768px) {
+    .custom-profile-container {
+      flex-direction: column;
+    }
+  
+    .profile-update,
+    .profile-user {
+      max-width: 100%;
+    }
+  
+    .user-info-fields {
+      flex-direction: column;
+    }
+  }
+  
+  /* End of My Profile Style */

@@ -6,7 +6,7 @@ import man from '../../../../assets/images/man.png'
 import { CSVLink } from 'react-csv'
 import '../ProjectStyles.css'
 import ProjectSidebar from '../ProjectFolderSidebar';
-import { FaCaretDown, FaFileExcel, FaHistory } from "react-icons/fa";
+import { FaCaretDown, FaFileExcel, FaHistory, FaChevronCircleLeft, FaChevronCircleRight } from "react-icons/fa";
 
 import SidebarOffcanvas from '../MobileSidebar';
 import useWindowWidth from './windowWidthHook.jsx'
@@ -25,6 +25,15 @@ function ProjectActivity() {
   const [selectedFilters, setSelectedFilters] = useState({});
   const [filteredActivities, setFilteredActivities] = useState([]);
   const dropdownRef = useRef(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Limit to 20 items per page
+
+  const totalPages = Math.ceil(filteredActivities.length / itemsPerPage);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
 
   const toggleDropdown = (id) => {
     console.log("Toggling dropdown for ID:", id);
@@ -110,17 +119,17 @@ function ProjectActivity() {
 
 useEffect(() => {
   const generateFilters = () => {
-    const typeOptions = ["Files", "Folders", "Users", "Views", "Clashsets", "activitys", "ToDo", "Topics", "Comments", "Share", "Other"]; // Static mapping for ownership
-    const userOptions = Array.from(
-      new Set(activityCardData.map((owner) => owner.activityOwner))
-    );    
-    const groupOptions = projectGroups; // Already formatted in `fetchAvailableUsers`
+    // const typeOptions = ["Files", "Folders", "Users", "Views", "Clashsets", "activitys", "ToDo", "Topics", "Comments", "Share", "Other"]; // Static mapping for ownership
+    // const userOptions = Array.from(
+    //   new Set(activityCardData.map((owner) => owner.activityOwner))
+    // );    
+    // const groupOptions = projectGroups; // Already formatted in `fetchAvailableUsers`
     const dateModifiedOptions = ["Today", "This Week", "Last Month"];
     
     const filters = [
-      { type: "Type", options: typeOptions},
-      { type: "Users", options: userOptions},
-      { type: "Groups", options: groupOptions},
+      // { type: "Type", options: typeOptions},
+      // { type: "Users", options: userOptions},
+      // { type: "Groups", options: groupOptions},
       { type: "Date Modified", options: dateModifiedOptions},
     ];
     
@@ -139,12 +148,12 @@ useEffect(() => {
       if (selectedOptions.length > 0) {
         filteredData = filteredData.filter((activity) => {
           switch (filterType) {
-            case "Type":
-              return selectedOptions.includes(activity.activityType);
-            case "Users":
-              return selectedOptions.includes(activity.activityOwner);
-            case "Groups":
-              return selectedOptions.includes(activity.group);
+            // case "Type":
+            //   return selectedOptions.includes(activity.activityType);
+            // case "Users":
+            //   return selectedOptions.includes(activity.activityOwner);
+            // case "Groups":
+            //   return selectedOptions.includes(activity.group);
             case "Date Modified":
               { const dueDate = new Date(activity.lastModified);
               const today = new Date();
@@ -180,6 +189,10 @@ useEffect(() => {
     setFilteredActivities(filteredData);
   }, [selectedFilters, activityCardData]);
 
+  const currentActivities = filteredActivities.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified)).slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleCheckboxChange = (filterType, option) => {
     setSelectedFilters((prevFilters) => ({
@@ -289,7 +302,7 @@ useEffect(() => {
                       </div> 
 
                 <div className="activity-cards-box mt-1 d-flex">
-                  {filteredActivities.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified)).map((data) => (
+                  {currentActivities.map((data) => (
                     <div
                       key={data.id}
                       className="activity-card container-fluid mb-2"
@@ -317,6 +330,27 @@ useEffect(() => {
                     </div>
                   ))}
                 </div>
+                  {/* Pagination Controls */}
+                  <div className="pagination-controls d-flex justify-content-center mt-3 mb-4 flex-row">
+                  <button
+                    className="btn btn-tertiary"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    <FaChevronCircleLeft/>
+                  </button>
+                  <span className="mx-2">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    className="btn btn-tertiary"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    <FaChevronCircleRight/>
+                  </button>
+                </div>
+
               </div>
             </div>
           </div>

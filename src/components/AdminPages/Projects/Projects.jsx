@@ -303,7 +303,7 @@ function Projects() {
               className="dataTables_wrapper"
               columns={columns}
               data={filteredData}
-              pagination
+              pagination={filteredData.length >=20}
               paginationPerPage={20}
               paginationRowsPerPageOptions={[20, 30]}
             />

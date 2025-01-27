@@ -309,7 +309,7 @@ const Sidebar = ({ projectId }) => {
               </div>
             </li>
 
-            {/* <li
+            <li
           className={`nav-item-group ${
             isActive(`/project-folder/${projectId}/settings/edit-project`) ? "active" : ""
           }`}
@@ -318,9 +318,9 @@ const Sidebar = ({ projectId }) => {
             <MdSettings id="nav-icons" size={20}/>
             <span id="nav-label">Project Settings</span>
           </div>
-        </li> */}
-
-            {/* Settings Group */}
+        </li>
+{/* 
+            {/* Settings Group 
             <li className="nav-item-group">
               <div id="nav-group">
                 <div
@@ -352,7 +352,7 @@ const Sidebar = ({ projectId }) => {
                         'height 0.3s ease, opacity 0.3s ease',
                     }}
                   >
-                    <li
+                     <li
                       className={`nav-item-subgroup ${
                         isActive(
                           `/project-folder/${projectId}/settings/edit-project`
@@ -372,8 +372,8 @@ const Sidebar = ({ projectId }) => {
                         <BiSolidEdit id="nav-icons" size={20} />
                         <span id="nav-label">Project Details</span>
                       </div>
-                    </li>
-                    {/* <li
+                    </li> 
+                    <li
                       className={`nav-item-subgroup ${
                         isActive(
                           `/project-folder/${projectId}/settings/topic-settings`
@@ -393,8 +393,8 @@ const Sidebar = ({ projectId }) => {
                         <HiCog id="nav-icons" size={20} />
                         <span id="nav-label">Topic Settings</span>
                       </div>
-                    </li> */}
-                    <li
+                    </li> 
+                     <li
                       className={`nav-item-subgroup ${
                         isActive(
                           `/project-folder/${projectId}/settings/unit-settings`
@@ -414,11 +414,12 @@ const Sidebar = ({ projectId }) => {
                         <TbRulerMeasure id="nav-icons" size={20} />
                         <span id="nav-label">Units</span>
                       </div>
-                    </li>
+                    </li> 
                   </ul>
                 )}
               </div>
-            </li>
+            </li> 
+            */}
           </>
         )}
       </ul>

@@ -137,7 +137,7 @@ const SidebarOffcanvas = ({ projectId }) => {
                   }
                 >
                   <FaFolderTree id="mobile-nav-icons" size={20} />
-                  <span id="mobile-nav-label">Explorer</span>
+                  <span id="mobile-nav-label">File Explorer</span>
                 </div>
               </li>
               {userRole === "Admin" && (
@@ -156,7 +156,7 @@ const SidebarOffcanvas = ({ projectId }) => {
                       }
                     >
                       <FaHistory id="mobile-nav-icons" size={20} />
-                      <span id="mobile-nav-label">Activity</span>
+                      <span id="mobile-nav-label">Project Activity</span>
                     </div>
                   </li>
                   <li
@@ -178,7 +178,28 @@ const SidebarOffcanvas = ({ projectId }) => {
                       <span id="mobile-nav-label">Project Members</span>
                     </div>
                   </li>
-                  <li className="mobile-nav-item-group">
+
+                  <li
+                    className={`mobile-nav-item-group ${
+                    location.pathname ===
+                    `/project-folder/${projectId}/settings/edit-project`
+                      ? "active"
+                      : ""
+                    }`}
+                  >
+                    <div
+                      id="mobile-nav-item"
+                      onClick={() =>
+                          navigate(`/project-folder/${projectId}/settings/edit-project`)
+                          }
+                    >
+                      <MdSettings id="mobile-nav-icons" />
+                      <span id="mobile-nav-label">Project Settings</span>
+                    </div>
+                  </li>
+
+
+                  {/* <li className="mobile-nav-item-group">
                     <div id="nav-group">
                       <div className="big-nav-wrapper" onClick={collapseSettingGroup}>
                         <MdSettings id="mobile-nav-icons" size={20} />
@@ -238,7 +259,7 @@ const SidebarOffcanvas = ({ projectId }) => {
                         </ul>
                       )}
                     </div>
-                  </li>
+                  </li> */}
                 </>
               )}
             </ul>
