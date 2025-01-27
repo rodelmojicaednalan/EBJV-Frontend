@@ -41,7 +41,7 @@ background-color: #fff !important;
         right: 0;
         left: 0;
         width: 100%;
-        padding-top: 0 !important;
+        top: 100% !important;
     }
 }
 
