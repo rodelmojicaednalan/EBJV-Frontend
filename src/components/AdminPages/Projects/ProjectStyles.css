@@ -10,7 +10,6 @@
       flex-direction: column; */
 }
 
-
 #project-folder-container {
   display: flex;
   flex-flow: row nowrap;
@@ -21,15 +20,18 @@
   margin-top: 0;
 }
 
-#projectFolder-title {
-  margin-left: -75%;
-  white-space: nowrap;
-  /* Prevents text from wrapping to a new line */
-  /* overflow: hidden;           Hides the overflowed content */
-  text-overflow: ellipsis;
-  display: block;
-  width: 270px;
+.offcanvas-action-btn{
+  padding: .675rem !important;
+  border-radius: 50%;
 }
+.projectFolder-title{
+  position:fixed;
+  top: 1.5rem;
+  right: 0;
+  margin-right: 1rem;
+  z-index: 10;
+}
+
 
 /* .form-group > select > option{
   font-size: 12px;
@@ -425,6 +427,34 @@ p {
   transition: ease-in-out .5s;
 }
 
+.edit-file-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#file-edited{
+  border: 1px solid #9c9c9c49;
+  background-color: #bfbfbf1e;
+  color: #212a3183;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  padding: 5px;
+  width: 100%;
+  font-size: .875rem;
+}
+
+.edit-file-inputField{
+  background-color: #bfbfbf1e;
+  padding: 10px;
+  border: 1px solid #9c9c9c49;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  width: 100%;
+  font-size: .875rem;
+}
+
 
 /* Project Views */
 
@@ -498,6 +528,7 @@ p {
 }
 
 .offcanvas {
+  z-index: 99999;
   background: white;
   padding: 20px;
   width: 45% !important;
@@ -1602,7 +1633,7 @@ p {
   }
 
   .addFile-dd-item:hover {
-    background: #f8f9fa;
+    background: #fec19db8;
   }
 
   .addFile-dd-icon {

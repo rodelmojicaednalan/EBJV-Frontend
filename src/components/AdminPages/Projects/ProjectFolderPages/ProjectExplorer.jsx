@@ -4,7 +4,6 @@ import axiosInstance from '../../../../../axiosInstance.js';
 import Swal from 'sweetalert2';
 import { useNavigate, useParams } from 'react-router-dom';
 import ReactDOM from "react-dom";
-import StickyHeader from '../../../SideBar/StickyHeader';
 import { saveAs } from 'file-saver'
 import { CSVLink } from 'react-csv'
 import Select from 'react-select';
@@ -68,6 +67,7 @@ function ProjectExplorer() {
   const [toastPosition, setToastPosition] = useState('bottom-end')
   const showToast = () => setShowSuccessToast(!showSuccessToast);
 
+
   const addMenuToggle = () => {
     setIsAddMenuOpen(!isAddMenuOpen);
   }
@@ -98,6 +98,7 @@ function ProjectExplorer() {
   const handleCloseCanvas = () => setShowCanvas(false);
   const handleShowCanvas = () => setShowCanvas(true);
 
+
   const [selectedRow, setSelectedRow] = useState(null); // State to hold the selected row details
 
 // Handle row click
@@ -105,6 +106,10 @@ function ProjectExplorer() {
     setSelectedRow(row); // Set the clicked row's data
     handleShowCanvas(); // Show the Offcanvas
   };
+
+  const handleEditClick = () => {
+    setShowEditCanvas(true);
+  }
 
   // const handleOpenPicker = () => {
   //   openPicker({
@@ -191,14 +196,14 @@ function ProjectExplorer() {
           project_name,
           owner,
           files,
-          createdAt,
-          updatedAt,
           project_file,
         } = response.data;
 
         setProjectName(project_name);
         setOwnerName(`${owner.first_name} ${owner.last_name}`);
         setExistingFiles(project_file);
+        // const parsedFiles = JSON.parse(files)
+        // console.log(parsedFiles)
 
         const formattedFiles = files.map((file) => ({
           projectId: id,
@@ -211,12 +216,17 @@ function ProjectExplorer() {
             month: 'short',
             day: '2-digit',
             year: 'numeric',
-          }).format(new Date(createdAt)),
+          }).format(new Date(file.fileCreationTime)),
+          lastAccessed: new Intl.DateTimeFormat('en-US', {
+            month: 'short',
+            day: '2-digit',
+            year: 'numeric',
+          }).format(new Date(file.fileLastAccessed)), // Format updatedAt
           lastModified: new Intl.DateTimeFormat('en-US', {
             month: 'short',
             day: '2-digit',
             year: 'numeric',
-          }).format(new Date(updatedAt)), // Format updatedAt
+          }).format(new Date(file.fileLastModified)), // Format updatedAt
         }));
 
         setExplorerTable(formattedFiles);
@@ -339,8 +349,8 @@ function ProjectExplorer() {
 
   
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showAddFolderModal, setShowAddFolderModal] = useState(false);
-  const [newFolder, setNewFolder] = useState("");
+  // const [showAddFolderModal, setShowAddFolderModal] = useState(false);
+  // const [newFolder, setNewFolder] = useState("");
   const [newFiles, setNewFiles] = useState([]);
 
   const handleAddNewFile = async () => {
@@ -375,9 +385,46 @@ function ProjectExplorer() {
     }
   };
 
-  const handleAddNewFolder = async () => {
-    console.log("Folder Added")
-  }
+
+
+  // const [newFileName, setNewFileName] = useState('')
+  // const handleRenameFile = async () => {
+  //   if (!newFileName.trim()) {
+  //     alert('New file name cannot be empty.');
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await axiosInstance.post(`/rename-file/${projectId}`, {
+  //       oldFileName: selectedRow.fileName,
+  //       newFileName: newFileName,
+  //     });
+
+  //     if (response.status === 200) {
+  //       setRefreshKey((prevKey) => prevKey + 1); //Trigger a refresh or update
+  //       handleCloseEditCanvas(); // Close the Offcanvas
+  //     }
+  //   } catch (error) {
+  //     console.error('Error renaming file:', error);
+  //     alert('Failed to rename the file. Please try again.');
+  //   }
+  // };
+
+  // // Extract the base name and extension from the current file name
+  // const fileNameParts = selectedRow?.fileName ? selectedRow.fileName.split('.') : [];
+  // const fileBaseName = fileNameParts.length > 1 
+  //   ? fileNameParts.slice(0, -1).join('.') 
+  //   : selectedRow?.fileName || 'Untitled';
+  // const fileExtension = fileNameParts.length > 1 
+  //   ? fileNameParts[fileNameParts.length - 1] 
+  //   : 'ifc'; // Fallback to a default extension if not available
+  
+
+  
+
+  // const handleAddNewFolder = async () => {
+  //   console.log("Folder Added")
+  // }
 
   const handleDeleteFiles = async () => {
     try {
@@ -436,8 +483,6 @@ function ProjectExplorer() {
     showToast();
 
   };
-
-
 
   // const handleShare = async () => {
   //   document.querySelector(".offcanvas").setAttribute("aria-hidden", "true");
@@ -557,11 +602,9 @@ function ProjectExplorer() {
 
   return (
     <div className="container">
-      {/* <StickyHeader /> */}
-
-      {/* <h3 className="title-page" id="projectFolder-title" style={{zIndex: '99999'}}>
+      <h3 className="projectFolder-title" id="projectFolder-title" >
         {ownerName}&apos;s {projectName}
-      </h3> */}
+      </h3>
 
       <div
         className="container-content"
@@ -720,6 +763,9 @@ function ProjectExplorer() {
                       id="explorer-table"
                       columns={explorerColumn}
                       data={explorerTable}
+                      pagination={explorerTable.length >=10}
+                      paginationPerPage={10}
+                      paginationRowsPerPageOptions={[10, 20, 30]}
                       onRowClicked={handleRowClick}
                       responsive
                       noDataComponent={
@@ -899,9 +945,9 @@ function ProjectExplorer() {
             {selectedRow ? selectedRow.fileName : "File Details"}
           </span>
           <div className="offcanvas-button-group">
-            <button className="offcanvas-btn" title="Edit">
+            {/* <button className="offcanvas-btn" title="Edit" onClick={handleEditClick}>
               <BiSolidEditAlt size={18} />
-            </button>
+            </button> */}
             <button
               className="offcanvas-btn"
               title="Close"
@@ -917,7 +963,7 @@ function ProjectExplorer() {
         <div className="offcanvas-button-group2 mb-3 flex-wrap">
               <label htmlFor="buttons">  </label>
               {selectedRow?.fileName?.endsWith('.ifc') && (
-              <button className="btn mr-4 ml-1"
+              <button className="btn ml-1 mr-auto"
                       onClick={() =>
                         navigate(`/ifc-viewer/${projectId}/${selectedRow.fileName}`, {
                           state: {
@@ -929,10 +975,10 @@ function ProjectExplorer() {
                 View 
               </button>
               )}
-              <button className="btn" onClick={handleOpenShareModal}><IoMdPersonAdd size={20}/></button>
-              <button className="btn" onClick={() => downloadFile(selectedRow.fileName)} ><IoMdDownload size={20}/></button>
+              <button className="btn offcanvas-action-btn" onClick={handleOpenShareModal}><IoMdPersonAdd size={20}/></button>
+              <button className="btn offcanvas-action-btn" onClick={() => downloadFile(selectedRow.fileName)} ><IoMdDownload size={20}/></button>
               {selectedRow?.fileName?.endsWith('.ifc') && (
-              <button className="btn" onClick={handleOpenQRCodeModal}><BsQrCode size={20}/></button>
+              <button className="btn offcanvas-action-btn mr-1" onClick={handleOpenQRCodeModal}><BsQrCode size={20}/></button>
               )}
               {/* <button className="btn " onClick={handleOCMenuToggle}><BiDotsVertical size={20}/></button>  
               {offcanvasMenuOpen && (
@@ -965,10 +1011,13 @@ function ProjectExplorer() {
                 <p>{selectedRow.created} by {selectedRow.fileOwner}</p>
               <label style={{margin: "0", fontWeight: "300"}}>Last Modified:</label>
                 <p>{selectedRow.lastModified} by {selectedRow.fileOwner}</p>
+                <label style={{margin: "0", fontWeight: "300"}}>Last Accessed:</label>
+                <p>{selectedRow.lastAccessed} by {selectedRow.fileOwner}</p>
           </div>
         )}
         </Offcanvas.Body>
       </Offcanvas>
+
 
 
       <Modal 
@@ -1018,6 +1067,17 @@ function ProjectExplorer() {
         </Toast>
         </ToastContainer>
         </div> */}
+{/* 
+      <ToastContainer className="p-3" position={toastPosition}>
+          <Toast className="success-toast-container" show={showEditToast} onClose={closeSuccessEdit} delay={5000} autohide>
+            <Toast.Header className='success-toast-header justify-content-between'>
+           <span> File Renamed Successfully! </span>   
+            </Toast.Header>
+            <Toast.Body className="success-toast-body">
+              Review the details, share with your team, and proceed with the discussion on the topic.
+            </Toast.Body>
+          </Toast>
+        </ToastContainer> */}
         
     </div>
   );

@@ -91,7 +91,7 @@ function Layout() {
         <Route path="/reset-password/:passwordToken" name="reset-password"  element={<ResetPassword />}/>
         <Route path="/open-email"  element={<CheckEmail />}/>
         <Route path="/user-management" element={<ProtectedRoute element={<UserRoleManagement />} allowedRoles={['Admin']} />} />
-        <Route path="/staff-logs" element={<ProtectedRoute element={<StaffLogs />} allowedRoles={['Admin',]} />} />
+        {/* <Route path="/staff-logs" element={<ProtectedRoute element={<StaffLogs />} allowedRoles={['Admin',]} />} /> */}
 
         <Route path="/projects" element={<ProtectedRoute element={<Projects />} allowedRoles={['Admin', 'Client']} />} />
         <Route path="/add-project" element={<ProtectedRoute element={<AddProject />} allowedRoles={['Admin', 'Client']} />} />
@@ -99,15 +99,15 @@ function Layout() {
         <Route path="/project-folder/:projectId" element={<ProtectedRoute element={<ProjectFolder />} allowedRoles={['Admin', 'Client']} />} />
 
         <Route path="/project-folder/:projectId/data/project-explorer" element={<ProtectedRoute element={<ProjectExplorer />} allowedRoles={['Admin', 'Client']} />} />
-        <Route path="/project-folder/:projectId/data/project-views" element={<ProtectedRoute element={<ProjectViews />} allowedRoles={['Admin', 'Client']} />} />
-        <Route path="/project-folder/:projectId/data/project-releases" element={<ProtectedRoute element={<ProjectReleases />} allowedRoles={['Admin', 'Client']} />} />
+        {/* <Route path="/project-folder/:projectId/data/project-views" element={<ProtectedRoute element={<ProjectViews />} allowedRoles={['Admin', 'Client']} />} /> */}
+        {/* <Route path="/project-folder/:projectId/data/project-releases" element={<ProtectedRoute element={<ProjectReleases />} allowedRoles={['Admin', 'Client']} />} /> */}
         <Route path="/project-folder/:projectId/project-activity" element={<ProtectedRoute element={<ProjectActivity />} allowedRoles={['Admin', 'Client']} />} />
         {/* <Route path="/project-folder/:projectId/project-topics" element={<ProtectedRoute element={<ProjectTopics />} allowedRoles={['Admin', 'Client']} />} />
         <Route path="/project-folder/:projectId/project-ToDos" element={<ProtectedRoute element={<ProjectToDo />} allowedRoles={['Admin', 'Client']} />} /> */}
         <Route path="/project-folder/:projectId/project-contributors" element={<ProtectedRoute element={<ProjectContributors />} allowedRoles={['Admin', 'Client']} />} />
         <Route path="/project-folder/:projectId/settings/edit-project" element={<ProtectedRoute element={<ProjectSettings />} allowedRoles={['Admin', 'Client']} />} />
         {/* <Route path="/project-folder/:projectId/settings/topic-settings" element={<ProtectedRoute element={<TopicSettings />} allowedRoles={['Admin', 'Client']} />} /> */}
-        <Route path="/project-folder/:projectId/settings/unit-settings" element={<ProtectedRoute element={<UnitSettings />} allowedRoles={['Admin', 'Client']} />} />
+        {/* <Route path="/project-folder/:projectId/settings/unit-settings" element={<ProtectedRoute element={<UnitSettings />} allowedRoles={['Admin', 'Client']} />} /> */}
  
         <Route path="/add-new-user" element={<ProtectedRoute element={<AddNewUser />} allowedRoles={['Admin']} />} />
         <Route path="/edit-user/:userId" element={<ProtectedRoute element={<EditUser />} allowedRoles={['Admin']} />} />
@@ -117,7 +117,7 @@ function Layout() {
         <Route path="/my-profile" element={<ProtectedRoute element={<MyProfile />} allowedRoles={['Admin', 'Client']} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
 
-        <Route path="map" element={ProjectMap}/>
+        {/* <Route path="map" element={ProjectMap}/> */}
       </Routes>
     </>
     </AuthContextProvider>

@@ -107,24 +107,24 @@ function Login() {
                                 />
                             </div>
                             <div className="form-group group-field-password">
-                                <div>
+                                <div className="d-flex">
                                 <input
                                     type="checkbox"
                                     id="showPassword"
                                     checked={showPassword}
                                     onChange={() => setShowPassword(!showPassword)}
                                 /> &nbsp; 
-                                <label htmlFor="showPassword">Show Password</label>
+                                <label id="showPassLabel" htmlFor="showPassword">Show Password</label>
                                 </div>
 
-                                <div>
+                                <div className="d-flex">
                                 <input
                                     type="checkbox"
                                     id="rememberMe"
                                     checked={rememberMe}
                                     onChange={() => setRememberMe(!rememberMe)}
                                 /> &nbsp; 
-                                <label htmlFor="rememberMe">Remember Me</label>
+                                <label id="rememberMeLabel" htmlFor="rememberMe">Remember Me</label>
                                 </div>
 
 

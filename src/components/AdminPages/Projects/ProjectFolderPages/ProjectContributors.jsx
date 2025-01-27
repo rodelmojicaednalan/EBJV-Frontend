@@ -82,7 +82,7 @@ function ProjectContributors() {
         setSelectedRow(row); // Set the clicked row's data
         handleShowCanvas(); // Show the Offcanvas
       };
-      console.log(selectedRow)
+      // console.log(selectedRow)
 
   // search people hide function
   const handleSearch = (event) => {
@@ -266,7 +266,7 @@ function ProjectContributors() {
       filteredColumns.map((col) => [col.key, col.selector(row)]) // Extract values dynamically
     )
   );
-    console.log(headers)
+    // console.log(headers)
     return { headers, data };
   };
 
@@ -288,13 +288,13 @@ function ProjectContributors() {
             ),
       sortable: true,
     },
-    {
-      name: "Employer",
-      key: 'contEmployer',
-      selector: (row) => row.contEmployer,
-      sortable: true,
-      hide: 'md'
-    },
+    // {
+    //   name: "Employer",
+    //   key: 'contEmployer',
+    //   selector: (row) => row.contEmployer,
+    //   sortable: true,
+    //   hide: 'md'
+    // },
     {
       name: "Role",
       key: 'contRole',
@@ -359,7 +359,7 @@ function ProjectContributors() {
   };
 
   const handleInviteToGroup = async (id) => {
-    console.log(selectedGroup);
+    // console.log(selectedGroup);
     // Validate that selected users are not already in the group
     const usersToInvite = selectedUsers.filter(
       (user) => !contributors.some((contributor) => contributor.contEmail === user.value)
@@ -393,7 +393,7 @@ function ProjectContributors() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const response = await axiosInstance.post(`/group-invite/${projectId}/${id}`, {
+           await axiosInstance.post(`/group-invite/${projectId}/${id}`, {
             emails: usersToInvite.map((user) => user.value),
           });
   
@@ -411,7 +411,7 @@ function ProjectContributors() {
             },
           });
           setRefreshKey((prevKey) => prevKey + 1);
-          console.log("Invite response:", response.data);
+          // console.log("Invite response:", response.data);
           setSelectedUsers([]); // Clear selections after submitting
         } catch (error) {
           Swal.fire({
@@ -432,8 +432,8 @@ function ProjectContributors() {
   
 
   const handleDeleteGroup = async (id) => {
-    console.log(id)
-    console.log(selectedGroup)
+    // console.log(id)
+    // console.log(selectedGroup)
     Swal.fire({
       title: 'Are you sure?',
       text: 'You won’t be able to revert this!',
@@ -818,11 +818,11 @@ useEffect(() => {
                           <div className="tableSection">
                             <div className="tablePanel relative">
                               <div className="tableHeader">
-                                <h3 className="text-ellipsis d-none d-md-block">All project members</h3>
+                                <h3 className="text-ellipsis d-md-block d-none">All project members</h3>
                                   <div className="panelControls">
-                                    <div className="filters-wrapper d-xl-flex d-none">
+                                    <div className="filters-wrapper d-xl-flex ">
                                       <div className="filter-container null">
-                                      <div className="view-filters">
+                                      <div className="view-filters d-none">
                                         <div className="filter-container null">
                                           <div className="filters d-flex">
                                           {filters.map((filter) => (
@@ -891,7 +891,7 @@ useEffect(() => {
                                     )}
                                     <div style={{ position: "relative" }}>
                                       <button
-                                        className="search-button"
+                                        className="search-button p-2"
                                         onClick={handleSearchClick}
                                         style={{ display: "flex", alignItems: "center" }}
                                       >
@@ -1062,9 +1062,27 @@ useEffect(() => {
                   </h5>
                 </div>
                   <div className="offcanvas-button-group">
-                    <button className="offcanvas-btn" title="Edit">
+                    {/* <button className="offcanvas-btn" title="Edit">
                       <BiSolidEditAlt size={18} />
-                    </button>
+                    </button> */}
+                     <button
+                        className="btn mr-1"
+                        onClick={() => {
+                          const groupsWithContributor = groups.filter(group =>
+                            group.members.some(member => member.name === selectedRow?.contName)
+                          );
+
+                          if (groupsWithContributor.length > 0) {
+                            // console.log(groupsWithContributor)
+                            // Remove from the first group found (or adapt for specific group selection)
+                            handleRemoveFromGroup(selectedRow.contId, groupsWithContributor[0].groupId);
+                          } else {
+                            handleRemoveContributor(selectedRow.contId);
+                          }
+                        }}
+                      >
+                        <IoPersonRemoveSharp size={18} />
+                      </button>
                     <button
                       className="offcanvas-btn"
                       title="Close"
@@ -1077,32 +1095,9 @@ useEffect(() => {
                 </Offcanvas.Title>
               </Offcanvas.Header>
                 <Offcanvas.Body className="offcanvas-body">
-                <div className="offcanvas-button-group2 mb-3 flex-wrap">
-                      <label htmlFor="buttons">  </label>
-                      {/* <button className="btn mr-1" ><FaFileExcel size={18}/></button> */}
-                      <button
-                        className="btn mr-1"
-                        onClick={() => {
-                          const groupsWithContributor = groups.filter(group =>
-                            group.members.some(member => member.name === selectedRow?.contName)
-                          );
-
-                          if (groupsWithContributor.length > 0) {
-                            console.log(groupsWithContributor)
-                            // Remove from the first group found (or adapt for specific group selection)
-                            handleRemoveFromGroup(selectedRow.contId, groupsWithContributor[0].groupId);
-                          } else {
-                            handleRemoveContributor(selectedRow.contId);
-                          }
-                        }}
-                      >
-                        <IoPersonRemoveSharp size={18} />
-                      </button>
-
-
-                  </div>
+             
                 {selectedRow && (
-                  <div className="todo-details-container" style={{fontSize: "12px"}}>
+                  <div className="todo-details-container mt-2" style={{fontSize: "12px"}}>
                     <p><strong>Details: </strong></p>
                     <label style={{margin: "0", fontWeight: "300"}}>Email:</label>
                         <p>{selectedRow.contEmail}</p>

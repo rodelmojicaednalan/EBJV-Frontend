@@ -316,12 +316,12 @@ function UsersList() {
             </button>
           </div>
 
-          <div className="container-content" id="userlist-container">
+          <div className="container-content mb-5" id="userlist-container">
             <DataTable
               className="dataTables_wrapper"
               columns={columns}
               data={filteredUsers}
-              pagination
+              pagination={filteredUsers.length >= 20}
               paginationPerPage={20}
               paginationRowsPerPageOptions={[20, 30]}
               responsive
