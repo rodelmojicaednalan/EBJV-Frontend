@@ -12,7 +12,6 @@ export const createPsetsRow = async (
 ) => {
   const { displayUnits } = uiState;
   const row: BUI.TableGroupData = { data: { Name: 'PropertySets' } };
-  console.log('row', row);
   for (const pset of psets) {
     const setRow: BUI.TableGroupData = {
       data: { Name: pset.Name?.value },

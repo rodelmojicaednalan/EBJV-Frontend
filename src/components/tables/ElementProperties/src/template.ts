@@ -171,13 +171,31 @@ const processContainerRelations = async (
     expressID,
     'ContainedInStructure'
   );
-
   if (contianerRelations && contianerRelations[0]) {
     const containerID = contianerRelations[0];
     const container = await model.getProperties(containerID);
+    console.log('container', container);
     if (container) {
       const attributesRow = await createAttributesRow(container, {
         groupName: 'SpatialContainer',
+      });
+      console.log('attributesRow', attributesRow);
+      addRowChildren(row, attributesRow);
+    }
+  }
+
+  const assembly = indexer.getEntityRelations(
+    model,
+    expressID,
+    'Decomposes'
+  );
+
+  if (assembly && assembly[0]) {
+    const containerID = assembly[0];
+    const container = await model.getProperties(containerID);
+    if (container) {
+      const attributesRow = await createAttributesRow(container, {
+        groupName: 'Tekla Assembly',
       });
       addRowChildren(row, attributesRow);
     }
@@ -217,7 +235,6 @@ const computeTableData = async (
       }
 
       const elementAttrs = await model.getProperties(expressID);
-      console.log('elementAttrs', elementAttrs);
       if (!elementAttrs) continue;
 
       elementRow = {
