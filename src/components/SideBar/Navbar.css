@@ -9,7 +9,9 @@ background-color: #fff !important;
     z-index: 999999 !important;
     overflow: visible;
 }
-
+.navbar-nav {
+    align-items: center;
+}
 #mynav{
     background-color: #fff;
     box-shadow: 0px 0px 5px 1px rgba(165, 163, 163, 0.402);

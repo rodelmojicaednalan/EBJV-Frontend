@@ -53,6 +53,7 @@
     "react-sweetalert2": "^0.6.0",
     "react-switch": "^7.0.0",
     "react-to-print": "^2.15.1",
+    "styled-components": "^6.1.14",
     "three": "^0.171.0",
     "web-ifc": "^0.0.66",
     "web-ifc-viewer": "^1.0.218"

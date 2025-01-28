@@ -14,7 +14,6 @@ import { FaUsersCog } from "react-icons/fa";
 import { GrProjects } from "react-icons/gr";
 import { BiLogOut } from "react-icons/bi";
 
-import Swal from "sweetalert2";
 import axiosInstance from "../../../axiosInstance.js";
 import { AuthContext } from "../Authentication/authContext";
 function NewNavBar() {
@@ -110,19 +109,6 @@ function NewNavBar() {
             </Nav.Link>
           </Nav>
         )}
-          {/* <Nav className="mr-4">
-            <NavDropdown
-              title={<BsPersonCircle size={40} color="#eb6314" />}
-              id="avatarDropdown"
-              align="end"
-              className="avatar-dropdown"
-            >
-              <NavDropdown.Item href="/my-profile">My Profile</NavDropdown.Item>
-              <NavDropdown.Item href="/settings">Settings</NavDropdown.Item>
-              <NavDropdown.Divider />
-              <NavDropdown.Item href="/logout">Logout</NavDropdown.Item>
-            </NavDropdown>
-          </Nav> */}
         </Navbar.Collapse>
 
       </Container>
