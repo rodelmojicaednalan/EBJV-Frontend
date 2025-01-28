@@ -841,7 +841,7 @@ useEffect(() => {
                                       <div className="group-action-buttons d-flex">
                                         <div style={{ position: "relative" }}>
                                           <button
-                                            className="btn"
+                                            className="btn btn-icon"
                                             onClick={() => setShowInviteBox((prev) => !prev)} // Toggle the invite dropdown visibility
                                           >
                                             <MdGroupAdd size={18}/>
@@ -882,7 +882,7 @@ useEffect(() => {
                                           )}
                                         </div>
                                         <button
-                                          className="btn "
+                                          className="btn btn-icon"
                                           onClick={() => handleDeleteGroup(selectedGroup.groupId)}
                                         >
                                           <MdDeleteSweep size={18}/>
@@ -891,7 +891,7 @@ useEffect(() => {
                                     )}
                                     <div style={{ position: "relative" }}>
                                       <button
-                                        className="search-button p-2"
+                                        className="search-button p-2 btn btn-icon"
                                         onClick={handleSearchClick}
                                         style={{ display: "flex", alignItems: "center" }}
                                       >

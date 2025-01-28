@@ -23,7 +23,7 @@
   color: #626262;
   cursor: text;
   border: 1px solid #dfdfdf;
-  background-color: #fdffff;
+  background-color: #FBFBF9;
   box-shadow: rgba(0, 0, 0, 0.20) 0px 1px 2px;
 }
 
@@ -32,7 +32,7 @@
 }
 
 .dataTables_wrapper .rdt_TableHead .rdt_TableHeadRow {
-  background-color: #f3f2f2;
+  background-color: rgba(0, 0, 0, .09);
   /* changed */
   /* border-radius: 10px; */
   margin-bottom: 6px;
@@ -83,7 +83,7 @@ span.user-email-row {
 }
 
 .profile-image {
-  background: #73c3f9;
+  background: #FFF;
   border-radius: 5px;
 }
 

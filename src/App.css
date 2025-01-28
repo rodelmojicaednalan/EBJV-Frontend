@@ -5,7 +5,7 @@ html,
 body {
   height: 100%;
   margin: 0;
-  background-color: #f8f8fa;
+  background-color: #FBFBF9;
 }
 
 #root,
@@ -63,7 +63,7 @@ button:hover {
 .container {
   /* flex: 1;               */
   overflow-y: auto;
-  background-color: #f8f8fa;
+  background-color: #FBFBF9;
   /* border-radius: 13px; */
   padding: 0 0 30px 0 ;
   width: 100%;
@@ -75,7 +75,7 @@ button:hover {
 #search-bar {
   padding: 8.2px 20px;
   border: none;
-  border-radius: 3px;
+  border-radius: 5px !important;
   color: #626262;
   cursor: text;
   border: 1px solid #dfdfdf;
@@ -111,19 +111,19 @@ h3 {
 /* Start of table style */
 
 .dataTables_wrapper {
-  border: 2px solid #f3f2f2;
-  box-shadow: 1px 2px 5px 3px rgba(174, 173, 172, 0.2);
+  border: 3px solid rgba(0, 0, 0, .09);
 }
 
-.dataTables_wrapper .rdt_TableCell {
-  background-color: #fdffff;
+
+.dataTables_wrapper .rdt_TableCell, .dataTables_wrapperz .rdt_TableCell {
+  background-color: #FFFFFF;
   font-size: 14px;
   color: #525252;
   padding: 9px 14px;
 }
 
-.dataTables_wrapper .rdt_TableHead {
-  background-color: #fdffff;
+.dataTables_wrapper .rdt_TableHead, .dataTables_wrapperz .rdt_TableCell {
+  /* background-color: #fdffff; */
   font-size: 15px;
   color: #626262;
 }

@@ -13,10 +13,8 @@ import { Modal, Button } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import axiosInstance from '../../../../axiosInstance.js';
 import { useLoader } from '../../Loaders/LoaderContext';
-import StickyHeader from '../../SideBar/StickyHeader';
 import { AuthContext } from '../../Authentication/authContext';
 
-import BackToTopButton from "../../../utils/BackToTopButton";
 
 function Projects() {
   const { user } = useContext(AuthContext);
