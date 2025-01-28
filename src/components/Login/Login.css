@@ -5,6 +5,9 @@
     margin-bottom: 0;
     width: 100%;
 }
+.login-container-wrapper{
+    /* background-color: rgba(38, 48, 58, .785); */
+}
 .custom-login {
     height: 100vh;
     width: 100%;
@@ -18,24 +21,34 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 49%;
-    height: 98%;
-    background: #26303A;
-    border-radius: 0 0 100% 0;
+    width: 45%;
+    height: 100%;
+    background-color: rgba(38, 48, 58, 1); /* Adds transparency over the image */
+    background-image: url('../../assets/images/loginImage1.png');
+    background-blend-mode: multiply;
+    background-size: cover; /* Ensures the image stretches to cover the area */
+    background-position: center; /* Centers the image */
+    background-repeat: no-repeat; 
+    /* border-radius: 15%; */
+    animation: slideInLeft 0.7s ease-in-out 0.5s;
+    animation-fill-mode: both;
     z-index: -1;
 }
 
 /* .custom-login::after {
     content: '';
-    position: absolute;
+    position: fixed;
     top: 0;
     right: 0;
     width: 50%;
     height: 100%;
-    background: #FFFFFF;
     z-index: -1;
 } */
 
+.login-form-body{
+    animation: slideInRight 0.7s ease-in-out 0.5s;
+    animation-fill-mode: both;
+}
 .card {
     border: none;
     background-color: #00000000;
@@ -62,9 +75,8 @@ input#username , input#password{
 .custom-login h2 {
     position: initial;
     font-size:  clamp(28px, 2vw , 2vw)!important;
-    text-transform: uppercase;
-    text-align: left;
-    margin-bottom: 42px !important;
+    /* text-transform: uppercase; */
+    /* margin-bottom: 42px !important; */
     color: #454545;
 }
 .custom-login h1 {
@@ -104,7 +116,7 @@ input[type=checkbox]#showPassword:before, input[type=checkbox]#rememberMe:before
 }
 
 input[type=checkbox]#showPassword:checked:before, input[type=checkbox]#rememberMe:checked:before  {
-    background-color: #2780ff;
+    background-color: #f87c34;
   }
   
   input[type=checkbox]#showPassword:checked:after,   input[type=checkbox]#rememberMe:checked:after {
@@ -291,6 +303,7 @@ form label{
     .custom-login {
         /* height: auto; */
         padding: 0 !important;
+        justify-content: center !important;
 
     }
   .custom-login .custom-col {

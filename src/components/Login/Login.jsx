@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Login.css';
-import rme_login_image from '../../assets/images/rme_login_image.png';
+import rme_login_image from '../../assets/images/ebjv-logo.png';
 import axiosInstance from '../../../axiosInstance.js';
 // import Swal from 'sweetalert2'
 // import close from "../../assets/images/close.png";
@@ -56,22 +56,28 @@ function Login() {
 
 
     return (
-        <div className="d-flex align-items-center justify-content-center custom-login">
-            <div className="row">
-                <div className="col-md-6 d-flex flex-column align-items-center justify-content-center custom-col">
-                    <div className="header-title mt-5">
+        <div className="login-container-wrapper">
+        <div className="d-flex align-items-center justify-content-around custom-login">
+            <div className="d-flex ">
+                <div className=" login-leftCol">
+                    {/* <div className="header-title mt-5">
                         <h1>EBJV Construction <br></br> Modelling Portal</h1>
                         <br />
 
-                    </div>
+                    </div> */}
                     <div className='bg-image'>
                         <img className='img-fluid login_image' src={rme_login_image} alt="Login" />
                     </div>
+                  
+                    
+                </div>
                 </div>
 
-                <div className="col-md-6 d-flex align-items-center justify-content-center">
+                <div className="d-flex login-form-body">
+                <div className="">
                     <div className="card p-4 login-form-wrap" style={{ width: '450px' }}>
-                        <h2 className="text-left mb-4">Login</h2>
+                        <h2 className="text-center">Enter the Workspace</h2>
+                        <label className="text-center"> Manage, Build, and Innovate with Ease. </label>
                         {error.value !== "" && error.isShow && (
                             <div className="alert alert-danger">
                                 {error.value}
@@ -142,6 +148,7 @@ function Login() {
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     );
 }
