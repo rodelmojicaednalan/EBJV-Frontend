@@ -476,6 +476,8 @@ input[type="date"] {
   font-weight: bold;
 }
 
+
+
 /* Media Queries for Mobile Responsiveness */
 @media (max-width: 768px) {
   /* .container{
@@ -536,6 +538,7 @@ input[type="date"] {
     border: 1px solid #dfdfdf;
     /* margin-left: 0 !important; */
     margin-bottom: 10px;
+
   }
   .top-filter {
     padding: 0px 10px 20px 0px !important;
@@ -546,9 +549,9 @@ input[type="date"] {
     width: 100%;
     margin-bottom: 10px;
   }
-  .add-user-btn {
+  /* .add-user-btn {
     margin-right: -375px;
-  }
+  } */
   .add-resource-btn {
     margin-right: 0;
   }
@@ -844,6 +847,7 @@ input[type="date"] {
     align-self: center;
     margin-left: auto;
     margin-right: auto;
+    margin-top: 0;
   }
   .container {
     margin-left: 0px;

@@ -144,3 +144,9 @@ span.user-email-row {
     margin-top: 0px;
   }
 } */
+
+@media (max-width: 991px) and (min-width: 769px) {
+  #addUser-button{
+    margin-right: -385px;
+  }
+}

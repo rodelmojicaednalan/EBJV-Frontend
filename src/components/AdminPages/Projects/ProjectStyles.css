@@ -344,11 +344,18 @@
   width: calc(33.333% - 20px);
   /* Adjust width for 3 items per row */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  
+}
+.file-icon{
+  display: flex;
+  justify-content: center;
+}
+.icon-img{
+  max-width: 10vh;
+  height: auto;
 }
 
-.grid-item>h5,
-p {
-  display: flex;
+.file-info > h5, p {
   word-break: break-all;
 }
 
@@ -2110,4 +2117,5 @@ p {
   #editProject-saveBtn{
     font-size: .875rem;
   }
+  
 }

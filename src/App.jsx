@@ -1,6 +1,6 @@
 // Layout.js
 import React from 'react';
-import {BrowserRouter, Routes, Route, useLocation, Navigate, useParams  } from 'react-router-dom';
+import {BrowserRouter, Routes, Route, useLocation, Navigate  } from 'react-router-dom';
 import Login from './components/Login/Login';
 // import SideBar from './components/SideBar/SideBar';
 import SideBar from './components/SideBar/Navbar'
@@ -11,19 +11,19 @@ import AddProject from './components/AdminPages/Projects/AddProject';
 import EditProject from './components/AdminPages/Projects/EditProjects';
 import ProjectFolder from './components/AdminPages/Projects/ProjectFolder';
 
-import ProjectViews from './components/AdminPages/Projects/ProjectFolderPages/ProjectViews';
-import ProjectTopics from './components/AdminPages/Projects/ProjectFolderPages/ProjectTopics';
-import ProjectToDo from './components/AdminPages/Projects/ProjectFolderPages/ProjectToDo';
-import ProjectReleases from './components/AdminPages/Projects/ProjectFolderPages/ProjectReleases';
+// import ProjectViews from './components/AdminPages/Projects/ProjectFolderPages/ProjectViews';
+// import ProjectTopics from './components/AdminPages/Projects/ProjectFolderPages/ProjectTopics';
+// import ProjectToDo from './components/AdminPages/Projects/ProjectFolderPages/ProjectToDo';
+// import ProjectReleases from './components/AdminPages/Projects/ProjectFolderPages/ProjectReleases';
 import ProjectExplorer from './components/AdminPages/Projects/ProjectFolderPages/ProjectExplorer';
 import ProjectContributors from './components/AdminPages/Projects/ProjectFolderPages/ProjectContributors';
 import ProjectActivity from './components/AdminPages/Projects/ProjectFolderPages/ProjectActivity';
 
 import ProjectSettings from './components/AdminPages/Projects/ProjectFolderPages/ProjectSettingsPages/EditProject';
-import TopicSettings from './components/AdminPages/Projects/ProjectFolderPages/ProjectSettingsPages/TopicSettings';
-import UnitSettings from './components/AdminPages/Projects/ProjectFolderPages/ProjectSettingsPages/UnitSettings';
+// import TopicSettings from './components/AdminPages/Projects/ProjectFolderPages/ProjectSettingsPages/TopicSettings';
+// import UnitSettings from './components/AdminPages/Projects/ProjectFolderPages/ProjectSettingsPages/UnitSettings';
 
-import StaffLogs from './components/AdminPages/StaffLogs/StaffLogs';
+// import StaffLogs from './components/AdminPages/StaffLogs/StaffLogs';
 import AddNewUser from './components/AdminPages/UsersList/AddNewUser';
 import EditUser from './components/AdminPages/UsersList/EditUser';
 import UserRoleManagement from './components/AdminPages/UserManagement/UsersManagement';
@@ -40,7 +40,7 @@ import CheckEmail from './components/PasswordReset/CheckEmail';
 
 import IfcUploadPage from './components/AdminPages/IfcUploadPage/IfcUploadPage';
 import IfcViewer from './components/AdminPages/IfcViewer/IfcViewer';
-import ProjectMap from './components/AdminPages/Projects/ProjectFolderPages/ProjectMap';
+// import ProjectMap from './components/AdminPages/Projects/ProjectFolderPages/ProjectMap';
 
 import QrCodeGenerator from './QrCodeGenerator';
 

@@ -11,10 +11,11 @@ import Swal from "sweetalert2";
 import axiosInstance from "../../../../axiosInstance.js";
 import check from "../../../assets/images/check.png";
 import { useLoader } from "../../Loaders/LoaderContext";
-import StickyHeader from "../../SideBar/StickyHeader";
-
+import useWindowWidth from "../Projects/ProjectFolderPages/windowWidthHook.jsx";
 function UserRoleManagement() {
   const navigate = useNavigate();
+  const windowWidthHook = useWindowWidth();
+  const isMobile = windowWidthHook <= 425;
   const [selectedUserRole, setSelectedUserRole] = useState(null);
   const [roles, setRoles] = useState([]);
   const [showModal, setShowModal] = useState(false);

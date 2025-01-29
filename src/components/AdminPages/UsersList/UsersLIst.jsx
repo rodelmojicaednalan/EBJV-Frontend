@@ -13,10 +13,14 @@ import Swal from "sweetalert2";
 import axiosInstance from "../../../../axiosInstance.js";
 import { useLoader } from "../../Loaders/LoaderContext";
 import "./UserList.css";
-import StickyHeader from "../../SideBar/StickyHeader";
+import useWindowWidth from "../Projects/ProjectFolderPages/windowWidthHook.jsx";
+
+import { IoPersonAdd } from "react-icons/io5";
 
 function UsersList() {
   const navigate = useNavigate();
+  const windowWidthHook = useWindowWidth();
+  const isMobile = windowWidthHook <= 425;
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -310,9 +314,10 @@ function UsersList() {
             />
             <button
               onClick={() => navigate("/add-new-user")}
-              className="btn btn-primary float-end add-user-btn"
+              id="addUser-button"
+              className={`btn btn-primary float-end ${isMobile ? 'mobile-add-user-btn' : 'add-user-btn'}`}
             >
-              Add User
+             {isMobile? <IoPersonAdd/> : <span> Add User </span>}
             </button>
           </div>
 

@@ -3,10 +3,8 @@ import { /*useLocation*/ useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import axiosInstance from "../../../../axiosInstance.js";
 import check from "../../../assets/images/check.png";
-import { FiChevronLeft } from 'react-icons/fi';
-import StickyHeader from "../../SideBar/StickyHeader";
-
-
+import { FaCircleArrowLeft } from "react-icons/fa6";
+import '../UsersList/EditUser.css'
 
 function EditUserRole() {
   //const location = useLocation();
@@ -80,40 +78,57 @@ function EditUserRole() {
   };
 
    return (
-    <div className="container">
-      {/* <StickyHeader/> */}
-       <a href="/user-management" className="back-btn">
-        <h3 className="title-page">
-          <FiChevronLeft className="icon-left" /> Update Role
+    <div className="addUser-form-page pb-5">
+       <a onClick={() => navigate("/user-management")} className="back-btn">
+        <h3 className="m-3">
+          <FaCircleArrowLeft size={30} className="icon-left" /> Go back
         </h3>
       </a>
-      <div className="container-content">
-        <form onSubmit={updateUserRole}>
-          <div className="form-group ml-5 mt-3">
-            <label>Role Name:</label>
-            <input
-              type="text"
-              className="form-control col-lg-3"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              placeholder="Enter new role name"
-            />
+
+      <form onSubmit={updateUserRole} className="">
+        <div className="addUser-form-container">
+        <div className="addUser-form-header">
+            <h4 className="addUser-form-title">Edit Role</h4>
           </div>
-          <div className="form-group ml-5 mt-3">
-            <label>Role Description:</label>
-            <textarea
-              type="text"
-              className="form-control col-lg-3"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter new description for this role"
-            />
+
+          <div className="addUser-form-body">
+            <div className="form-body">
+              <div className="form-group">
+                <label>New Role Name:</label>
+                <input
+                  type="text"
+                  className="form-control col-lg-3"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Role Description:</label>
+                <textarea
+                  className="form-control col-lg-3"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  required
+                />
+              </div>
+
+            </div>
+
+            <div className="access-btn-group mt-3">
+              <div className="access-btn-group-item">
+                <button
+                  type="submit"
+                  className="btn btn-primary login-btn"
+                >
+                  Add Role
+                </button>
+              </div>
+            </div>
+
           </div>
-          <button className="submit-btn mb-4 mt-4" type="submit">
-            UPDATE
-          </button>
+          </div>
         </form>
-      </div>
     </div>
   );
 }

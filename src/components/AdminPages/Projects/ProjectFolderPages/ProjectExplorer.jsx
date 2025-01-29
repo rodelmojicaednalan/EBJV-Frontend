@@ -7,18 +7,22 @@ import ReactDOM from "react-dom";
 import { saveAs } from 'file-saver'
 import { CSVLink } from 'react-csv'
 import Select from 'react-select';
-
+import '../../../../Custom.css';
 import '../ProjectStyles.css';
 import { BiDotsVertical, BiSolidEditAlt } from 'react-icons/bi';
 import { LiaTimesSolid } from "react-icons/lia";
 import { IoMdDownload, IoMdPersonAdd  } from "react-icons/io";
 import { IoGrid } from 'react-icons/io5';
-import { FaThList, FaFolderPlus, FaEdit, FaGoogleDrive, FaChevronLeft } from 'react-icons/fa';
+import { FaThList, FaFolderPlus, FaEdit,
+  FaGoogleDrive, FaChevronLeft, FaFile,
+  FaChevronCircleLeft, FaChevronCircleRight } from 'react-icons/fa';
 import { MdFolderOff } from "react-icons/md";
 import { RiAddLargeFill } from "react-icons/ri";
 import { AiOutlineFileAdd } from "react-icons/ai";
 import { BsQrCode } from "react-icons/bs";
-
+import ifcIcon from '../../../../assets/images/ifc-icon.png';
+import pdfIcon from '../../../../assets/images/pdf-icon.png';
+import dxfIcon from '../../../../assets/images/dxf-icon.png';
 import { Modal, Button, ToastContainer, Toast } from 'react-bootstrap';
 import ProjectSidebar from '../ProjectFolderSidebar';
 import SidebarOffcanvas from '../MobileSidebar';
@@ -293,8 +297,8 @@ function ProjectExplorer() {
         </label>
       ),
       ignoreRowClick: true,
-      // allowOverflow: true,
-      button: "true",
+      allowOverflow: true,
+      button: true,
       // hide: 'sm'
     },
     {
@@ -601,6 +605,22 @@ function ProjectExplorer() {
   };
   // console.log(selectedRow?.projectId || '')
 
+  const getFileIcon = (fileName) => {
+    if (fileName.endsWith(".ifc")) return ifcIcon;
+    if (fileName.endsWith(".pdf")) return pdfIcon;
+    if (fileName.endsWith(".dxf")) return dxfIcon;
+    return <FaFile size={24} color="#555" />;
+  };
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const filesPerPage = 9;
+  
+  const indexOfLastFile = currentPage * filesPerPage;
+  const indexOfFirstFile = indexOfLastFile - filesPerPage;
+  const currentFiles = explorerTable.slice(indexOfFirstFile, indexOfLastFile);
+
+  const totalPages = Math.ceil(explorerTable.length / filesPerPage);
+  
   return (
     <div className="container">
       <h3 className="projectFolder-title" id="projectFolder-title" >
@@ -748,16 +768,32 @@ function ProjectExplorer() {
 
                 <div className={`project-display ${viewType}`} >
                   {viewType === 'grid' ? (
-                    <div className="grid-view"  >
-                      {explorerTable.map((row, index) => (
-                        <div key={index} className="grid-item" onClick={() => handleRowClick(row)}>
-                          <h5>{row.fileName}</h5>
-                          <p>Owner: {row.fileOwner}</p>
-                          <p>Modified: {row.lastModified}</p>
-                          <p>Size: {row.fileSize}</p>
-                        </div>
-                      ))}
-                    </div>
+                     <div>
+                     <div className="grid-view">
+                       {currentFiles.map((row, index) => (
+                         <div key={index} className="grid-item" onClick={() => handleRowClick(row)}>
+                           <div className="file-icon">
+                             {typeof getFileIcon(row.fileName) === "string" ? (
+                               <img src={getFileIcon(row.fileName)} alt="file icon" className="icon-img" />
+                             ) : (
+                               getFileIcon(row.fileName)
+                             )}
+                           </div>
+                           <div className="file-info">
+                             <h5>{row.fileName}</h5>
+                             <p>Owner: {row.fileOwner}</p>
+                             <p>Modified: {row.lastModified}</p>
+                             <p>Size: {row.fileSize}</p>
+                           </div>
+                         </div>
+                       ))}
+                     </div>
+                     <div className="pagination-controls d-flex justify-content-center mt-4 mb-5 flex-row">
+                       <button className="btn btn-tertiary" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}><FaChevronCircleLeft/></button>
+                       <span className="mx-2"> Page {currentPage} of {totalPages} </span>
+                       <button className="btn btn-tertiary" disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}><FaChevronCircleRight/></button>
+                     </div>
+                   </div>
                   ) : (
                     <DataTable
                       className="dataTables_wrapperz mt-3"

@@ -3,8 +3,8 @@ import axiosInstance from "../../../../axiosInstance.js";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import check from "../../../assets/images/check.png";
-import { FiChevronLeft } from 'react-icons/fi';
-import StickyHeader from "../../SideBar/StickyHeader";
+import { FaCircleArrowLeft } from "react-icons/fa6";
+import '../UsersList/EditUser.css'
 
 function AddNewRole() {
   const navigate = useNavigate();
@@ -68,122 +68,60 @@ function AddNewRole() {
   };
 
   return (
-    <div className="container">
-      {/* <StickyHeader/> */}
-      <a href="/user-management" className="back-btn">
-        <h3 className="title-page">
-          <FiChevronLeft className="icon-left" /> Add New Role
-        </h3>
-      </a>
-      <div className="container-content">
-        <form onSubmit={addUserRole}>
-          <div className="form-group ml-5 mt-3">
-            <label>New Role Name:</label>
-            <input
-              type="text"
-              className="form-control col-lg-3"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              required
-            />
+    <div className="addUser-form-page pb-5">
+       <a onClick={() => navigate("/user-management")} className="back-btn">
+          <h3 className="m-3">
+            <FaCircleArrowLeft size={30} className="icon-left" /> Go back
+          </h3>
+        </a>
+
+      <form onSubmit={addUserRole} className="">
+        <div className="addUser-form-container">
+        <div className="addUser-form-header">
+            <h4 className="addUser-form-title">Add New Role</h4>
           </div>
-          <div className="form-group ml-5 mt-3">
-            <label>Role Description:</label>
-            <textarea
-              className="form-control col-lg-3"
-              value={roleDescription}
-              onChange={(e) => setRoleDescription(e.target.value)}
-              required
-            />
-          </div>
-          {/*}
-          <div className="form-group ml-5 mt-5">
-            <label>Permissions</label> <br />
-            <div className="d-flex flex-row justify-content-between mr-5">
-              <div className="d-flex flex-column align-items-start">
-                <label className="mb-3">
-                  <input
-                    className="mr-2"
-                    type="checkbox"
-                    name="generateTicket"
-                    checked={permissions.generateTicket}
-                    onChange={handlePermissionChange}
-                  />
-                  Generate Ticket
-                </label>
-                <label className="mb-3">
-                  <input
-                    className="mr-2"
-                    type="checkbox"
-                    name="viewTicketHistory"
-                    checked={permissions.viewTicketHistory}
-                    onChange={handlePermissionChange}
-                  />
-                  View Ticket History
-                </label>
-                <label className="mb-3">
-                  <input
-                    className="mr-2"
-                    type="checkbox"
-                    name="viewUsersList"
-                    checked={permissions.viewUsersList}
-                    onChange={handlePermissionChange}
-                  />
-                  View Users
-                </label>
+
+          <div className="addUser-form-body">
+            <div className="form-body">
+
+      
+              <div className="form-group">
+                <label>New Role Name:</label>
+                <input
+                  type="text"
+                  className="form-control col-lg-3"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  required
+                />
               </div>
-              <div className="d-flex flex-column align-items-start">
-                <label className="mb-3">
-                  <input
-                    className="mr-2"
-                    type="checkbox"
-                    name="manageUsers"
-                    checked={permissions.manageUsers}
-                    onChange={handlePermissionChange}
-                  />
-                  Manage Users
-                </label>
-                <label className="mb-3">
-                  <input
-                    className="mr-2"
-                    type="checkbox"
-                    name="viewBranches"
-                    checked={permissions.viewBranches}
-                    onChange={handlePermissionChange}
-                  />
-                  View Branches
-                </label>
-                <label className="mb-3">
-                  <input
-                    className="mr-2"
-                    type="checkbox"
-                    name="manageAccount"
-                    checked={permissions.manageAccount}
-                    onChange={handlePermissionChange}
-                  />
-                  Manage Account
-                </label>
+              <div className="form-group">
+                <label>Role Description:</label>
+                <textarea
+                  className="form-control col-lg-3"
+                  value={roleDescription}
+                  onChange={(e) => setRoleDescription(e.target.value)}
+                  required
+                />
               </div>
-              <div className="d-flex flex-column align-items-start">
-                <label className="mb-3">
-                  <input
-                    className="mr-2"
-                    type="checkbox"
-                    name="viewStaffLogs"
-                    checked={permissions.viewStaffLogs}
-                    onChange={handlePermissionChange}
-                  />
-                  View Staff Logs
-                </label>
+
+            </div>
+
+            <div className="access-btn-group mt-3">
+              <div className="access-btn-group-item">
+                <button
+                  type="submit"
+                  className="btn btn-primary login-btn"
+                >
+                  Add Role
+                </button>
               </div>
             </div>
+
           </div>
-          */}
-          <button className="submit-btn mb-4 mt-4" type="submit">
-            SAVE
-          </button>
+          </div>
         </form>
-      </div>
+
     </div>
   );
 }
