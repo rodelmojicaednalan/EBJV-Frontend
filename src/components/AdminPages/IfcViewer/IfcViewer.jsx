@@ -146,9 +146,22 @@ function IfcViewer() {
         dimensions.enabled = true;
         dimensions.snapDistance = 1;
 
-        containerRef.current.ondblclick = () => {
-          dimensions.create();
-        };
+        if (containerRef.current) {
+          let lastTap = 0;
+
+          containerRef.current.ondblclick = () => {
+            dimensions.create();
+          };
+
+          containerRef.current.ontouchstart = () => {
+            const now = Date.now();
+            if (now - lastTap < 300) {
+              dimensions.create();
+            }
+            lastTap = now;
+          };
+        }
+
         window.onkeydown = (event) => {
           if (event.code === 'Delete' || event.code === 'Backspace') {
             dimensions.delete();
