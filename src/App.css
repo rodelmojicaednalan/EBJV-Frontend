@@ -114,6 +114,10 @@ h3 {
   border: 3px solid rgba(0, 0, 0, .09);
 }
 
+/* .dataTables_wrapper > div > .rdt_Table > .rdt_TableBody > .rdt_TableRow > #cell-3-33{
+
+} */
+
 
 .dataTables_wrapper .rdt_TableCell, .dataTables_wrapperz .rdt_TableCell {
   background-color: #FFFFFF;

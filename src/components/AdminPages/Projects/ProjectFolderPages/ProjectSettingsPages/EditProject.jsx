@@ -11,6 +11,7 @@ import '../../ProjectStyles.css'
 import '../../../../../App.css'
 import { FiChevronLeft } from 'react-icons/fi';
 import { RiEdit2Fill } from "react-icons/ri";
+import { MdSaveAs } from "react-icons/md";
 
 import map from '../../../../../assets/images/samplemap.png'
 import ProjectSidebar from '../../ProjectFolderSidebar';
@@ -289,8 +290,8 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                         <h2>Edit Project Details</h2>
                       </div>
                       <div className="button-group d-flex">
-                        <button className="btn btn-primary add-btn" title="Save" form="updateProjectForm">
-                          Save Changes
+                        <button id="editProject-saveBtn" className="btn btn-primary add-btn" title="Save" form="updateProjectForm">
+                        {isMobile? <MdSaveAs size={24}/> :   'Save Changes'}
                         </button>
                       </div>
                     </div>

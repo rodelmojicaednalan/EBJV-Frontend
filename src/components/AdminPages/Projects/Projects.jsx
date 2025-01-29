@@ -14,11 +14,14 @@ import Swal from 'sweetalert2';
 import axiosInstance from '../../../../axiosInstance.js';
 import { useLoader } from '../../Loaders/LoaderContext';
 import { AuthContext } from '../../Authentication/authContext';
-
+import useWindowWidth from './ProjectFolderPages/windowWidthHook.jsx';
+import { TbCubePlus } from "react-icons/tb";
 
 function Projects() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const windowWidthHook = useWindowWidth();
+  const isMobile = windowWidthHook <= 425;
   const [data, setData] = useState([]);
   const [selectedprojectId, setSelectedprojectId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -288,11 +291,12 @@ function Projects() {
             {roleCheck == "Admin" && (
             <button
               onClick={() => setShowAddModal(true)}
-              className="btn btn-primary float-end add-user-btn"
+              className={`btn btn-primary float-end ${isMobile ? 'mobile-add-user-btn' : 'add-user-btn'}`}
               id='add-new-project-btn'
             >
               {/* <i className="fa fa-plus"></i>  */}
-              Add Project
+              {isMobile ? <TbCubePlus /> : <span>Add Project</span>}
+              {/* Add Project */}
             </button>
               )}
           </div>

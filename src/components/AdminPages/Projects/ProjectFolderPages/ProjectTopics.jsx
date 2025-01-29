@@ -395,10 +395,6 @@ useEffect(() => {
 
     return (
       <div className="container">
-      <StickyHeader />
-      <h3 className="title-page" id="projectFolder-title">
-        {ownerName}&apos;s {projectName} 
-      </h3>
       <div className="container-content" id="project-folder-container">
       <div className="projectFolder-sidebar-container">
       {isMobile ? (

@@ -805,6 +805,7 @@ p {
   flex: 1 1 auto;
   flex-flow: column nowrap;
   height: calc(100% - 4rem);
+  border: 1px solid rgba(0, 0, 0, .09);
 }
 
 .relative {
@@ -832,6 +833,7 @@ p {
   min-height: 510px;
   /* Allow dynamic height adjustment */
   overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, .09);
 }
 
 .tableWrapper .table-list {
@@ -1533,11 +1535,11 @@ p {
     width: 100%;
   }
 
-  #add-new-project-btn{
+  /* #add-new-project-btn{
     margin: 10px 0;
     position: relative;
     top: -10px;
-  }
+  } */
 
   #projectFolder-title {
     margin-left: -65% !important;
@@ -1590,7 +1592,7 @@ p {
     display: none;
   }
 
-  #addFiles-btn {
+  #addFiles-btn, .mobile-add-user-btn {
     border-radius: 50%;
     position: fixed;
     /* Fix the button relative to the viewport */
@@ -1687,7 +1689,7 @@ p {
     font-size: 16px;
   }
 
-  #add-new-project-btn {
+  /* #add-new-project-btn {
     width: 20%;
     height: 35px;
     font-size: 12px;
@@ -1697,7 +1699,7 @@ p {
     float: inline-end !important;
     top: -10px;
     position: relative;
-  }
+  } */
 
   #nav-label {
     font-size: .875rem;
@@ -1755,6 +1757,11 @@ p {
     font-size: 14px;
   }
 
+  
+.rdt_Pagination {
+  justify-content: flex-start !important;
+}
+
 }
 
 @media (min-width: 768px) and (max-width: 900px){
@@ -1778,6 +1785,9 @@ p {
   .creator > p {
     width: 9rem;
   }
+    
+
+
 }
 @media (max-width: 560px) {
   #topic-card-detail-grp > li > label{
@@ -1790,6 +1800,11 @@ p {
     overflow: hidden; 
     text-overflow: ellipsis;
     display: block;
+  }
+  .rdt_Pagination {
+    justify-content: flex-start !important;
+    width: 10% !important;
+    padding: 0 !important;
   }
 }
 @media (max-width: 420px ){
@@ -1842,18 +1857,18 @@ p {
     /* Slightly smaller font for better fit */
   }
 
-  #add-new-project-btn {
+  /* #add-new-project-btn {
     width: 20%;
-    /* Adjust button width */
+
     height: 38px;
     font-size: 11px;
     padding: 6px;
     margin-top: 10px;
     margin-bottom: 10px;
     float: right;
-    /* Align to the end */
+
     position: relative;
-  }
+  } */
 
   #nav-label {
     font-size: 0.75rem;
@@ -2083,7 +2098,16 @@ p {
 }
 
 @media (max-width: 375px) {
-  #add-new-project-btn {
+  /* #add-new-project-btn {
     top: 0;
+  } */
+   .rdt_Pagination > div > div > select {
+    width: 20px !important;
+   }
+}
+
+@media (max-width: 360px) {
+  #editProject-saveBtn{
+    font-size: .875rem;
   }
 }

@@ -293,8 +293,9 @@ function ProjectExplorer() {
         </label>
       ),
       ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
+      // allowOverflow: true,
+      button: "true",
+      // hide: 'sm'
     },
     {
       name: 'File Name',
@@ -319,7 +320,7 @@ function ProjectExplorer() {
       // width: '20%',
       selector: (row) => row.lastModified,
       sortable: true,
-      right: true,
+      // right: true,
       hide: 'md'
     },
     {
@@ -327,7 +328,7 @@ function ProjectExplorer() {
       key: 'fileSize',
       selector: (row) => row.fileSize,
       sortable: true,
-      right: true,
+      // right: true,
       hide: 'md'
     },
   ];
@@ -660,7 +661,7 @@ function ProjectExplorer() {
             )}
             </div>
               <div className="project-content">
-                <div className="table-header d-flex justify-content-between align-items-center mb-3">
+                <div className="table-header d-flex justify-content-between align-items-center">
                   <div className="page-title">
                     <h2>Explorer</h2>
                   </div>
