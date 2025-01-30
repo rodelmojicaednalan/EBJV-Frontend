@@ -23,8 +23,8 @@
     left: 0;
     width: 45%;
     height: 100%;
-    background-color: rgba(38, 48, 58, 1); /* Adds transparency over the image */
-    background-image: url('../../assets/images/loginImage1.png');
+    background-color: rgba(38, 48, 58, 0.9); /* Adds transparency over the image */
+    background-image: url('../../assets/images/backdrop2.png');
     background-blend-mode: multiply;
     background-size: cover; /* Ensures the image stretches to cover the area */
     background-position: center; /* Centers the image */

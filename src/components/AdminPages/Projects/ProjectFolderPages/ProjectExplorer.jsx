@@ -230,7 +230,7 @@ function ProjectExplorer() {
             month: 'short',
             day: '2-digit',
             year: 'numeric',
-          }).format(new Date(file.fileLastModified)), // Format updatedAt
+          }).format(new Date(file.fileLastModified)), 
         }));
 
         setExplorerTable(formattedFiles);

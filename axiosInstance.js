@@ -8,7 +8,7 @@ import {
 } from './src/components/Authentication/getCookie';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://ebjv-api.olongapobataanzambalesads.com/api',
+  baseURL: 'https://www.ebjv.api.e-fab.com.au/api',
 });
 
 // const axiosInstance = axios.create({

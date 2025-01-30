@@ -97,7 +97,7 @@ function EditUserRole() {
                 <label>New Role Name:</label>
                 <input
                   type="text"
-                  className="form-control col-lg-3"
+                  className="form-control "
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
                   required
@@ -106,7 +106,7 @@ function EditUserRole() {
               <div className="form-group">
                 <label>Role Description:</label>
                 <textarea
-                  className="form-control col-lg-3"
+                  className="form-control "
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   required
