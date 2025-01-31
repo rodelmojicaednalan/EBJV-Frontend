@@ -44,8 +44,13 @@
     height: 100%;
     z-index: -1;
 } */
-
+.header-image{
+    width: auto;
+    height: 100px;
+}
 .login-form-body{
+    display: flex;
+    flex-direction: column;
     animation: slideInRight 0.7s ease-in-out 0.5s;
     animation-fill-mode: both;
 }

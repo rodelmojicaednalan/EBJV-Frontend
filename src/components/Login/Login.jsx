@@ -3,11 +3,16 @@ import { useNavigate, useLocation } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Login.css';
 import rme_login_image from '../../assets/images/ebjv-logo.png';
+import formheaderImage from '../../assets/images/ebjvLogo-transparent.png'
 import axiosInstance from '../../../axiosInstance.js';
 // import Swal from 'sweetalert2'
 // import close from "../../assets/images/close.png";
 
+import useWindowWidth from '../AdminPages/Projects/ProjectFolderPages/windowWidthHook.jsx';
+
 function Login() {
+    const windowWidthHook = useWindowWidth();
+    const isTabMobile = windowWidthHook <= 768;
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -73,7 +78,13 @@ function Login() {
                 </div>
                 </div>
 
-                <div className="d-flex login-form-body">
+                <div className="d-flex login-form-body mb-5">
+                    {isTabMobile ? (
+                    <div className="form-header d-flex justify-content-center mb-2">
+                        <img src={formheaderImage} className='header-image'/>
+                    </div>
+                    ) : ('')}
+              
                 <div className="">
                     <div className="card p-4 login-form-wrap" style={{ width: '450px' }}>
                         <h2 className="text-center">Enter the Workspace</h2>
