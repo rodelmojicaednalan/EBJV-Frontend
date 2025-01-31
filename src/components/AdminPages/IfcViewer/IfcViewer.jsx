@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react/prop-types */
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -5,6 +6,8 @@ import {
   useNavigate,
   useParams,
 } from 'react-router-dom';
+
+import { useDoubleTap } from 'use-double-tap';
 
 // import Stats from 'stats.js';
 import * as OBC from '@thatopen/components';
@@ -55,15 +58,28 @@ function IfcViewer() {
   const [isLoading, setIsLoading] = useState(true);
   const [cameraControls, setCameraControls] = useState(false);
   const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [dimensions, setDimensions] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.matchMedia('(max-width: 768px)').matches);
+    };
+
+    // Initial check
+    checkIsMobile();
+
+    // Add event listener to track window resizing
+    window.addEventListener('resize', checkIsMobile);
+
+    // Cleanup on component unmount
+    return () => {
+      window.removeEventListener('resize', checkIsMobile);
+    };
+  }, []);
 
   // const fileUrl = location.state?.fileUrl;
   const fileUrl = fileName;
-  // const []+
-
-  // const handleFileSelect = (event) => {
-  //   const file = event.target.files[0];
-  //   handleIfcUpload(file);
-  // };
 
   const togglePanel = () => {
     const panelDiv = document.querySelector('.asd');
@@ -87,6 +103,13 @@ function IfcViewer() {
   const handleBack = () => {
     navigate(`/projects`);
   };
+
+  const bind = useDoubleTap(() => {
+    if (isMobile && dimensions) {
+      console.log('from the bind');
+      dimensions.create();
+    }
+  });
 
   useEffect(() => {
     if (fileUrl) {
@@ -117,48 +140,21 @@ function IfcViewer() {
         const grids = components.get(OBC.Grids);
         grids.create(world);
 
-        // const sceneComponent = new OBC.SimpleScene(components);
-        // sceneComponent.setup();
-        // world.scene = sceneComponent;
-
-        // const rendererComponent = new OBC.SimpleRenderer(
-        //   components,
-        //   viewport
-        // );
-        // world.renderer = rendererComponent;
-
-        // const cameraComponent = new OBC.SimpleCamera(components);
-        // world.camera = cameraComponent;
-
-        // viewport.addEventListener('resize', () => {
-        //   rendererComponent.resize();
-        //   cameraComponent.updateAspect();
-        // });
-
-        // const viewerGrids = components.get(OBC.Grids);
-        // viewerGrids.create(world);
-
         const fragmentIfcLoader = components.get(OBC.IfcLoader);
         // components.init();
 
-        const dimensions = components.get(OBCF.LengthMeasurement);
-        dimensions.world = world;
-        dimensions.enabled = true;
-        dimensions.snapDistance = 1;
+        const dimensionsInstance = components.get(
+          OBCF.LengthMeasurement
+        );
+        dimensionsInstance.world = world;
+        dimensionsInstance.enabled = true;
+        dimensionsInstance.snapDistance = 1;
+        setDimensions(dimensionsInstance);
 
-        if (containerRef.current) {
-          let lastTap = 0;
-
+        if (window.matchMedia('(min-width: 768px)').matches) {
           containerRef.current.ondblclick = () => {
-            dimensions.create();
-          };
-
-          containerRef.current.ontouchstart = () => {
-            const now = Date.now();
-            if (now - lastTap < 300) {
-              dimensions.create();
-            }
-            lastTap = now;
+            console.log('from the container');
+            dimensionsInstance.create();
           };
         }
 
@@ -400,7 +396,7 @@ function IfcViewer() {
         handleTogglePanel={togglePanel}
         isPanelOpen={isPanelOpen}
       />
-      <div className="container" ref={containerRef}>
+      <div className="container" {...bind} ref={containerRef}>
         {/* <StickyHeader /> */}
         {isLoading && <Loader />}
       </div>
