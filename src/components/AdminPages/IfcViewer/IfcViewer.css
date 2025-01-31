@@ -699,3 +699,7 @@ bim-grid {
 .ml-5 {
   margin-left: 5px;
 }
+
+.default-vertex-picker {
+  border: 5px solid rgb(0, 255, 0) !important;
+}
