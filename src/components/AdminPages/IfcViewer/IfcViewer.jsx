@@ -313,25 +313,25 @@ function IfcViewer() {
                   checked 
                   label="Dimensions enabled"
                   @change="${(event) => {
-                    dimensions.enabled = event.target.value;
+                    dimensionsInstance.enabled = event.target.value;
                   }}}">  
                 </bim-checkbox>        
                 <bim-checkbox checked label="Dimensions visible" 
                    @change="${(event) => {
-                     dimensions.visible = event.target.value;
+                     dimensionsInstance.visible = event.target.value;
                    }}">  
                 </bim-checkbox>  
                 
                 <bim-color-input 
                   label="Dimensions Color" color="#202932" 
                    @input="${(event) => {
-                     dimensions.color.set(event.target.color);
+                     dimensionsInstance.color.set(event.target.color);
                    }}">
                 </bim-color-input>
                 
                 <bim-button label="Delete all"
                   @click="${() => {
-                    dimensions.deleteAll();
+                    dimensionsInstance.deleteAll();
                   }}">
                 </bim-button>
         
