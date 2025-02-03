@@ -16,7 +16,7 @@ function QrCodeGenerator({fileName, projectId }) {
  const toggleShowCopy = () => setShowCopy(!showCopy);
   useEffect(() => {
     if (fileName && projectId) {
-      setUrl(`https://evjbportal.olongapobataanzambalesads.com/ifc-viewer/${projectId}/${fileName}`);
+      setUrl(`https://cadstream.ebjv.e-fab.com.au/ifc-viewer/${projectId}/${fileName}`);
     }
   }, [fileName, projectId]);
 
@@ -87,7 +87,7 @@ function QrCodeGenerator({fileName, projectId }) {
     <ToastContainer
           className="p-3"
           position={position}
-          style={{ zIndex: 1 }}
+          style={{ zIndex: 99999999 }}
         >
           <Toast
             onClose={toggleShowCopy}
