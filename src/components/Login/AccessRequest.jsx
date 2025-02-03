@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import './Access.css'
 import axiosInstance from '../../../axiosInstance';
 import { getCookie } from '../Authentication/getCookie'
+import ebjvLogo from '../../assets/images/ebjvLogo-transparent.png'
 const AccessRequest = () => {
   const navigate = useNavigate();
   const location = useLocation();   
@@ -59,14 +60,14 @@ const AccessRequest = () => {
             
         </div>
         <div className="access-request-card">
-            <div className="access-request-card-header">
-                <h2> ⚠ Access Prohibited ⚠ </h2>
+            <div className="access-request-card-header mb-2">
+               <img className="d-flex w-50" src={ebjvLogo} />
             </div>
             <div className="access-request-card-body">
-                <p>You do not have permission to access this resource.</p>
+              <div className="access-text-group mb-3">
                 <p>Please log in to your account to continue.</p>
                 <p>If you do not have an account, you can click the &apos;Request Access&apos; button below.</p>
-
+              </div>
                 <div className="access-btn-group">
                     <div className="access-btn-group-item">
                         <button className="btn btn-primary login-btn" onClick={handleLogin}>Log In</button>
@@ -85,7 +86,7 @@ const AccessRequest = () => {
             </div>
         </div>
         <div className="access-request-page-footer">
-            <p> © EBJV</p>
+            <p> ©2018 EBJV Construction Modeling</p>
         </div>
     </div>
   
