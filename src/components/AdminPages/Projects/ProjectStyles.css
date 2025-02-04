@@ -1536,6 +1536,22 @@
 .edit-topic-btn, .delete-topic-btn{
   color: #525252;
 }
+
+.pdf-name{
+  font-size: 16px;
+  font-weight: 500;
+  margin: .875rem 0;
+  cursor: pointer;
+}
+.pdf-name:hover{
+  color: #eb6314;
+  text-decoration: underline;
+}
+.pdf-iframe{
+  width: 100%;
+  max-height: 600px;
+  height: 600px;
+}
 /* Media Queries for Responsiveness */
 @media (max-width: 1024px) {
   #projectList-container{
@@ -1566,6 +1582,10 @@
 }
 
 @media (max-width: 768px) {
+  .pdf-iframe{
+    height: 400px;
+  }
+
   .project-folder-icon, .ifc-viewer-icon, .delete-project-icon{
     width: 1.3rem;
     height: auto;
@@ -1934,6 +1954,10 @@
 }
 
 @media (max-width: 425px) {
+  .pdf-iframe{
+    height: 300px;
+  }
+
   .projectFolder-sidebar-container{
     border-right: none;
     border: none;

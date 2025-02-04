@@ -64,6 +64,10 @@ function ProjectExplorer() {
   const handleOpenQRCodeModal = () => setIsGenerateQRCodeModalOpen(true);
   const handleCloseQRCodeModal = () => setIsGenerateQRCodeModalOpen(false);
 
+  const [isPDFPreviewOpen, setIsPDFPreviewOpen] = useState(false)
+  const handleOpenPDFPreview = () => setIsPDFPreviewOpen(true);
+  const handleClosePDFPreview = () => setIsPDFPreviewOpen(false);
+
   const handleOpenShareModal = () => setIsShareModalOpen(true);
   const handleCloseShareModal = () => setIsShareModalOpen(false);
 
@@ -999,7 +1003,7 @@ function ProjectExplorer() {
         <Offcanvas.Body className="offcanvas-body">
         <div className="offcanvas-button-group2 mb-3 flex-wrap">
               <label htmlFor="buttons">  </label>
-              {selectedRow?.fileName?.endsWith('.ifc') && (
+              {selectedRow?.fileName?.endsWith('.ifc') ? (
               <button className="btn ml-1 mr-auto"
                       onClick={() =>
                         navigate(`/ifc-viewer/${projectId}/${selectedRow.fileName}`, {
@@ -1009,12 +1013,18 @@ function ProjectExplorer() {
                         })
                       }
                       style={{fontSize: "12px"}}>
-                View 
+                View Model 
               </button>
+              ) : (
+                <button className="btn ml-1 mr-auto"
+                        onClick={() => navigate(`/project-folder/pdf-viewer/${projectId}/${selectedRow.fileName}`)}
+                        style={{fontSize: "12px"}}>
+                  View PDF 
+                </button>
               )}
               <button className="btn offcanvas-action-btn" onClick={handleOpenShareModal}><IoMdPersonAdd size={20}/></button>
               <button className="btn offcanvas-action-btn" onClick={() => downloadFile(selectedRow.fileName)} ><IoMdDownload size={20}/></button>
-              {selectedRow?.fileName?.endsWith('.ifc') && (
+              {selectedRow?.fileName?.endsWith('.ifc')  || selectedRow?.fileName?.endsWith('.pdf') && (
               <button className="btn offcanvas-action-btn mr-1" onClick={handleOpenQRCodeModal}><BsQrCode size={20}/></button>
               )}
               {/* <button className="btn " onClick={handleOCMenuToggle}><BiDotsVertical size={20}/></button>  
@@ -1056,7 +1066,7 @@ function ProjectExplorer() {
       </Offcanvas>
 
 
-
+{/* GENERATE QR MODAL */}
       <Modal 
         show={isGenerateQRCodeModalOpen} 
         onHide={() => setIsGenerateQRCodeModalOpen(false)} 
@@ -1076,6 +1086,32 @@ function ProjectExplorer() {
             id="closeAdd"
             variant="secondary"
             onClick={() => setIsGenerateQRCodeModalOpen(false)}
+          >
+            Close
+          </Button>
+          {/* <Button id="saveAdd" variant="primary" onClick={QrCodeGenerator.downloadQRCode}>
+            Download
+          </Button> */}
+        </Modal.Footer>
+      </Modal>
+
+{/* PDF PREVIEW MODAL */}
+      <Modal 
+        show={isPDFPreviewOpen} 
+        onHide={handleClosePDFPreview} 
+        centered
+      >
+        <Modal.Header>
+          <Modal.Title> PDF Preview </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+         
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            id="closeAdd"
+            variant="secondary"
+            onClick={handleClosePDFPreview}
           >
             Close
           </Button>

@@ -102,10 +102,7 @@ function Projects() {
           : true) &&
         (project.project_name
           .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-          project.address
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()))
+          .includes(searchTerm.toLowerCase()))
     );
     setFilteredData(results);
   }, [searchTerm, data, selectedprojectId]);

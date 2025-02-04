@@ -9,7 +9,7 @@ import UsersList from './components/AdminPages/UsersList/UsersLIst';
 import Projects from './components/AdminPages/Projects/Projects';
 import AddProject from './components/AdminPages/Projects/AddProject';
 import EditProject from './components/AdminPages/Projects/EditProjects';
-import ProjectFolder from './components/AdminPages/Projects/ProjectFolder';
+import ProjectPDFViewer from './components/AdminPages/Projects/ProjectPDFViewer';
 
 // import ProjectViews from './components/AdminPages/Projects/ProjectFolderPages/ProjectViews';
 // import ProjectTopics from './components/AdminPages/Projects/ProjectFolderPages/ProjectTopics';
@@ -96,7 +96,7 @@ function Layout() {
         <Route path="/projects" element={<ProtectedRoute element={<Projects />} allowedRoles={['Admin', 'Client']} />} />
         <Route path="/add-project" element={<ProtectedRoute element={<AddProject />} allowedRoles={['Admin', 'Client']} />} />
         <Route path="/edit-project/:projectId" element={<ProtectedRoute element={<EditProject />} allowedRoles={['Admin', 'Client']} />} />
-        <Route path="/project-folder/:projectId" element={<ProtectedRoute element={<ProjectFolder />} allowedRoles={['Admin', 'Client']} />} />
+        <Route path="/project-folder/pdf-viewer/:projectId/:fileName" element={<ProtectedRoute element={<ProjectPDFViewer />} allowedRoles={['Admin', 'Client']} />} />
 
         <Route path="/project-folder/:projectId/data/project-explorer" element={<ProtectedRoute element={<ProjectExplorer />} allowedRoles={['Admin', 'Client']} />} />
         {/* <Route path="/project-folder/:projectId/data/project-views" element={<ProtectedRoute element={<ProjectViews />} allowedRoles={['Admin', 'Client']} />} /> */}

@@ -1,6 +1,6 @@
 {
-  "name": "ebjv-project",
-  "homepage": "https://evjbportal.olongapobataanzambalesads.com/",
+  "name": "cadstream-ebjv",
+  "homepage": "https://cadstream.ebjv.e-fab.com.au/",
   "private": true,
   "version": "1.0",
   "type": "module",
@@ -13,6 +13,7 @@
   "dependencies": {
     "@parametricos/bcf-js": "^0.2.6",
     "@react-pdf-viewer/core": "^3.12.0",
+    "@react-pdf-viewer/default-layout": "^3.12.0",
     "@react-pdf/renderer": "^3.4.4",
     "@thatopen/components": "^2.4.3",
     "@thatopen/components-front": "^2.4.2",
@@ -35,6 +36,7 @@
     "lightgallery": "^2.7.2",
     "lodash": "^4.17.21",
     "papaparse": "^5.4.1",
+    "pdfjs-dist": "^4.10.38",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.4",
     "react-color": "^2.19.3",
