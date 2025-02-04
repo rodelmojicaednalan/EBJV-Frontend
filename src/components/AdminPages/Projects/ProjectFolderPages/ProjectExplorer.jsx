@@ -1024,9 +1024,12 @@ function ProjectExplorer() {
               )}
               <button className="btn offcanvas-action-btn" onClick={handleOpenShareModal}><IoMdPersonAdd size={20}/></button>
               <button className="btn offcanvas-action-btn" onClick={() => downloadFile(selectedRow.fileName)} ><IoMdDownload size={20}/></button>
-              {selectedRow?.fileName?.endsWith('.ifc')  || selectedRow?.fileName?.endsWith('.pdf') && (
-              <button className="btn offcanvas-action-btn mr-1" onClick={handleOpenQRCodeModal}><BsQrCode size={20}/></button>
+              {(selectedRow?.fileName?.endsWith('.ifc') || selectedRow?.fileName?.endsWith('.pdf')) && (
+                  <button className="btn offcanvas-action-btn mr-1" onClick={handleOpenQRCodeModal}>
+                      <BsQrCode size={20}/>
+                  </button>
               )}
+
               {/* <button className="btn " onClick={handleOCMenuToggle}><BiDotsVertical size={20}/></button>  
               {offcanvasMenuOpen && (
                         <div className="dropdown-menu" id="offcanvas-dropdown" ref={menuRef}>
