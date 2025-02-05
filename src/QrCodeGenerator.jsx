@@ -59,6 +59,9 @@ function QrCodeGenerator({ fileName, projectId }) {
           <div className="qrcode__download">
             <div className="qrcode__image" ref={qrCodeRef}>
               <QRCode value={url} size={150} />
+              {/* <a href={url} target="_blank" rel="noopener noreferrer">
+                {url}
+              </a> */}
             </div>
             <button className="btn btn-primary addbtn" onClick={downloadQRCode}>Download QR Code</button>
           </div>

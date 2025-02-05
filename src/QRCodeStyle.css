@@ -62,3 +62,17 @@
   .qrcode__download button {
     margin-top: 10px;
   }
+
+  .qrcode__image{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .qrcode__image h6{
+    font-weight: 600;
+    text-align: justify;
+    font-size: .875rem;
+    margin: 10px;
+  }

@@ -539,7 +539,7 @@
 }
 
 .offcanvas {
-  z-index: 99999;
+  /* z-index: 99999; */
   background: white;
   padding: 20px;
   width: 45% !important;
@@ -1552,6 +1552,21 @@
   max-height: 600px;
   height: 600px;
 }
+.pdf-preview-container, .pdf-container{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.addQR-to-PDF{
+  background-color: transparent !important;
+  border: none !important;
+  width: 50%;
+}
+.addQR-btn{
+  margin-right: 1rem;
+}
 /* Media Queries for Responsiveness */
 @media (max-width: 1024px) {
   #projectList-container{
@@ -1954,6 +1969,15 @@
 }
 
 @media (max-width: 425px) {
+  .add-download-btngroup{
+    flex-direction: column;
+    align-items: center;
+  }
+  .addQR-btn, .downloadNewPDF-btn{
+    padding: 5px;
+    margin: 0;
+    margin-bottom: 5px;
+  }
   .pdf-iframe{
     height: 300px;
   }
