@@ -84,7 +84,7 @@
   .qr-tile-image{
     max-width: 200px;
   }
-.qr-tile-bot-grp{
+.qr-tile-bot-grp, .qr-tile-url{
   display: flex;
   max-width: 200px;
   max-height: 200px;
@@ -107,4 +107,12 @@
     overflow: hidden;
     font-weight: bold;
     text-align: center;
+  }
+
+  .qr-tile-url{
+    font-size: 11px;
+    text-align: left;
+    word-wrap: break-word;
+    white-space:inherit;
+    width: 200px;
   }

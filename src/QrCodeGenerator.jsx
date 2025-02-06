@@ -28,18 +28,21 @@ function QrCodeGenerator({ fileName, projectId }) {
   }, [fileName, projectId]);
 
   const downloadQRCode = () => {
+    const scale = 3; // Increase scale for higher resolution (e.g., 2x, 3x, 4x)
+  
     htmlToImage
-      .toPng(qrCodeRef.current)
-      .then(function (dataUrl) {
+      .toCanvas(qrCodeRef.current, { pixelRatio: scale })
+      .then((canvas) => {
         const link = document.createElement("a");
-        link.href = dataUrl;
+        link.href = canvas.toDataURL("image/png"); // Convert canvas to high-quality PNG
         link.download = `${Date.now()}_EBJV-QRCode.png`;
         link.click();
       })
-      .catch(function (error) {
-        console.error("Error generating QR code:", error);
+      .catch((error) => {
+        console.error("Error generating high-resolution QR code:", error);
       });
   };
+  
   
   const copyToClipboard = () => {
     if (!url) {
@@ -70,7 +73,7 @@ function QrCodeGenerator({ fileName, projectId }) {
                  <span className="qr-tile-link"> Digital Model <br/> Scan or Click</span>
                 </div>
               </div>
-        
+              {/* <div className="qr-tile-url">{url}</div> */}
             </div>
             <button className="btn btn-primary addbtn" onClick={downloadQRCode}>Download QR Code</button>
           </div>

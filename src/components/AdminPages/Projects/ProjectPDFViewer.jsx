@@ -35,6 +35,7 @@ function ProjectFolder() {
   const [uploadedImage, setUploadedImage] = useState(null);
   const canvasRef = useRef(null);
   const [viewerKey, setViewerKey] = useState(0);
+  const [qrUrl, setQrUrl] = useState("");
 
 useEffect(() => {
   setViewerKey(prev => prev + 1); // Change key to force refresh
@@ -70,15 +71,16 @@ const handleImageUpload = (event) => {
   if (file) {
     const reader = new FileReader();
     reader.onload = (e) => {
-      setUploadedImage(e.target.result); // Store image as data URL
+      setUploadedImage(e.target.result); // Store image as base64 Data URL
     };
-    reader.readAsArrayBuffer(file);
+    reader.readAsDataURL(file); // ✅ Use readAsDataURL instead of readAsArrayBuffer
   }
 };
 
+
 const modifyPDF = async () => {
-  if (!uploadedImage) {
-    alert("Please upload an image first.");
+  if (!uploadedImage || !fileName || !qrUrl) {
+    alert("Please upload an image and provide a URL.");
     return;
   }
 
@@ -92,24 +94,41 @@ const modifyPDF = async () => {
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
 
-    // Embed the uploaded image
-    const imageBytes = new Uint8Array(uploadedImage);
+    // ✅ Convert base64 to byte array
+    const base64Data = uploadedImage.split(',')[1]; // Extract only the base64 data part
+    const binaryString = atob(base64Data);
+    const imageBytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      imageBytes[i] = binaryString.charCodeAt(i);
+    }
+
+    // Embed the image
     const image = await pdfDoc.embedPng(imageBytes);
 
     // Get page dimensions
     const { width, height } = firstPage.getSize();
 
-    // Define margins and position
+    // Define margins and position for the QR code
     const margin = 30;
-    const imageWidth = 100;
-    const imageHeight = 130;
+    const imageWidth = 180;
+    const imageHeight = 260;
+    const qrX = width - imageWidth - margin; // Right aligned
+    const qrY = margin + 175; // Bottom aligned
 
+    // Draw the image
     firstPage.drawImage(image, {
-      x: margin, // Right aligned
-      y: margin, // Bottom aligned
+      x: qrX,
+      y: qrY,
       width: imageWidth,
       height: imageHeight,
       opacity: 1,
+    });
+
+    // Add Clickable Text Link Below Image
+    firstPage.drawText(qrUrl, {
+      x: qrX,
+      y: qrY - 30, // Position below the QR code
+      size: 12,
     });
 
     // Save modified PDF
@@ -124,6 +143,9 @@ const modifyPDF = async () => {
     console.error("Error modifying PDF:", error);
   }
 };
+
+
+
 
 const renderPDFPreview = async (pdfBlob) => {
   if (!canvasRef.current) return;
@@ -209,8 +231,18 @@ const activeFileUrl = pdfPreviewUrl || `https://www.ebjv.api.e-fab.com.au/upload
                         </div> */}
                         {/* Upload Image */}
                         <div className="pdf-preview-btnGroup d-flex mb-5 mt-2 ml-2">
+                        
+                          <div className="d-flex flex-column mr-auto">
                           <input type="file" accept="image/png, image/jpeg" onChange={handleImageUpload} className="mr-auto addQR-to-PDF"/>
-                          
+                          <input 
+                            type="text" 
+                            placeholder="Enter URL for QR code" 
+                            value={qrUrl} 
+                            onChange={(e) => setQrUrl(e.target.value)}
+                            className="form-control"
+                          />
+                          </div>
+
                           {/* Buttons */}
                           <div className="d-flex add-download-btngroup">
                             <button className="btn btn-primary addQR-btn" onClick={modifyPDF}>
