@@ -4,6 +4,8 @@ import * as htmlToImage from "html-to-image";
 import QRCode from 'react-qr-code'
 import './QRCodeStyle.css'
 import {Toast, ToastContainer} from 'react-bootstrap'
+import insideQRImage from './assets/images/ebjv-logo-fab.png'
+import view_model from './assets/images/view-model.png';
 
 function QrCodeGenerator({ fileName, projectId }) {
   const [url, setUrl] = useState("");
@@ -58,10 +60,17 @@ function QrCodeGenerator({ fileName, projectId }) {
         {qrIsVisible && (
           <div className="qrcode__download">
             <div className="qrcode__image" ref={qrCodeRef}>
-              <QRCode value={url} size={150} />
-              {/* <a href={url} target="_blank" rel="noopener noreferrer">
-                {url}
-              </a> */}
+              <QRCode value={url} className="qr-tile-image"/> 
+              <div className="qr-tile-bot-grp mt-3">
+                <div>
+                 <img src={insideQRImage} className="qr-tile-logo"/> 
+                </div>
+                <div className="d-flex flex-column align-items-center ml-4">
+                  <img src={view_model} className="qr-tile-icon"/>
+                 <span className="qr-tile-link"> Digital Model <br/> Scan or Click</span>
+                </div>
+              </div>
+        
             </div>
             <button className="btn btn-primary addbtn" onClick={downloadQRCode}>Download QR Code</button>
           </div>

@@ -68,8 +68,9 @@ function Layout() {
     // const isProjectFolder = /^\/project-folder\/[a-zA-Z0-9]+/.test(location.pathname);
     const isIfcViewer = /^\/ifc-viewer\/[a-zA-Z0-9]+\/[a-zA-Z0-9._-]+$/.test(location.pathname);
     const isResetPassword = /^\/reset-password\/[a-zA-Z0-9]+$/.test(location.pathname);
+    // const isPDFViewer = /^\/project-folder\/pdf-viewer\/[^/]+\/[^/]+$/.test(location.pathname);
 
-    return isIfcViewer || isResetPassword;
+    return isIfcViewer || isResetPassword ;
   };
 //  console.log(location);
   return (
@@ -85,8 +86,8 @@ function Layout() {
         <Route path="/wait-instructions" element={<WaitInstructions/>} />
         <Route path="/userlist" element={<ProtectedRoute element={<UsersList />} allowedRoles={['Admin']} />} />
         <Route path="/uploaded-ifc-file" element={<ProtectedRoute element={<IfcUploadPage />} allowedRoles={['Admin']} />} />
-        {/* <Route path="/ifc-viewer/:projectId/:fileName"element={<IfcViewer/>}/> */}
-        <Route path="/ifc-viewer/:projectId/:fileName"element={<ProtectedRoute element={<IfcViewer />} allowedRoles={['Admin', 'Client']} /> }/>
+        <Route path="/ifc-viewer/:projectId/:fileName"element={<IfcViewer/>}/>
+        {/* <Route path="/ifc-viewer/:projectId/:fileName"element={<ProtectedRoute element={<IfcViewer />} allowedRoles={['Admin', 'Client']} /> }/> */}
         <Route path="/forgot-password"  element={<ForgotPassword />}/>
         <Route path="/reset-password/:passwordToken" name="reset-password"  element={<ResetPassword />}/>
         <Route path="/open-email"  element={<CheckEmail />}/>
@@ -96,7 +97,8 @@ function Layout() {
         <Route path="/projects" element={<ProtectedRoute element={<Projects />} allowedRoles={['Admin', 'Client']} />} />
         <Route path="/add-project" element={<ProtectedRoute element={<AddProject />} allowedRoles={['Admin', 'Client']} />} />
         <Route path="/edit-project/:projectId" element={<ProtectedRoute element={<EditProject />} allowedRoles={['Admin', 'Client']} />} />
-        <Route path="/project-folder/pdf-viewer/:projectId/:fileName" element={<ProtectedRoute element={<ProjectPDFViewer />} allowedRoles={['Admin', 'Client']} />} />
+        {/* <Route path="/project-folder/pdf-viewer/:projectId/:fileName" element={<ProtectedRoute element={<ProjectPDFViewer />} allowedRoles={['Admin', 'Client']} />} /> */}
+        <Route path="/project-folder/pdf-viewer/:projectId/:fileName" element={<ProjectPDFViewer/>}/>
 
         <Route path="/project-folder/:projectId/data/project-explorer" element={<ProtectedRoute element={<ProjectExplorer />} allowedRoles={['Admin', 'Client']} />} />
         {/* <Route path="/project-folder/:projectId/data/project-views" element={<ProtectedRoute element={<ProjectViews />} allowedRoles={['Admin', 'Client']} />} /> */}

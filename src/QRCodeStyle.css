@@ -68,6 +68,11 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    padding: .875rem;
+    border: 1px solid black;
+    border-radius: 5px;
+    background-color: #fff;
+    max-height: 310px;
   }
 
   .qrcode__image h6{
@@ -75,4 +80,31 @@
     text-align: justify;
     font-size: .875rem;
     margin: 10px;
+  }
+  .qr-tile-image{
+    max-width: 200px;
+  }
+.qr-tile-bot-grp{
+  display: flex;
+  max-width: 200px;
+  max-height: 200px;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+}
+  .qr-tile-logo{
+    width: 70px;
+    height: 65px;
+    opacity: 75%;
+  }
+  .qr-tile-icon{
+    width: 30px;
+    height: 30px;
+  }
+  .qr-tile-link{
+    font-size: 12px;
+    word-wrap: break-word;
+    overflow: hidden;
+    font-weight: bold;
+    text-align: center;
   }

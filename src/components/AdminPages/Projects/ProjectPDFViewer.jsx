@@ -34,30 +34,35 @@ function ProjectFolder() {
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState(null);
   const [uploadedImage, setUploadedImage] = useState(null);
   const canvasRef = useRef(null);
+  const [viewerKey, setViewerKey] = useState(0);
+
+useEffect(() => {
+  setViewerKey(prev => prev + 1); // Change key to force refresh
+}, [fileName]);
 
    // Fetch project details and populate fields
-   const fetchProjectDetails = async () => {
-    try {
-      const response = await axiosInstance.get(
-        `/project/${projectId}`
-      );
-      const {
-        project_name,
-        owner,
-      } = response.data;
+//    const fetchProjectDetails = async () => {
+//     try {
+//       const response = await axiosInstance.get(
+//         `/project/${projectId}`
+//       );
+//       const {
+//         project_name,
+//         owner,
+//       } = response.data;
 
-      setProjectName(project_name);
-      setOwnerName(`${owner.first_name} ${owner.last_name}`);
+//       setProjectName(project_name);
+//       setOwnerName(`${owner.first_name} ${owner.last_name}`);
 
-    } catch (error) {
-      console.error('Error fetching project details:', error);
-    }
-  };
+//     } catch (error) {
+//       console.error('Error fetching project details:', error);
+//     }
+//   };
 
 
-  useEffect(() => {
-  fetchProjectDetails();
-}, [projectId, refreshKey]);
+//   useEffect(() => {
+//   fetchProjectDetails();
+// }, [projectId, refreshKey]);
   
 
 const handleImageUpload = (event) => {
@@ -95,15 +100,16 @@ const modifyPDF = async () => {
     const { width, height } = firstPage.getSize();
 
     // Define margins and position
-    const margin = 190;
-    const imageWidth = 180;
-    const imageHeight = 180;
+    const margin = 30;
+    const imageWidth = 100;
+    const imageHeight = 130;
 
     firstPage.drawImage(image, {
-      x: width - imageWidth - margin, // Right aligned
-      y: margin + 95, // Bottom aligned
+      x: margin, // Right aligned
+      y: margin, // Bottom aligned
       width: imageWidth,
       height: imageHeight,
+      opacity: 1,
     });
 
     // Save modified PDF
@@ -153,20 +159,21 @@ const downloadPDF = () => {
 };
 
 console.log(fileName, pdfBlob)
+const activeFileUrl = pdfPreviewUrl || `https://www.ebjv.api.e-fab.com.au/uploads/ifc-files/${fileName}`;
 
   return (
     <div className="container">
-      <h3 className="projectFolder-title" id="projectFolder-title" >
+      {/* <h3 className="projectFolder-title" id="projectFolder-title" >
        {ownerName}&apos;s {projectName}
-      </h3>
+      </h3> */}
       <div className="container-content" id="project-folder-container">
-      <div className="projectFolder-sidebar-container">
+      {/* <div className="projectFolder-sidebar-container">
         {isMobile ? (
           <SidebarOffcanvas projectId={projectId} />
         ) : (
           <ProjectSidebar projectId={projectId} />
         )}
-        </div>
+        </div> */}
 
           <div className="projectFolder-display">
                 <div className="main"> 
@@ -191,15 +198,15 @@ console.log(fileName, pdfBlob)
                           </div> */}
 
                         <div className="pdf-container">
-                        <Worker workerUrl="https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js">
-                          <Viewer fileUrl={`https://www.ebjv.api.e-fab.com.au/uploads/ifc-files/${fileName}`} plugins={[defaultLayoutPluginInstance]} />
-                        </Worker>
+
+                          <Viewer key={viewerKey} fileUrl={activeFileUrl} plugins={[defaultLayoutPluginInstance]} />
+    
                         </div>
 
-                         <div className="pdf-preview-container">
+                         {/* <div className="pdf-preview-container">
                           <h6 className="mt-4 ml-2"> Modified PDF Preview: </h6>
                           <canvas ref={canvasRef} className="pdf-canvas"></canvas>
-                        </div>
+                        </div> */}
                         {/* Upload Image */}
                         <div className="pdf-preview-btnGroup d-flex mb-5 mt-2 ml-2">
                           <input type="file" accept="image/png, image/jpeg" onChange={handleImageUpload} className="mr-auto addQR-to-PDF"/>
