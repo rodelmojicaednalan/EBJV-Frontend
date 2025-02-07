@@ -24,6 +24,9 @@ import Loader from '../../Loaders/Loader';
 import Switch from './Switch';
 import './IfcViewer.css';
 
+// opacity
+import * as OPACITY from './fragmentOpacity';
+
 import {
   FiUpload,
   FiMessageCircle,
@@ -45,6 +48,8 @@ import {
   FiSettings,
   FiColumns,
   FiChevronDown,
+  FiEyeOff,
+  FiRotateCcw,
 } from 'react-icons/fi';
 
 BUI.Manager.init();
@@ -60,6 +65,25 @@ function IfcViewer() {
   const [isPanelOpen, setIsPanelOpen] = useState(true);
   const [dimensions, setDimensions] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [isHideContainerOpen, setIsHideContainerOpen] =
+    useState(false);
+  const [selectedFragmentIdMap, setSelectedFragmentIdMap] =
+    useState(null);
+  const [hiderInstance, setHiderInstance] = useState(null);
+  const [hiddenFragmentIds, setHiddenFragmentIds] = useState([]);
+
+  const addHiddenFragmentId = (fragmentId) => {
+    setHiddenFragmentIds((hiddenFragmentIds) => [
+      ...hiddenFragmentIds,
+      fragmentId,
+    ]);
+  };
+
+  const restoreHiddenFragments = () => {
+    hiddenFragmentIds.forEach((id) => hiderInstance.set(true, id));
+
+    setHiddenFragmentIds([]);
+  };
 
   useEffect(() => {
     const checkIsMobile = () => {
@@ -178,6 +202,11 @@ function IfcViewer() {
             classifications: [],
           });
 
+        //HIDER
+
+        const hider = components.get(OBC.Hider);
+        setHiderInstance(hider);
+
         const classifier = components.get(OBC.Classifier);
 
         fragmentsManager.onFragmentsLoaded.add(async (model) => {
@@ -205,12 +234,15 @@ function IfcViewer() {
         highlighter.setup({ world });
 
         highlighter.events.select.onHighlight.add((fragmentIdMap) => {
+          setSelectedFragmentIdMap(fragmentIdMap);
+          setIsHideContainerOpen(() => true);
           updatePropertiesTable({ fragmentIdMap });
         });
 
-        highlighter.events.select.onClear.add(() =>
-          updatePropertiesTable({ fragmentIdMap: {} })
-        );
+        highlighter.events.select.onClear.add(() => {
+          setIsHideContainerOpen(() => false);
+          updatePropertiesTable({ fragmentIdMap: {} });
+        });
 
         const loadIfc = async () => {
           try {
@@ -249,6 +281,7 @@ function IfcViewer() {
               const indexer = components.get(OBC.IfcRelationsIndexer);
               await indexer.process(model);
               setIsLoading(false);
+              console.log('indexer', indexer.onRelationsIndexed);
 
               worker.terminate();
             };
@@ -400,6 +433,28 @@ function IfcViewer() {
         {/* <StickyHeader /> */}
         {isLoading && <Loader />}
       </div>
+      {isHideContainerOpen && (
+        <div className="tools-container">
+          <div className="hide-container">
+            <button
+              className="hide-button"
+              onClick={() => {
+                hiderInstance.set(false, selectedFragmentIdMap);
+                addHiddenFragmentId(selectedFragmentIdMap);
+              }}
+            >
+              <FiEyeOff />
+            </button>
+            <button
+              className="reset-button"
+              onClick={restoreHiddenFragments}
+            >
+              <FiRotateCcw />
+            </button>
+          </div>
+          {/* <button className="opacity-button">opacity</button> */}
+        </div>
+      )}
     </div>
   );
 }

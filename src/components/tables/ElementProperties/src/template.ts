@@ -190,9 +190,12 @@ const processContainerRelations = async (
     'Decomposes'
   );
 
+  console.log('assembly', assembly);
+
   if (assembly && assembly[0]) {
     const containerID = assembly[0];
     const container = await model.getProperties(containerID);
+    console.log('contianer', container);
     if (container) {
       const attributesRow = await createAttributesRow(container, {
         groupName: 'Tekla Assembly',

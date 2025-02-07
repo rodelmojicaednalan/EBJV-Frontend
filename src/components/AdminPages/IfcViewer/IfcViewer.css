@@ -646,7 +646,6 @@ bim-grid {
   border: none;
   background-color: rgb(234, 234, 234);
   width: auto;
-  color: black;
 }
 
 .options-menu {
@@ -702,4 +701,29 @@ bim-grid {
 
 .default-vertex-picker {
   border: 5px solid rgb(0, 255, 0) !important;
+}
+
+.tools-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #f3f3f3;
+  padding: 7px;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+}
+
+.tools-container>button,
+.hide-container>button {
+  background-color: #f3f3f3;
+  border: none;
+  color: black;
+}
+
+.tools-container>button:active,
+.hide-container>button:active {
+  opacity: 90%;
 }
