@@ -75,7 +75,8 @@ function ProjectExplorer() {
   const [toastPosition, setToastPosition] = useState('bottom-end')
   const showToast = () => setShowSuccessToast(!showSuccessToast);
 
-
+const [roleCheck, setRoleCheck] = useState("")
+console.log(roleCheck)
   const addMenuToggle = () => {
     setIsAddMenuOpen(!isAddMenuOpen);
   }
@@ -254,6 +255,8 @@ function ProjectExplorer() {
         ]);
     
         const currentUser = currentUserResponse.data;
+        const userRole = currentUser.roles.map((roleName) => roleName.role_name );
+        setRoleCheck(userRole);
         const { contributors } = projectResponse.data; // Get contributors from project details
         const users = usersResponse.data;
     
@@ -1022,13 +1025,17 @@ function ProjectExplorer() {
                   View PDF 
                 </button>
               )}
-              <button className="btn offcanvas-action-btn" onClick={handleOpenShareModal}><IoMdPersonAdd size={20}/></button>
+              {roleCheck.includes('Admin') && (
+                <button className="btn offcanvas-action-btn" onClick={handleOpenShareModal}><IoMdPersonAdd size={20}/></button>   
+              ) }
+
               <button className="btn offcanvas-action-btn" onClick={() => downloadFile(selectedRow.fileName)} ><IoMdDownload size={20}/></button>
-              {(selectedRow?.fileName?.endsWith('.ifc') || selectedRow?.fileName?.endsWith('.pdf')) && (
-                  <button className="btn offcanvas-action-btn mr-1" onClick={handleOpenQRCodeModal}>
-                      <BsQrCode size={20}/>
-                  </button>
-              )}
+              {roleCheck.includes('Admin') && selectedRow?.fileName?.endsWith('.ifc') || selectedRow?.fileName?.endsWith('.pdf') ? (
+                <button className="btn offcanvas-action-btn mr-1" onClick={handleOpenQRCodeModal}>
+                  <BsQrCode size={20} />
+                </button>
+              ) : null}
+
 
               {/* <button className="btn " onClick={handleOCMenuToggle}><BiDotsVertical size={20}/></button>  
               {offcanvasMenuOpen && (

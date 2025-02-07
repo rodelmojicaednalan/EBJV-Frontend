@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext} from "react";
 import axiosInstance from "../../../../axiosInstance.js";
 import { useNavigate, useParams } from "react-router-dom";
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, StandardFonts, PDFName, PDFAnnotation } from "pdf-lib";
 import * as pdfjsLib from "pdfjs-dist";
 import "pdfjs-dist/build/pdf.worker.entry";
 import { Viewer, Worker } from '@react-pdf-viewer/core';
@@ -17,8 +17,13 @@ import useWindowWidth from '../Projects/ProjectFolderPages/windowWidthHook.jsx'
 import ProjectSidebar from './ProjectFolderSidebar.jsx';
 import SidebarOffcanvas from "./MobileSidebar.jsx";
 import { FaChevronLeft } from "react-icons/fa6";
-
+import { AuthContext } from '../../Authentication/authContext';
 function ProjectFolder() {
+    const { user } = useContext(AuthContext);
+    const userRoles = user?.roles?.map((role) => role.role_name) || [];
+    const isAdmin = userRoles.includes('Admin');
+    console.log(isAdmin)
+    const [isUserLoaded, setIsUserLoaded] = useState(false); 
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
   const windowWidthHook = useWindowWidth();
   const isMobile = windowWidthHook <= 425;
@@ -36,6 +41,12 @@ function ProjectFolder() {
   const canvasRef = useRef(null);
   const [viewerKey, setViewerKey] = useState(0);
   const [qrUrl, setQrUrl] = useState("");
+
+  useEffect(() => {
+    if (user !== undefined) {
+      setIsUserLoaded(true);
+    }
+  }, [user]);
 
 useEffect(() => {
   setViewerKey(prev => prev + 1); // Change key to force refresh
@@ -85,6 +96,10 @@ const modifyPDF = async () => {
   }
 
   try {
+    console.log("📌 Starting modifyPDF function");
+
+    // ✅ Generate a shortened link or use "Click Here!"
+
     // Fetch the existing PDF file
     const fileUrl = await axiosInstance.get(`/uploads/${fileName}`, { responseType: "arraybuffer" });
     const arrayBuffer = fileUrl.data;
@@ -94,8 +109,10 @@ const modifyPDF = async () => {
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
 
+    console.log("✅ PDF loaded successfully");
+
     // ✅ Convert base64 to byte array
-    const base64Data = uploadedImage.split(',')[1]; // Extract only the base64 data part
+    const base64Data = uploadedImage.split(',')[1];
     const binaryString = atob(base64Data);
     const imageBytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
@@ -104,6 +121,7 @@ const modifyPDF = async () => {
 
     // Embed the image
     const image = await pdfDoc.embedPng(imageBytes);
+    console.log("✅ Image embedded successfully");
 
     // Get page dimensions
     const { width, height } = firstPage.getSize();
@@ -112,8 +130,8 @@ const modifyPDF = async () => {
     const margin = 30;
     const imageWidth = 180;
     const imageHeight = 260;
-    const qrX = width - imageWidth - margin; // Right aligned
-    const qrY = margin + 175; // Bottom aligned
+    const qrX = width - imageWidth - margin;
+    const qrY = margin + 255;
 
     // Draw the image
     firstPage.drawImage(image, {
@@ -124,11 +142,23 @@ const modifyPDF = async () => {
       opacity: 1,
     });
 
-    // Add Clickable Text Link Below Image
+    console.log("✅ Image drawn on PDF");
+
+    // Embed a font for the text
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    console.log("✅ Font embedded: Helvetica");
+
+    // ✅ Draw the "Click Here!" text
+    const fontSize = 14;
+    const textY = qrY - 30;
+
     firstPage.drawText(qrUrl, {
       x: qrX,
-      y: qrY - 30, // Position below the QR code
-      size: 12,
+      y: textY,
+      size: fontSize,
+      font, 
+      wordBreaks: [' ', '-', '/', '.'],
+      maxWidth: imageWidth,
     });
 
     // Save modified PDF
@@ -137,14 +167,15 @@ const modifyPDF = async () => {
     setPdfBlob(pdfBlob);
     setPdfPreviewUrl(URL.createObjectURL(pdfBlob));
 
+    console.log("✅ PDF modification complete");
+
     // Render PDF preview
+    setViewerKey(prev => prev + 1); // Change key to force refresh
     renderPDFPreview(pdfBlob);
   } catch (error) {
-    console.error("Error modifying PDF:", error);
+    console.error("❌ Error modifying PDF:", error);
   }
 };
-
-
 
 
 const renderPDFPreview = async (pdfBlob) => {
@@ -180,7 +211,8 @@ const downloadPDF = () => {
   link.click();
 };
 
-console.log(fileName, pdfBlob)
+// console.log(fileName, pdfBlob)
+// console.log(user)
 const activeFileUrl = pdfPreviewUrl || `https://www.ebjv.api.e-fab.com.au/uploads/ifc-files/${fileName}`;
 
   return (
@@ -230,8 +262,9 @@ const activeFileUrl = pdfPreviewUrl || `https://www.ebjv.api.e-fab.com.au/upload
                           <canvas ref={canvasRef} className="pdf-canvas"></canvas>
                         </div> */}
                         {/* Upload Image */}
-                        <div className="pdf-preview-btnGroup d-flex mb-5 mt-2 ml-2">
-                        
+                        {isUserLoaded && user && isAdmin &&(
+                          <div className="pdf-preview-btnGroup d-flex mb-5 mt-2 ml-2">
+                                                
                           <div className="d-flex flex-column mr-auto">
                           <input type="file" accept="image/png, image/jpeg" onChange={handleImageUpload} className="mr-auto addQR-to-PDF"/>
                           <input 
@@ -256,6 +289,7 @@ const activeFileUrl = pdfPreviewUrl || `https://www.ebjv.api.e-fab.com.au/upload
                           </div>
                         
                         </div>
+                        ) }
                      
 
 
