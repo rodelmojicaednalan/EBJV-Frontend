@@ -68,7 +68,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: .875rem;
+    padding: .475rem;
     border: 1px solid black;
     border-radius: 5px;
     background-color: #fff;
@@ -78,7 +78,7 @@
   .qrcode__image h6{
     font-weight: 600;
     text-align: justify;
-    font-size: .875rem;
+    font-size: .675rem;
     margin: 10px;
   }
   .qr-tile-image{
@@ -109,10 +109,20 @@
     text-align: center;
   }
 
-  .qr-tile-url{
-    font-size: 11px;
-    text-align: left;
-    word-wrap: break-word;
-    white-space:inherit;
+  .qr-tile-url {
+    display: flex;
+    justify-content: center;
+    font-size: 10px;
+    text-align: justify;
+    /* word-wrap: break-word;
+    white-space:inherit; */
     width: 200px;
+    padding: .125rem;
+  }
+
+  .qr-url-custom{
+    text-align: center;
+    font-size: 14px;
+    color: #eb6314;
+    font-weight: 500;
   }

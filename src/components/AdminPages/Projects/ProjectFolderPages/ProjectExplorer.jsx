@@ -779,7 +779,7 @@ console.log(roleCheck)
                      <div className="grid-view">
                        {currentFiles.map((row, index) => (
                          <div key={index} className="grid-item" onClick={() => handleRowClick(row)}>
-                           <div className="file-icon">
+                           <div className="file-icon mb-2">
                              {typeof getFileIcon(row.fileName) === "string" ? (
                                <img src={getFileIcon(row.fileName)} alt="file icon" className="icon-img" />
                              ) : (
@@ -787,10 +787,10 @@ console.log(roleCheck)
                              )}
                            </div>
                            <div className="file-info">
-                             <h5>{row.fileName}</h5>
-                             <p>Owner: {row.fileOwner}</p>
-                             <p>Modified: {row.lastModified}</p>
-                             <p>Size: {row.fileSize}</p>
+                             <h5><strong> {row.fileName} </strong></h5>
+                             <p><span className="fileOwner"> File Owner:</span> <strong> {row.fileOwner} </strong></p>
+                             <p><span className="lastModified"> Last Modified:</span> <strong> {row.lastModified} </strong></p>
+                             <p><span className="fileSize"> File Size:</span> <strong> {row.fileSize} </strong></p>
                            </div>
                          </div>
                        ))}

@@ -338,7 +338,7 @@
 
 .project-display.grid .grid-item {
   border: 1px solid #ccc;
-  padding: 15px;
+  padding: 1.2rem;
   border-radius: 8px;
   background-color: #fefdfc;
   width: calc(33.333% - 20px);
@@ -346,9 +346,14 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   
 }
+
+.fileOwner, .lastModified, .fileSize {
+  font-weight: 500;
+  color: #212a3183;
+}
 .file-icon{
   display: flex;
-  justify-content: center;
+  justify-content: start;
 }
 .icon-img{
   max-width: 10vh;
@@ -1566,6 +1571,15 @@
 }
 .addQR-btn{
   margin-right: 1rem;
+}
+
+.pdf-preview-btnGroup > div > input {
+  white-space: nowrap;
+  overflow: hidden;        
+  text-overflow: ellipsis;
+  display: block;
+  word-break: break-all;
+  width: 100%;
 }
 /* Media Queries for Responsiveness */
 @media (max-width: 1024px) {
