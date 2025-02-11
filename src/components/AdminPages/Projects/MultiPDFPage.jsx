@@ -186,15 +186,18 @@ function MultiPDFEditor() {
                   <FaCircleArrowLeft size={28} className="icon-left mr-2 align-items-center"/> Go Back
                 </span>
               </div>  
-          <div className="yes d-flex flex-row mt-2 ">
+          <div className="multipdf-wrapper d-flex flex-row mt-2 ">
             <div className="multipdf-sidebar">
                 <h5>{projectName} - PDF Files</h5>
+                <div className="pdf-item-wrapper">
                 {pdfFiles.map((file, index) => (
-                  <div key={file} className="pdf-item mb-3">
+                  <div key={file} className="pdf-item mb-1">
                     <input id="selectedPDF" type="checkbox" checked={selectedFiles.includes(file)} onChange={() => handleSelectionChange(file)} /> &nbsp; 
                     <span className="selectedPDF-label" onClick={() => setActiveIndex(index)}>{file}</span>
                   </div>
                 ))}
+                </div>
+              
             </div>
 
             <div className="multipdf-main-content d-flex">

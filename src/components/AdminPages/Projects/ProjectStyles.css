@@ -1613,10 +1613,19 @@
   display: flex;
   flex-direction: column;
   justify-content: start;
+  /* border: rgba(0, 0, 0, .05);
+  border-radius: 5px;
+  box-shadow: 0 0 .25rem #aeaeb6; */
+  padding: 1rem;
+}
+.pdf-item-wrapper{
   border: rgba(0, 0, 0, .05);
   border-radius: 5px;
   padding: 1rem;
   box-shadow: 0 0 .25rem #aeaeb6;
+}
+.pdf-item{
+  padding: 5px;
 
 }
 .multipdf-main-content{
@@ -1633,7 +1642,7 @@
   max-width: 600px;
   width: 600px;
 }
-.yes{
+.multipdf-wrapper{
   display: flex;
   justify-content: space-around;
 }
