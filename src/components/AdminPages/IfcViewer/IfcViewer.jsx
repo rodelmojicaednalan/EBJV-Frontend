@@ -62,7 +62,7 @@ function IfcViewer() {
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
   const [cameraControls, setCameraControls] = useState(false);
-  const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [dimensions, setDimensions] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isHideContainerOpen, setIsHideContainerOpen] =
@@ -316,7 +316,7 @@ function IfcViewer() {
           };
 
           return BUI.html`
-          <bim-panel class="asd" label="Classifications Tree" class="options-menu">
+          <bim-panel class="asd hidden" label="Classifications Tree" class="options-menu">
           <bim-panel-section label="Classifications">
           ${classificationsTree}
           </bim-panel-section>
@@ -377,8 +377,8 @@ function IfcViewer() {
         app.layouts = {
           main: {
             template: `
-              "panel viewport"
-              /368px 1fr  
+              "panel viewport
+              /0px 1fr"
             `,
             elements: { panel, viewport },
           },
