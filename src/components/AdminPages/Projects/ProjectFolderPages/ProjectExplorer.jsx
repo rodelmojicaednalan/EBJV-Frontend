@@ -734,22 +734,9 @@ console.log(roleCheck)
                                 Export to CSV
                             </CSVLink>
                           </div>
-                          {/* <div
-                            className="dropdown-item"
-                            onClick={() =>
-                              handleMenuOptionClick('Checkin')
-                            }
-                          >
-                            Checkin Files
+                          <div className="dropdown-item" onClick={() => navigate(`/project-folder/multi-pdf-editor/${projectId}`)}>
+                              Edit Multiple PDFs
                           </div>
-                          <div
-                            className="dropdown-item"
-                            onClick={() =>
-                              handleMenuOptionClick('Checkout')
-                            }
-                          >
-                            Checkout Files
-                          </div> */}
                         </div>
                       )}
                     </div>

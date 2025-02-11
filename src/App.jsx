@@ -10,6 +10,7 @@ import Projects from './components/AdminPages/Projects/Projects';
 import AddProject from './components/AdminPages/Projects/AddProject';
 import EditProject from './components/AdminPages/Projects/EditProjects';
 import ProjectPDFViewer from './components/AdminPages/Projects/ProjectPDFViewer';
+import MultiPDFEditor from './components/AdminPages/Projects/MultiPDFPage';
 
 // import ProjectViews from './components/AdminPages/Projects/ProjectFolderPages/ProjectViews';
 // import ProjectTopics from './components/AdminPages/Projects/ProjectFolderPages/ProjectTopics';
@@ -47,6 +48,7 @@ import QrCodeGenerator from './QrCodeGenerator';
 import AccessRequest from './components/Login/AccessRequest';
 import RequestAccessForm from './components/Login/RequestAccessForm';
 import WaitInstructions from './components/Login/WaitInstructions';
+
 
 function Layout() {
   const location = useLocation();
@@ -99,6 +101,7 @@ function Layout() {
         <Route path="/edit-project/:projectId" element={<ProtectedRoute element={<EditProject />} allowedRoles={['Admin', 'Client']} />} />
         {/* <Route path="/project-folder/pdf-viewer/:projectId/:fileName" element={<ProtectedRoute element={<ProjectPDFViewer />} allowedRoles={['Admin', 'Client']} />} /> */}
         <Route path="/project-folder/pdf-viewer/:projectId/:fileName" element={<ProjectPDFViewer/>}/>
+        <Route path="/project-folder/multi-pdf-editor/:projectId" element={<MultiPDFEditor/>}/>
 
         <Route path="/project-folder/:projectId/data/project-explorer" element={<ProtectedRoute element={<ProjectExplorer />} allowedRoles={['Admin', 'Client']} />} />
         {/* <Route path="/project-folder/:projectId/data/project-views" element={<ProtectedRoute element={<ProjectViews />} allowedRoles={['Admin', 'Client']} />} /> */}

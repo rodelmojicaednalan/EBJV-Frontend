@@ -1581,6 +1581,124 @@
   word-break: break-all;
   width: 100%;
 }
+
+/* multi pdf style */
+.multipdf-container{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #FFF;
+}
+.multipdf-controls{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.multipdf-controls > input {
+  background-color: #FFF;
+  border: none;
+  /* color: #FFF !important; */
+}
+.multipdf-controls > input#file-upload-button {
+  background-color: #eb6314;
+  border: none !important;
+  padding: 2px;
+}
+.pdf-preview-header{
+  display: flex;
+  align-items: center;
+  padding: .785rem 0;
+}
+.multipdf-sidebar{
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  border: rgba(0, 0, 0, .05);
+  border-radius: 5px;
+  padding: 1rem;
+  box-shadow: 0 0 .25rem #aeaeb6;
+
+}
+.multipdf-main-content{
+  display: flex;
+  flex-direction: column;
+  border: rgba(0, 0, 0, .05);
+  border-radius: 5px;
+  padding: 1rem;
+  box-shadow: 0 0 .25rem #aeaeb6;
+}
+
+.multipdf-viewer{
+  max-height: 400px;
+  max-width: 600px;
+  width: 600px;
+}
+.yes{
+  display: flex;
+  justify-content: space-around;
+}
+.extractedUrl{
+  display: none;
+}
+.addqr-btn{
+  background-color: #6B6B6B;
+  border: 0;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  border-radius: 5px;
+}
+.pdfControl-btn{
+  background-color: #eb6314;
+  border: 0;
+  padding: 5px;
+  display: flex;
+  border-radius: 5px;
+  align-items: center;
+}
+
+input[type=checkbox]#selectedPDF:before {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: -1px;
+  left: -1px;
+  border: 1px solid #b9b9b9;
+  border-radius: 4px;
+  padding: 1px;
+  background-color: #FFF;
+}
+
+input[type=checkbox]#selectedPDF:checked:before {
+  background-color: #f87c34;
+}
+
+input[type=checkbox]#selectedPDF:checked:after {
+  content: "";
+  display: block;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+  position: absolute;
+  top: 1px;
+  left: 5px;
+  
+}
+#selectedPDF {
+  position: relative;
+  width: auto;
+  height: fit-content;    
+}
+.selectedPDF-label{
+  font-size: .875rem;
+  color: #6a6976;
+}
+/* end  of multi pdf */
 /* Media Queries for Responsiveness */
 @media (max-width: 1024px) {
   #projectList-container{

@@ -47,29 +47,6 @@ useEffect(() => {
   setViewerKey(prev => prev + 1); // Change key to force refresh
 }, [fileName]);
 
-   // Fetch project details and populate fields
-//    const fetchProjectDetails = async () => {
-//     try {
-//       const response = await axiosInstance.get(
-//         `/project/${projectId}`
-//       );
-//       const {
-//         project_name,
-//         owner,
-//       } = response.data;
-
-//       setProjectName(project_name);
-//       setOwnerName(`${owner.first_name} ${owner.last_name}`);
-
-//     } catch (error) {
-//       console.error('Error fetching project details:', error);
-//     }
-//   };
-
-
-//   useEffect(() => {
-//   fetchProjectDetails();
-// }, [projectId, refreshKey]);
   
 const handleImageUpload = (event) => {
   const file = event.target.files[0];
