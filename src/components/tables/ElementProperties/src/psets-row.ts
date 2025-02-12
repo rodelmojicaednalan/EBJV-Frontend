@@ -50,5 +50,30 @@ export const createPsetsRow = async (
     if (!row.children) row.children = [];
     row.children.push(setRow);
   }
+
+  if (row.children) {
+    const teklaQuantityChild = row.children.find(
+      (child) => child.data.Name === 'Tekla Quantity'
+    );
+
+    console.log(teklaQuantityChild);
+
+    if (teklaQuantityChild) {
+      teklaQuantityChild.children =
+        teklaQuantityChild.children.filter(
+          (item: any) =>
+            item.data.Name === 'Weight' || item.data.Name === 'Length'
+        );
+    }
+
+    // Filter out unwanted children
+    row.children = row.children.filter(
+      (child) =>
+        child.data.Name !== 'Tekla Common' &&
+        child.data.Name !== 'Pset_ColumnCommon' &&
+        child.data.Name !== 'Pset_BeamCommon'
+    );
+  }
+
   return row;
 };

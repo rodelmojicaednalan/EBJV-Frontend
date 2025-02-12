@@ -63,11 +63,16 @@ export const createAttributesRow = async (
 
   if (attrsRow.data['Name'] == 'Tekla Assembly') {
     attrsRow.children = attrsRow.children?.filter(
-      (item) => item.data.Name !== 'Tag'
+      (item) => item.data.Name === 'Assembly/Cast unit Mark'
     );
 
     return attrsRow;
   }
+
+  attrsRow.children = attrsRow.children?.filter(
+    (child) =>
+      child.data.Name !== 'Class' && child.data.Name !== 'GlobalId'
+  );
 
   return attrsRow;
 };

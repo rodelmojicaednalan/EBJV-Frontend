@@ -62,7 +62,7 @@ function IfcViewer() {
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
   const [cameraControls, setCameraControls] = useState(false);
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [isPanelOpen, setIsPanelOpen] = useState(true);
   const [dimensions, setDimensions] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isHideContainerOpen, setIsHideContainerOpen] =
@@ -325,7 +325,7 @@ function IfcViewer() {
           };
 
           return BUI.html`
-          <bim-panel class="asd hidden" label="Classifications Tree" class="options-menu">
+          <bim-panel class="asd" label="Classifications Tree" class="options-menu">
           <bim-panel-section label="Classifications">
           ${classificationsTree}
           </bim-panel-section>
@@ -337,12 +337,13 @@ function IfcViewer() {
           </div> 
           <bim-text-input @input=${onTextInput} placeholder="Search Property" debounce="250"></bim-text-input>
           ${propertiesTable}
-          </bim-panel-section> 
-          <bim-panel-section label="Assembly">
+          </bim-panel-section>
+           <bim-panel-section label="Assembly">
             <bim-text-input @input=${onSearch} placeholder="Search..." debounce="200"></bim-text-input>
             ${relationsTree}
           </bim-panel-section>
-          </bim-panel> 
+          </bim-panel>
+          
           `;
         });
 
@@ -380,8 +381,8 @@ function IfcViewer() {
                     dimensionsInstance.deleteAll();
                   }}">
                 </bim-button>
-        
               </bim-panel-section>
+              
             </bim-panel>
             `;
         });
@@ -390,8 +391,8 @@ function IfcViewer() {
         app.layouts = {
           main: {
             template: `
-              "panel viewport
-              /0px 1fr"
+              "panel viewport"
+              /368px 1fr  
             `,
             elements: { panel, viewport },
           },

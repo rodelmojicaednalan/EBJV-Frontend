@@ -67,20 +67,20 @@ const processDefinedByRelations = async (
 
   if (definedByRelations) {
     const psets: { [attribute: string]: any }[] = [];
-    const qsets: { [attribute: string]: any }[] = [];
+    // const qsets: { [attribute: string]: any }[] = [];
 
     for (const definition of definedByRelations) {
       const attrs = await model.getProperties(definition);
       if (!attrs) continue;
       if (attrs.type === WEBIFC.IFCPROPERTYSET) psets.push(attrs);
-      if (attrs.type === WEBIFC.IFCELEMENTQUANTITY) qsets.push(attrs);
+      // if (attrs.type === WEBIFC.IFCELEMENTQUANTITY) qsets.push(attrs);
     }
 
     const psetRow = await createPsetsRow(model, psets, uiState);
     if (psetRow.children) addRowChildren(row, psetRow);
 
-    const qsetRow = await createQsetsRow(model, qsets, uiState);
-    if (qsetRow.children) addRowChildren(row, qsetRow);
+    // const qsetRow = await createQsetsRow(model, qsets, uiState);
+    // if (qsetRow.children) addRowChildren(row, qsetRow);
   }
 };
 
@@ -174,12 +174,10 @@ const processContainerRelations = async (
   if (contianerRelations && contianerRelations[0]) {
     const containerID = contianerRelations[0];
     const container = await model.getProperties(containerID);
-    console.log('container', container);
     if (container) {
       const attributesRow = await createAttributesRow(container, {
         groupName: 'SpatialContainer',
       });
-      console.log('attributesRow', attributesRow);
       addRowChildren(row, attributesRow);
     }
   }
@@ -190,12 +188,9 @@ const processContainerRelations = async (
     'Decomposes'
   );
 
-  console.log('assembly', assembly);
-
   if (assembly && assembly[0]) {
     const containerID = assembly[0];
     const container = await model.getProperties(containerID);
-    console.log('contianer', container);
     if (container) {
       const attributesRow = await createAttributesRow(container, {
         groupName: 'Tekla Assembly',
