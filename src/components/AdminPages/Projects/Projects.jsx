@@ -40,6 +40,7 @@ function Projects() {
   });
 
   const [roleCheck, setRoleCheck] = useState([]);
+  console.log(roleCheck)
 
   useEffect(() => {
     if (user && user.id) {
@@ -51,26 +52,34 @@ function Projects() {
   }, [user]);
 
   useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const userResponse = await axiosInstance.get('/user');
+        const userRole = userResponse.data?.roles?.map(role => role.role_name);
+        setRoleCheck(userRole); // State update happens asynchronously
+      } catch (error) {
+        console.error('Error fetching user role:', error);
+      }
+    };
+  
+    fetchUserRole();
+  }, []); // Runs once on component mount
+  
+  useEffect(() => {
+    if (!roleCheck) return; // Ensure roleCheck is available before proceeding
+  
     const fetchProjects = async () => {
       setLoading(true);
       try {
-        // Check user's role
-        const userResponse = await axiosInstance.get('/user');
-        const userRole = userResponse.data?.roles?.map(
-          (role) => role.role_name
-        ); // Assuming `role` is returned from the API
-        setRoleCheck(userRole);
-        // console.log(roleCheck)
         let response;
-       
-        if ( roleCheck.some(role => ['Admin', 'Superadmin'].includes(role)) ) {
-          // Fetch all projects for Admin
+        const hasAdminRole = roleCheck.some(role => ['Admin', 'Superadmin'].includes(role));
+  
+        if (hasAdminRole) {
           response = await axiosInstance.get('/projects');
         } else {
-          // Fetch only client's projects
           response = await axiosInstance.get('/my-projects');
         }
-
+  
         const formattedData = response.data.data.map((project) => {
           const parsedFiles = JSON.parse(project.project_file);
           return {
@@ -81,7 +90,7 @@ function Projects() {
             project_file: parsedFiles,
           };
         });
-
+  
         setData(formattedData);
         setFilteredData(formattedData);
       } catch (error) {
@@ -90,9 +99,12 @@ function Projects() {
         setLoading(false);
       }
     };
-
-    fetchProjects();
-  }, [navigate, refreshKey]);
+  
+  
+    setTimeout(() => {
+      fetchProjects();
+    }, 500);
+  }, [roleCheck, refreshKey]); // Run
 
   //filter Projects
   useEffect(() => {
