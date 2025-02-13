@@ -15,7 +15,12 @@ import axiosInstance from '../../../../axiosInstance.js';
 import { useLoader } from '../../Loaders/LoaderContext';
 import { AuthContext } from '../../Authentication/authContext';
 import useWindowWidth from './ProjectFolderPages/windowWidthHook.jsx';
-import { TbCubePlus } from "react-icons/tb";
+import { TbCubePlus } from 'react-icons/tb';
+
+import * as WEBIFC from 'web-ifc';
+import * as BUI from '@thatopen/ui';
+import * as OBC from '@thatopen/components';
+import { FragmentsGroup } from '@thatopen/fragments';
 
 function Projects() {
   const { user } = useContext(AuthContext);
@@ -29,18 +34,62 @@ function Projects() {
   const { setLoading } = useLoader();
   const [projectOwner, setProjectOwner] = useState('');
   const [projectLocation, setProjectLocation] = useState('');
-  
-  const [refreshKey, setRefreshKey] = useState(0); 
+
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [newProject, setNewProject] = useState({
     projectName: '',
     location: '',
     file: null,
+    properties: null,
   });
 
   const [roleCheck, setRoleCheck] = useState([]);
-  console.log(roleCheck)
+  const [fragFile, setFragFile] = useState(null);
+  const [propertiesJSON, setPropertiesJSON] = useState('');
+  const [components] = useState(() => new OBC.Components());
+  useEffect(() => {
+    const fragments = components.get(OBC.FragmentsManager);
+    const fragmentIfcLoader = components.get(OBC.IfcLoader);
+
+    fragmentIfcLoader.setup();
+
+    fragments.onFragmentsLoaded.add(async (model) => {
+      const group = Array.from(fragments.groups.values())[0];
+      const data = fragments.export(group);
+      const file_name = await newProject.file.name.split('.')[0];
+      const dateID = Date.now();
+      setFragFile(
+        new File([new Blob([data])], `${dateID}-${file_name}.frag`)
+      );
+      const properties = group.getLocalProperties();
+      if (properties) {
+        setPropertiesJSON(
+          new File(
+            [JSON.stringify(properties)],
+            `${dateID}-${file_name}.json`
+          )
+        );
+      }
+    });
+  }, [components, newProject.file]);
+  const loadIfc = async (file) => {
+    if (!file) return;
+    try {
+      const data = await file.arrayBuffer();
+      const buffer = new Uint8Array(data);
+      const fragmentIfcLoader = components.get(OBC.IfcLoader);
+      await fragmentIfcLoader.load(buffer);
+    } catch (error) {
+      console.error('Error loading IFC:', error);
+    }
+  };
+  useEffect(() => {
+    if (newProject.file) {
+      loadIfc(newProject.file);
+    }
+  }, [newProject.file]);
 
   useEffect(() => {
     if (user && user.id) {
@@ -55,31 +104,35 @@ function Projects() {
     const fetchUserRole = async () => {
       try {
         const userResponse = await axiosInstance.get('/user');
-        const userRole = userResponse.data?.roles?.map(role => role.role_name);
+        const userRole = userResponse.data?.roles?.map(
+          (role) => role.role_name
+        );
         setRoleCheck(userRole); // State update happens asynchronously
       } catch (error) {
         console.error('Error fetching user role:', error);
       }
     };
-  
+
     fetchUserRole();
   }, []); // Runs once on component mount
-  
+
   useEffect(() => {
     if (!roleCheck) return; // Ensure roleCheck is available before proceeding
-  
+
     const fetchProjects = async () => {
       setLoading(true);
       try {
         let response;
-        const hasAdminRole = roleCheck.some(role => ['Superadmin'].includes(role));
-  
+        const hasAdminRole = roleCheck.some((role) =>
+          ['Superadmin'].includes(role)
+        );
+
         if (hasAdminRole) {
           response = await axiosInstance.get('/projects');
         } else {
           response = await axiosInstance.get('/my-projects');
         }
-  
+
         const formattedData = response.data.data.map((project) => {
           const parsedFiles = JSON.parse(project.project_file);
           return {
@@ -90,7 +143,7 @@ function Projects() {
             project_file: parsedFiles,
           };
         });
-  
+
         setData(formattedData);
         setFilteredData(formattedData);
       } catch (error) {
@@ -99,8 +152,7 @@ function Projects() {
         setLoading(false);
       }
     };
-  
-  
+
     setTimeout(() => {
       fetchProjects();
     }, 500);
@@ -113,9 +165,9 @@ function Projects() {
         (selectedprojectId
           ? project.id === parseInt(selectedprojectId)
           : true) &&
-        (project.project_name
+        project.project_name
           .toLowerCase()
-          .includes(searchTerm.toLowerCase()))
+          .includes(searchTerm.toLowerCase())
     );
     setFilteredData(results);
   }, [searchTerm, data, selectedprojectId]);
@@ -127,11 +179,23 @@ function Projects() {
   // add project
   const handleAddNewProject = async () => {
     try {
+      if (!fragFile) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+
       const formData = new FormData();
       formData.append('project_name', newProject.projectName);
       formData.append('user_id', projectOwner);
-      formData.append('project_location', projectLocation /*newProject.location*/);
-      formData.append('project_file', newProject.file);
+      formData.append(
+        'project_location',
+        projectLocation /*newProject.location*/
+      );
+      if (fragFile) {
+        formData.append('project_file', fragFile);
+        formData.append('properties', propertiesJSON);
+      } else {
+        console.warn('No frag file available');
+      }
 
       await axiosInstance.post('/create-project', formData);
 
@@ -220,7 +284,7 @@ function Projects() {
       name: 'Project Owner',
       selector: (row) => row.project_owner,
       sortable: true,
-      hide: 'md'
+      hide: 'md',
     },
 
     {
@@ -246,29 +310,34 @@ function Projects() {
               width="25"
               height="25"
               onClick={() =>
-                navigate(`/ifc-viewer/${row.id}/${row.project_file[0]}`, {
-                  state: {
-                    fileUrl: row.project_file.filter(
-                      (item) => item !== ''
-                    ),
-                    fileName: row.project_name,
-                  },
-                })
+                navigate(
+                  `/ifc-viewer/${row.id}/${row.project_file[0]}`,
+                  {
+                    state: {
+                      fileUrl: row.project_file.filter(
+                        (item) => item !== ''
+                      ),
+                      fileName: row.project_name,
+                    },
+                  }
+                )
               }
               style={{ cursor: 'pointer' }}
             />
           )}
-        {roleCheck.some(role => ['Admin', 'Superadmin'].includes(role)) && (
-          <img
-            className="delete-project-icon ml-3"
-            src={delete_icon}
-            title="Delete project"
-            style={{ cursor: 'pointer' }}
-            onClick={() => handleDeleteprojectClick(row.id)}
-            alt="delete"
-            width="25"
-            height="25"
-          />
+          {roleCheck.some((role) =>
+            ['Admin', 'Superadmin'].includes(role)
+          ) && (
+            <img
+              className="delete-project-icon ml-3"
+              src={delete_icon}
+              title="Delete project"
+              style={{ cursor: 'pointer' }}
+              onClick={() => handleDeleteprojectClick(row.id)}
+              alt="delete"
+              width="25"
+              height="25"
+            />
           )}
         </div>
       ),
@@ -277,18 +346,21 @@ function Projects() {
   ];
 
   const locationOptions = [
-    {"value": "North America", "label": "North America"},
-    {"value": "Europe", "label": "Europe"},
-    {"value": "Asia", "label": "Asia"},
-    {"value": "Australia", "label": "Australia"}
-  ]
+    { value: 'North America', label: 'North America' },
+    { value: 'Europe', label: 'Europe' },
+    { value: 'Asia', label: 'Asia' },
+    { value: 'Australia', label: 'Australia' },
+  ];
 
   return (
     <div className="container">
       {/* <StickyHeader /> */}
       {/* <BackToTopButton/> */}
       <div className="row">
-        <div className="col-lg-12 col-md-6 custom-content-container" id="projectList-container">
+        <div
+          className="col-lg-12 col-md-6 custom-content-container"
+          id="projectList-container"
+        >
           {/* <h3 className="title-page">Projects</h3> */}
           <div className="top-filter">
             <input
@@ -298,24 +370,28 @@ function Projects() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-          {roleCheck.some(role => ['Admin', 'Superadmin'].includes(role)) && (
-            <button
-              onClick={() => setShowAddModal(true)}
-              className={`btn btn-primary float-end ${isMobile ? 'mobile-add-user-btn' : 'add-user-btn'}`}
-              id='add-new-project-btn'
-            >
-              {/* <i className="fa fa-plus"></i>  */}
-              {isMobile ? <TbCubePlus /> : <span>Add Project</span>}
-              {/* Add Project */}
-            </button>
-              )}
+            {roleCheck.some((role) =>
+              ['Admin', 'Superadmin'].includes(role)
+            ) && (
+              <button
+                onClick={() => setShowAddModal(true)}
+                className={`btn btn-primary float-end ${
+                  isMobile ? 'mobile-add-user-btn' : 'add-user-btn'
+                }`}
+                id="add-new-project-btn"
+              >
+                {/* <i className="fa fa-plus"></i>  */}
+                {isMobile ? <TbCubePlus /> : <span>Add Project</span>}
+                {/* Add Project */}
+              </button>
+            )}
           </div>
           <div className="container-content">
             <DataTable
               className="dataTables_wrapper"
               columns={columns}
               data={filteredData}
-              pagination={filteredData.length >=20}
+              pagination={filteredData.length >= 20}
               paginationPerPage={20}
               paginationRowsPerPageOptions={[20, 30]}
             />
@@ -355,7 +431,9 @@ function Projects() {
               <Select
                 id="projectLocation"
                 options={locationOptions}
-                onChange={(selectedOptions) => setProjectLocation(selectedOptions?.value || null)}
+                onChange={(selectedOptions) =>
+                  setProjectLocation(selectedOptions?.value || null)
+                }
                 name="location"
                 className="basic-single"
                 classNamePrefix="select"

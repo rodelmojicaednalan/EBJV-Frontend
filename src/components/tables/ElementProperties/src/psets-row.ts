@@ -56,8 +56,6 @@ export const createPsetsRow = async (
       (child) => child.data.Name === 'Tekla Quantity'
     );
 
-    console.log(teklaQuantityChild);
-
     if (teklaQuantityChild) {
       teklaQuantityChild.children =
         teklaQuantityChild.children.filter(

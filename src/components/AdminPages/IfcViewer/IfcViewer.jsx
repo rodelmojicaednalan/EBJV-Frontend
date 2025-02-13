@@ -51,6 +51,7 @@ import {
   FiEyeOff,
   FiRotateCcw,
 } from 'react-icons/fi';
+import { FragmentsGroup } from '@thatopen/fragments';
 
 BUI.Manager.init();
 
@@ -163,7 +164,7 @@ function IfcViewer() {
         const grids = components.get(OBC.Grids);
         grids.create(world);
 
-        const fragmentIfcLoader = components.get(OBC.IfcLoader);
+        // const fragmentIfcLoader = components.get(OBC.IfcLoader);
         // components.init();
 
         const dimensionsInstance = components.get(
@@ -181,18 +182,20 @@ function IfcViewer() {
         }
 
         window.onkeydown = (event) => {
-          if (event.code === 'Delete') {
+          if (event.code === 'Delete' || event.code === 'Backspace') {
             dimensions.delete();
           }
         };
 
-        const ifcLoader = components.get(OBC.IfcLoader);
-        await ifcLoader.setup();
-
+        // const ifcLoader = components.get(OBC.IfcLoader);
         const fragmentsManager = components.get(OBC.FragmentsManager);
-        fragmentsManager.onFragmentsLoaded.add((model) => {
-          if (world.scene) world.scene.three.add(model);
-        });
+        let uuid = '';
+
+        // await ifcLoader.setup();
+
+        // fragmentsManager.onFragmentsLoaded.add((model) => {
+        //   if (world.scene) world.scene.three.add(model);
+        // });
 
         const [classificationsTree, updateClassificationsTree] =
           CUIT.tables.classificationTree({
@@ -244,51 +247,39 @@ function IfcViewer() {
         });
 
         const loadIfc = async () => {
+          if (fragmentsManager.groups.size) {
+            return;
+          }
           try {
             setIsLoading(true);
             const response = await axiosInstance.get(
               `/uploads/${fileUrl}`,
               { responseType: 'arraybuffer' }
             );
-            const arrayBuffer = response.data;
-
-            const worker = new Worker(
-              new URL('./encoderWorker.js', import.meta.url)
+            const jsonPath = await axiosInstance.get(
+              `/uploads/${fileUrl.split('.')[0]}.json`,
+              { responseType: 'arraybuffer' }
             );
 
-            worker.postMessage(arrayBuffer);
+            const data = await response.data;
+            const buffer = new Uint8Array(data);
 
-            worker.onmessage = async (e) => {
-              const processedBuffer = e.data;
+            const json_data = await jsonPath.data;
+            const json_text = new TextDecoder().decode(json_data);
+            const json_object = JSON.parse(json_text);
 
-              if (processedBuffer.error) {
-                console.error(
-                  'Error in worker:',
-                  processedBuffer.error
-                );
-                setIsLoading(false);
-                return;
-              }
+            const model = await fragmentsManager.load(buffer);
+            model._properties = await json_object;
 
-              const model = await fragmentIfcLoader.load(
-                processedBuffer
-              );
-              model.name = `${fileUrl}`;
-              world.scene.three.add(model);
-              world.meshes.add(model);
+            model.name = `${fileUrl}`;
+            world.scene.three.add(model);
+            world.meshes.add(model);
+            uuid = model.uuid;
 
-              const indexer = components.get(OBC.IfcRelationsIndexer);
-              await indexer.process(model);
-              setIsLoading(false);
+            const indexer = components.get(OBC.IfcRelationsIndexer);
+            await indexer.process(model, {});
 
-              worker.terminate();
-            };
-
-            worker.onerror = (err) => {
-              console.error('Worker error:', err);
-              setIsLoading(false);
-              worker.terminate();
-            };
+            setIsLoading(false);
           } catch (error) {
             console.error('Error loading IFC:', error);
             setIsLoading(false);
@@ -298,17 +289,6 @@ function IfcViewer() {
         loadIfc();
         const panel = BUI.Component.create(() => {
           const [loadIfcBtn] = CUIB.buttons.loadIfc({ components });
-          const [relationsTree] = CUIT.tables.relationsTree({
-            components,
-            models: [],
-          });
-
-          relationsTree.preserveStructureOnFilter = true;
-
-          const onSearch = (e) => {
-            const input = e.target;
-            relationsTree.queryString = input.value;
-          };
 
           const onTextInput = (e) => {
             const input = e.target;
@@ -337,10 +317,6 @@ function IfcViewer() {
           </div> 
           <bim-text-input @input=${onTextInput} placeholder="Search Property" debounce="250"></bim-text-input>
           ${propertiesTable}
-          </bim-panel-section> 
-          <bim-panel-section label="Assembly">
-            <bim-text-input @input=${onSearch} placeholder="Search..." debounce="200"></bim-text-input>
-            ${relationsTree}
           </bim-panel-section>
           </bim-panel> 
           `;
