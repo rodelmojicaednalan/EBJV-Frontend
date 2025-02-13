@@ -115,7 +115,7 @@ function NewNavBar() {
           <Navbar.Collapse id="responsive-navbar-nav">
             {!isProjectFolderPath && !isRequestFormPath && (
               <Nav className="ml-auto">
-                {roleCheck == 'Admin' && (
+                {roleCheck == 'Superadmin' && (
                   <>
                     <Nav.Link
                       onClick={() => navigate('/userlist')}

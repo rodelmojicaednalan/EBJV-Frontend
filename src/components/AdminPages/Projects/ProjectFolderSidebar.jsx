@@ -218,7 +218,7 @@ const Sidebar = ({ projectId }) => {
             </li>
 
         {/* Activity */}
-        {userRole === 'Admin' && (
+        {(userRole === 'Superadmin' || userRole === "Admin") && (
           <>
             <li
               className={`nav-item-group ${

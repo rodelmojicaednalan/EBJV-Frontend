@@ -121,7 +121,7 @@ function EditUserRole() {
                   type="submit"
                   className="btn btn-primary login-btn"
                 >
-                  Add Role
+                  Save Changes
                 </button>
               </div>
             </div>

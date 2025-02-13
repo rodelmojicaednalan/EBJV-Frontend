@@ -39,7 +39,7 @@ function Projects() {
     file: null,
   });
 
-  const [roleCheck, setRoleCheck] = useState("");
+  const [roleCheck, setRoleCheck] = useState([]);
 
   useEffect(() => {
     if (user && user.id) {
@@ -60,9 +60,10 @@ function Projects() {
           (role) => role.role_name
         ); // Assuming `role` is returned from the API
         setRoleCheck(userRole);
+        // console.log(roleCheck)
         let response;
        
-        if (userRole == 'Admin') {
+        if ( roleCheck.some(role => ['Admin', 'Superadmin'].includes(role)) ) {
           // Fetch all projects for Admin
           response = await axiosInstance.get('/projects');
         } else {
@@ -245,7 +246,7 @@ function Projects() {
               style={{ cursor: 'pointer' }}
             />
           )}
-          {roleCheck == "Admin" && (
+        {roleCheck.some(role => ['Admin', 'Superadmin'].includes(role)) && (
           <img
             className="delete-project-icon ml-3"
             src={delete_icon}
@@ -285,7 +286,7 @@ function Projects() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            {roleCheck == "Admin" && (
+          {roleCheck.some(role => ['Admin', 'Superadmin'].includes(role)) && (
             <button
               onClick={() => setShowAddModal(true)}
               className={`btn btn-primary float-end ${isMobile ? 'mobile-add-user-btn' : 'add-user-btn'}`}

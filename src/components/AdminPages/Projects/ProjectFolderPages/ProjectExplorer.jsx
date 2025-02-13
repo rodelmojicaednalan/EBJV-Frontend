@@ -75,7 +75,7 @@ function ProjectExplorer() {
   const [toastPosition, setToastPosition] = useState('bottom-end')
   const showToast = () => setShowSuccessToast(!showSuccessToast);
 
-const [roleCheck, setRoleCheck] = useState("")
+const [roleCheck, setRoleCheck] = useState([])
 console.log(roleCheck)
   const addMenuToggle = () => {
     setIsAddMenuOpen(!isAddMenuOpen);
@@ -283,7 +283,7 @@ console.log(roleCheck)
     fetchAvailableUsers();
     fetchProjectDetails();
   }, [projectId, refreshKey]);
-
+  
   // Define columns for the table
   const explorerColumn = [
     {
@@ -306,7 +306,6 @@ console.log(roleCheck)
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      // hide: 'sm'
     },
     {
       name: 'File Name',
@@ -344,10 +343,13 @@ console.log(roleCheck)
     },
   ];
 
+  const noDeleteColumn = roleCheck.includes('Client')
+  ? explorerColumn.slice(1) // Remove the first column
+  : explorerColumn;
 
   const handleExportToCSV = () => {
     // Filter out the checkbox column (no selector property)
-    const filteredColumns = explorerColumn.filter((col) => col.selector);
+    const filteredColumns = noDeleteColumn.filter((col) => col.selector);
     // Extract headers
     const headers = filteredColumns.map((col) => ({ label: col.name, key: col.key }));
     // Map data rows based on filtered columns
@@ -734,12 +736,15 @@ console.log(roleCheck)
                                 Export to CSV
                             </CSVLink>
                           </div>
+                          {roleCheck.some(role => ['Admin', 'Superadmin'].includes(role)) && (
                           <div className="dropdown-item" onClick={() => navigate(`/project-folder/multi-pdf-editor/${projectId}`)}>
                               Edit Multiple PDFs
                           </div>
+                          )}
                         </div>
                       )}
                     </div>
+                    {roleCheck.some(role => ['Admin', 'Superadmin'].includes(role)) && (
                      <button
                       id="addbtn"
                       className="btn btn-primary add-btn"
@@ -748,17 +753,19 @@ console.log(roleCheck)
                     >
                       Add 
                     </button> 
+                    )}
                   </div>
                 </div>
-        
-                <button
-                  onClick={() => handleDeleteFiles(projectId)}
-                  id="deleteUploadedfilesbtn"
-                  className="btn btn-danger"
-                  disabled={selectedFiles.length === 0} // Disable button when no files are selected
-                >
-                  Delete Files
-                </button>
+                {roleCheck.some(role => ['Admin', 'Superadmin'].includes(role)) && (
+                  <button
+                    onClick={() => handleDeleteFiles(projectId)}
+                    id="deleteUploadedfilesbtn"
+                    className="btn btn-danger"
+                    disabled={selectedFiles.length === 0} // Disable button when no files are selected
+                  >
+                    Delete Files
+                  </button>
+                )}
 
                 <div className={`project-display ${viewType}`} >
                   {viewType === 'grid' ? (
@@ -792,7 +799,7 @@ console.log(roleCheck)
                     <DataTable
                       className="dataTables_wrapperz mt-3"
                       id="explorer-table"
-                      columns={explorerColumn}
+                      columns={noDeleteColumn}
                       data={explorerTable}
                       pagination={explorerTable.length >=10}
                       paginationPerPage={10}
@@ -1012,17 +1019,18 @@ console.log(roleCheck)
                   View PDF 
                 </button>
               )}
-              {roleCheck.includes('Admin') && (
+              {roleCheck.some(role => ['Admin', 'Superadmin'].includes(role)) && (
                 <button className="btn offcanvas-action-btn" onClick={handleOpenShareModal}><IoMdPersonAdd size={20}/></button>   
               ) }
 
               <button className="btn offcanvas-action-btn" onClick={() => downloadFile(selectedRow.fileName)} ><IoMdDownload size={20}/></button>
-              {roleCheck.includes('Admin') && selectedRow?.fileName?.endsWith('.ifc') || selectedRow?.fileName?.endsWith('.pdf') ? (
+
+           {roleCheck.some(role => ['Admin', 'Superadmin'].includes(role)) &&
+              (selectedRow?.fileName?.endsWith('.ifc') || selectedRow?.fileName?.endsWith('.pdf')) && (
                 <button className="btn offcanvas-action-btn mr-1" onClick={handleOpenQRCodeModal}>
                   <BsQrCode size={20} />
                 </button>
-              ) : null}
-
+            )}
 
               {/* <button className="btn " onClick={handleOCMenuToggle}><BiDotsVertical size={20}/></button>  
               {offcanvasMenuOpen && (

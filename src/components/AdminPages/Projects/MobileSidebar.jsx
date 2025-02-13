@@ -140,7 +140,7 @@ const SidebarOffcanvas = ({ projectId }) => {
                   <span id="mobile-nav-label">File Explorer</span>
                 </div>
               </li>
-              {userRole === "Admin" && (
+              {userRole === "Superadmin" || userRole === "Admin" && (
                 <>
                   <li
                     className={`mobile-nav-item-group ${

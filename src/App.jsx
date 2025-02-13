@@ -86,40 +86,40 @@ function Layout() {
         <Route path="/access-request" element={<AccessRequest />} />
         <Route path="/request-access-form" element={<RequestAccessForm />} />
         <Route path="/wait-instructions" element={<WaitInstructions/>} />
-        <Route path="/userlist" element={<ProtectedRoute element={<UsersList />} allowedRoles={['Admin']} />} />
-        <Route path="/uploaded-ifc-file" element={<ProtectedRoute element={<IfcUploadPage />} allowedRoles={['Admin']} />} />
+        <Route path="/userlist" element={<ProtectedRoute element={<UsersList />} allowedRoles={['Superadmin']} />} />
+        {/* <Route path="/uploaded-ifc-file" element={<ProtectedRoute element={<IfcUploadPage />} allowedRoles={['Admin']} />} /> */}
         <Route path="/ifc-viewer/:projectId/:fileName"element={<IfcViewer/>}/>
         {/* <Route path="/ifc-viewer/:projectId/:fileName"element={<ProtectedRoute element={<IfcViewer />} allowedRoles={['Admin', 'Client']} /> }/> */}
         <Route path="/forgot-password"  element={<ForgotPassword />}/>
         <Route path="/reset-password/:passwordToken" name="reset-password"  element={<ResetPassword />}/>
         <Route path="/open-email"  element={<CheckEmail />}/>
-        <Route path="/user-management" element={<ProtectedRoute element={<UserRoleManagement />} allowedRoles={['Admin']} />} />
+        <Route path="/user-management" element={<ProtectedRoute element={<UserRoleManagement />} allowedRoles={['Superadmin']} />} />
         {/* <Route path="/staff-logs" element={<ProtectedRoute element={<StaffLogs />} allowedRoles={['Admin',]} />} /> */}
 
-        <Route path="/projects" element={<ProtectedRoute element={<Projects />} allowedRoles={['Admin', 'Client']} />} />
-        <Route path="/add-project" element={<ProtectedRoute element={<AddProject />} allowedRoles={['Admin', 'Client']} />} />
-        <Route path="/edit-project/:projectId" element={<ProtectedRoute element={<EditProject />} allowedRoles={['Admin', 'Client']} />} />
+        <Route path="/projects" element={<ProtectedRoute element={<Projects />} allowedRoles={['Superadmin', 'Admin', 'Client']} />} />
+        {/* <Route path="/add-project" element={<ProtectedRoute element={<AddProject />} allowedRoles={['Admin', 'Superadmin']} />} />
+        <Route path="/edit-project/:projectId" element={<ProtectedRoute element={<EditProject />} allowedRoles={['Admin', 'Superadmin']} />} /> */}
         {/* <Route path="/project-folder/pdf-viewer/:projectId/:fileName" element={<ProtectedRoute element={<ProjectPDFViewer />} allowedRoles={['Admin', 'Client']} />} /> */}
         <Route path="/project-folder/pdf-viewer/:projectId/:fileName" element={<ProjectPDFViewer/>}/>
         <Route path="/project-folder/multi-pdf-editor/:projectId" element={<MultiPDFEditor/>}/>
 
-        <Route path="/project-folder/:projectId/data/project-explorer" element={<ProtectedRoute element={<ProjectExplorer />} allowedRoles={['Admin', 'Client']} />} />
+        <Route path="/project-folder/:projectId/data/project-explorer" element={<ProtectedRoute element={<ProjectExplorer />} allowedRoles={['Superadmin', 'Admin', 'Client']} />} />
         {/* <Route path="/project-folder/:projectId/data/project-views" element={<ProtectedRoute element={<ProjectViews />} allowedRoles={['Admin', 'Client']} />} /> */}
         {/* <Route path="/project-folder/:projectId/data/project-releases" element={<ProtectedRoute element={<ProjectReleases />} allowedRoles={['Admin', 'Client']} />} /> */}
-        <Route path="/project-folder/:projectId/project-activity" element={<ProtectedRoute element={<ProjectActivity />} allowedRoles={['Admin', 'Client']} />} />
+        <Route path="/project-folder/:projectId/project-activity" element={<ProtectedRoute element={<ProjectActivity />} allowedRoles={['Superadmin', 'Admin']} />} />
         {/* <Route path="/project-folder/:projectId/project-topics" element={<ProtectedRoute element={<ProjectTopics />} allowedRoles={['Admin', 'Client']} />} />
         <Route path="/project-folder/:projectId/project-ToDos" element={<ProtectedRoute element={<ProjectToDo />} allowedRoles={['Admin', 'Client']} />} /> */}
-        <Route path="/project-folder/:projectId/project-contributors" element={<ProtectedRoute element={<ProjectContributors />} allowedRoles={['Admin', 'Client']} />} />
-        <Route path="/project-folder/:projectId/settings/edit-project" element={<ProtectedRoute element={<ProjectSettings />} allowedRoles={['Admin', 'Client']} />} />
+        <Route path="/project-folder/:projectId/project-contributors" element={<ProtectedRoute element={<ProjectContributors />} allowedRoles={['Superadmin', 'Admin']} />} />
+        <Route path="/project-folder/:projectId/settings/edit-project" element={<ProtectedRoute element={<ProjectSettings />} allowedRoles={['Superadmin', 'Admin']} />} />
         {/* <Route path="/project-folder/:projectId/settings/topic-settings" element={<ProtectedRoute element={<TopicSettings />} allowedRoles={['Admin', 'Client']} />} /> */}
         {/* <Route path="/project-folder/:projectId/settings/unit-settings" element={<ProtectedRoute element={<UnitSettings />} allowedRoles={['Admin', 'Client']} />} /> */}
  
-        <Route path="/add-new-user" element={<ProtectedRoute element={<AddNewUser />} allowedRoles={['Admin']} />} />
-        <Route path="/edit-user/:userId" element={<ProtectedRoute element={<EditUser />} allowedRoles={['Admin']} />} />
-        <Route path="/edit-user-role/:roleId" element={<ProtectedRoute element={<EditUserRole />} allowedRoles={['Admin']} />} />
-        <Route path="/add-new-role" element={<ProtectedRoute element={<AddNewRole />} allowedRoles={['Admin']} />} />
+        <Route path="/add-new-user" element={<ProtectedRoute element={<AddNewUser />} allowedRoles={['Superadmin']} />} />
+        <Route path="/edit-user/:userId" element={<ProtectedRoute element={<EditUser />} allowedRoles={['Superadmin']} />} />
+        <Route path="/edit-user-role/:roleId" element={<ProtectedRoute element={<EditUserRole />} allowedRoles={['Superadmin']} />} />
+        <Route path="/add-new-role" element={<ProtectedRoute element={<AddNewRole />} allowedRoles={['Superadmin']} />} />
 
-        <Route path="/my-profile" element={<ProtectedRoute element={<MyProfile />} allowedRoles={['Admin', 'Client']} />} />
+        <Route path="/my-profile" element={<ProtectedRoute element={<MyProfile />} allowedRoles={['Superadmin', 'Admin', 'Client']} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
 
         {/* <Route path="map" element={ProjectMap}/> */}
