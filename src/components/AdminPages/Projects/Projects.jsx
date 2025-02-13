@@ -72,7 +72,7 @@ function Projects() {
       setLoading(true);
       try {
         let response;
-        const hasAdminRole = roleCheck.some(role => ['Admin', 'Superadmin'].includes(role));
+        const hasAdminRole = roleCheck.some(role => ['Superadmin'].includes(role));
   
         if (hasAdminRole) {
           response = await axiosInstance.get('/projects');
