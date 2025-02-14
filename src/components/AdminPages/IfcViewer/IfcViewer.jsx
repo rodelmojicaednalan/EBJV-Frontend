@@ -239,6 +239,9 @@ function IfcViewer() {
                 culler.needsUpdate = true;
               }
             );
+            world.camera.controls.addEventListener('update', () => {
+              culler.needsUpdate = true;
+            });
 
             setIsLoading(false);
           } catch (error) {

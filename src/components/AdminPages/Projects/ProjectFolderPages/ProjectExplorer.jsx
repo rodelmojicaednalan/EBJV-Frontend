@@ -3,31 +3,43 @@ import DataTable from 'react-data-table-component';
 import axiosInstance from '../../../../../axiosInstance.js';
 import Swal from 'sweetalert2';
 import { useNavigate, useParams } from 'react-router-dom';
-import ReactDOM from "react-dom";
-import { saveAs } from 'file-saver'
-import { CSVLink } from 'react-csv'
+import ReactDOM from 'react-dom';
+import { saveAs } from 'file-saver';
+import { CSVLink } from 'react-csv';
 import Select from 'react-select';
 import '../../../../Custom.css';
 import '../ProjectStyles.css';
 import { BiDotsVertical, BiSolidEditAlt } from 'react-icons/bi';
-import { LiaTimesSolid } from "react-icons/lia";
-import { IoMdDownload, IoMdPersonAdd  } from "react-icons/io";
+import { LiaTimesSolid } from 'react-icons/lia';
+import { IoMdDownload, IoMdPersonAdd } from 'react-icons/io';
 import { IoGrid } from 'react-icons/io5';
-import { FaThList, FaFolderPlus, FaEdit,
-  FaGoogleDrive, FaChevronLeft, FaFile,
-  FaChevronCircleLeft, FaChevronCircleRight } from 'react-icons/fa';
-import { MdFolderOff } from "react-icons/md";
-import { RiAddLargeFill } from "react-icons/ri";
-import { AiOutlineFileAdd } from "react-icons/ai";
-import { BsQrCode } from "react-icons/bs";
+import {
+  FaThList,
+  FaFolderPlus,
+  FaEdit,
+  FaGoogleDrive,
+  FaChevronLeft,
+  FaFile,
+  FaChevronCircleLeft,
+  FaChevronCircleRight,
+} from 'react-icons/fa';
+import { MdFolderOff } from 'react-icons/md';
+import { RiAddLargeFill } from 'react-icons/ri';
+import { AiOutlineFileAdd } from 'react-icons/ai';
+import { BsQrCode } from 'react-icons/bs';
 import ifcIcon from '../../../../assets/images/ifc-icon.png';
 import pdfIcon from '../../../../assets/images/pdf-icon.png';
 import dxfIcon from '../../../../assets/images/dxf-icon.png';
-import { Modal, Button, ToastContainer, Toast } from 'react-bootstrap';
+import {
+  Modal,
+  Button,
+  ToastContainer,
+  Toast,
+} from 'react-bootstrap';
 import ProjectSidebar from '../ProjectFolderSidebar';
 import SidebarOffcanvas from '../MobileSidebar';
 import Offcanvas from 'react-bootstrap/Offcanvas';
-import useWindowWidth from './windowWidthHook.jsx'
+import useWindowWidth from './windowWidthHook.jsx';
 
 // import useDrivePicker from 'react-google-drive-picker';
 
@@ -48,7 +60,7 @@ function ProjectExplorer() {
 
   const [viewType, setViewType] = useState('list');
   const [menuOpen, setMenuOpen] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0); 
+  const [refreshKey, setRefreshKey] = useState(0);
   const [offcanvasMenuOpen, setOffcanvasMenuOpen] = useState(false);
 
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
@@ -57,14 +69,17 @@ function ProjectExplorer() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [availableEmails, setAvailableEmails] = useState([]);
   const [recipients, setRecipients] = useState([]);
-  const [releaseNote, setReleaseNote] = useState("")
+  const [releaseNote, setReleaseNote] = useState('');
 
-  const [isGenerateQRCodeModalOpen, setIsGenerateQRCodeModalOpen] = useState(false);
+  const [isGenerateQRCodeModalOpen, setIsGenerateQRCodeModalOpen] =
+    useState(false);
 
-  const handleOpenQRCodeModal = () => setIsGenerateQRCodeModalOpen(true);
-  const handleCloseQRCodeModal = () => setIsGenerateQRCodeModalOpen(false);
+  const handleOpenQRCodeModal = () =>
+    setIsGenerateQRCodeModalOpen(true);
+  const handleCloseQRCodeModal = () =>
+    setIsGenerateQRCodeModalOpen(false);
 
-  const [isPDFPreviewOpen, setIsPDFPreviewOpen] = useState(false)
+  const [isPDFPreviewOpen, setIsPDFPreviewOpen] = useState(false);
   const handleOpenPDFPreview = () => setIsPDFPreviewOpen(true);
   const handleClosePDFPreview = () => setIsPDFPreviewOpen(false);
 
@@ -72,14 +87,14 @@ function ProjectExplorer() {
   const handleCloseShareModal = () => setIsShareModalOpen(false);
 
   const [showSuccessToast, setShowSuccessToast] = useState(false);
-  const [toastPosition, setToastPosition] = useState('bottom-end')
+  const [toastPosition, setToastPosition] = useState('bottom-end');
   const showToast = () => setShowSuccessToast(!showSuccessToast);
 
-const [roleCheck, setRoleCheck] = useState([])
-console.log(roleCheck)
+  const [roleCheck, setRoleCheck] = useState([]);
+  console.log(roleCheck);
   const addMenuToggle = () => {
     setIsAddMenuOpen(!isAddMenuOpen);
-  }
+  };
 
   const handleOCMenuToggle = () => {
     setOffcanvasMenuOpen(!offcanvasMenuOpen);
@@ -88,7 +103,7 @@ console.log(roleCheck)
   const handleOCMenuOptionClick = (option) => {
     setOffcanvasMenuOpen(false);
     Swal.fire(`Function to ${option}`);
-  }
+  };
 
   const [explorerTable, setExplorerTable] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -107,10 +122,9 @@ console.log(roleCheck)
   const handleCloseCanvas = () => setShowCanvas(false);
   const handleShowCanvas = () => setShowCanvas(true);
 
-
   const [selectedRow, setSelectedRow] = useState(null); // State to hold the selected row details
 
-// Handle row click
+  // Handle row click
   const handleRowClick = (row) => {
     setSelectedRow(row); // Set the clicked row's data
     handleShowCanvas(); // Show the Offcanvas
@@ -118,7 +132,7 @@ console.log(roleCheck)
 
   const handleEditClick = () => {
     setShowEditCanvas(true);
-  }
+  };
 
   // const handleOpenPicker = () => {
   //   openPicker({
@@ -146,14 +160,14 @@ console.log(roleCheck)
 
   // useEffect(() => {
   //   if (data && data.folders) {
-  //     data.folders.map((i) => console.log(i)); 
+  //     data.folders.map((i) => console.log(i));
   //   }
   // }, [data]);
 
   // const fetchFolderContents = async (folderId) => {
   //   const accessToken = authResponse.access_token; // Assuming you get this from the Picker's authResponse
   //   const apiUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&fields=files(id,name,mimeType)`;
-  
+
   //   try {
   //     const response = await fetch(apiUrl, {
   //       headers: {
@@ -162,7 +176,7 @@ console.log(roleCheck)
   //     });
   //     const data = await response.json();
   //     console.log("Folder Contents:", data.files);
-  
+
   //     // Example: Copy a file
   //     if (data.files.length > 0) {
   //       copyFile(data.files[0].id, "New File Name", folderId, accessToken);
@@ -192,102 +206,100 @@ console.log(roleCheck)
   //     console.error("Error copying file:", error);
   //   }
   // };
-  
-  
-    // Fetch project details and populate fields
-    const fetchProjectDetails = async () => {
-      try {
-        const response = await axiosInstance.get(
-          `/project/${projectId}`
-        );
-        const {
-          id,
-          project_name,
-          owner,
-          files,
-          project_file,
-        } = response.data;
 
-        setProjectName(project_name);
-        setOwnerName(`${owner.first_name} ${owner.last_name}`);
-        setExistingFiles(project_file);
-        // const parsedFiles = JSON.parse(files)
-        // console.log(parsedFiles)
+  // Fetch project details and populate fields
+  const fetchProjectDetails = async () => {
+    try {
+      const response = await axiosInstance.get(
+        `/project/${projectId}`
+      );
+      const { id, project_name, owner, files, project_file } =
+        response.data;
 
-        const formattedFiles = files.map((file) => ({
-          projectId: id,
-          fileName: file.fileName, // Assuming the file object has this key
-          fileSize: `${(file.fileSize / (1024 * 1024)).toFixed(
-            2
-          )} MB`, // Convert bytes to KB
-          fileOwner: file.fileOwner,
-          created: new Intl.DateTimeFormat('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric',
-          }).format(new Date(file.fileCreationTime)),
-          lastAccessed: new Intl.DateTimeFormat('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric',
-          }).format(new Date(file.fileLastAccessed)), // Format updatedAt
-          lastModified: new Intl.DateTimeFormat('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric',
-          }).format(new Date(file.fileLastModified)), 
-        }));
+      setProjectName(project_name);
+      setOwnerName(`${owner.first_name} ${owner.last_name}`);
+      setExistingFiles(project_file);
+      // const parsedFiles = JSON.parse(files)
+      // console.log(parsedFiles)
 
-        setExplorerTable(formattedFiles);
-        //console.log(explorerTable)
-        //console.log(files)
-      } catch (error) {
-        console.error('Error fetching project details:', error);
-      }
-    };
+      const formattedFiles = files.map((file) => ({
+        projectId: id,
+        fileName: file.fileName, // Assuming the file object has this key
+        fileSize: `${(file.fileSize / (1024 * 1024)).toFixed(2)} MB`, // Convert bytes to KB
+        fileOwner: file.fileOwner,
+        created: new Intl.DateTimeFormat('en-US', {
+          month: 'short',
+          day: '2-digit',
+          year: 'numeric',
+        }).format(new Date(file.fileCreationTime)),
+        lastAccessed: new Intl.DateTimeFormat('en-US', {
+          month: 'short',
+          day: '2-digit',
+          year: 'numeric',
+        }).format(new Date(file.fileLastAccessed)), // Format updatedAt
+        lastModified: new Intl.DateTimeFormat('en-US', {
+          month: 'short',
+          day: '2-digit',
+          year: 'numeric',
+        }).format(new Date(file.fileLastModified)),
+      }));
 
-    const fetchAvailableUsers = async () => {
-      try {
-        const [currentUserResponse, projectResponse, usersResponse] = await Promise.all([
+      setExplorerTable(formattedFiles);
+      //console.log(explorerTable)
+      //console.log(files)
+    } catch (error) {
+      console.error('Error fetching project details:', error);
+    }
+  };
+
+  const fetchAvailableUsers = async () => {
+    try {
+      const [currentUserResponse, projectResponse, usersResponse] =
+        await Promise.all([
           axiosInstance.get(`/user`),
           axiosInstance.get(`/project-contributors/${projectId}`),
           axiosInstance.get(`/users`),
         ]);
-    
-        const currentUser = currentUserResponse.data;
-        const userRole = currentUser.roles.map((roleName) => roleName.role_name );
-        setRoleCheck(userRole);
-        const { contributors } = projectResponse.data; // Get contributors from project details
-        const users = usersResponse.data;
-    
-        // Extract emails of contributors
-        const contributorEmails = contributors.map((contributor) => contributor.email);
 
-        const formattedToAdd = users
-        .filter((user) => 
-        user.email !== currentUser.email && // Exclude current user
-        contributorEmails.includes(user.email) 
+      const currentUser = currentUserResponse.data;
+      const userRole = currentUser.roles.map(
+        (roleName) => roleName.role_name
+      );
+      setRoleCheck(userRole);
+      const { contributors } = projectResponse.data; // Get contributors from project details
+      const users = usersResponse.data;
+
+      // Extract emails of contributors
+      const contributorEmails = contributors.map(
+        (contributor) => contributor.email
+      );
+
+      const formattedToAdd = users
+        .filter(
+          (user) =>
+            user.email !== currentUser.email && // Exclude current user
+            contributorEmails.includes(user.email)
         )
         .map((user) => ({
           label: `${user.first_name} ${user.last_name} (${user.email})`, // Label for dropdown
           value: user.email, // Value for dropdown
         }));
 
-        setAvailableEmails(formattedToAdd);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
-    };
+      setAvailableEmails(formattedToAdd);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
 
-    useEffect(() => {
+  useEffect(() => {
     fetchAvailableUsers();
     fetchProjectDetails();
   }, [projectId, refreshKey]);
-  
+
   // Define columns for the table
   const explorerColumn = [
     {
-      name: " ",
+      name: ' ',
       cell: (row, index) => (
         <label className="del-checkbox">
           <input
@@ -295,7 +307,9 @@ console.log(roleCheck)
             onChange={(e) => {
               const checked = e.target.checked;
               setSelectedFiles((prev) =>
-                checked ? [...prev, index] : prev.filter((i) => i !== index)
+                checked
+                  ? [...prev, index]
+                  : prev.filter((i) => i !== index)
               );
             }}
             checked={selectedFiles.includes(index)}
@@ -314,7 +328,6 @@ console.log(roleCheck)
       selector: (row) => row.fileName,
       sortable: true,
       grow: 2,
-
     },
     {
       name: 'File Owner',
@@ -322,7 +335,7 @@ console.log(roleCheck)
       // width: '20%',
       selector: (row) => row.fileOwner,
       sortable: true,
-      hide: 'sm'
+      hide: 'sm',
     },
     {
       name: 'Last Modified',
@@ -331,7 +344,7 @@ console.log(roleCheck)
       selector: (row) => row.lastModified,
       sortable: true,
       // right: true,
-      hide: 'md'
+      hide: 'md',
     },
     {
       name: 'File Size',
@@ -339,29 +352,33 @@ console.log(roleCheck)
       selector: (row) => row.fileSize,
       sortable: true,
       // right: true,
-      hide: 'md'
+      hide: 'md',
     },
   ];
 
   const noDeleteColumn = roleCheck.includes('Client')
-  ? explorerColumn.slice(1) // Remove the first column
-  : explorerColumn;
+    ? explorerColumn.slice(1) // Remove the first column
+    : explorerColumn;
 
   const handleExportToCSV = () => {
     // Filter out the checkbox column (no selector property)
-    const filteredColumns = noDeleteColumn.filter((col) => col.selector);
+    const filteredColumns = noDeleteColumn.filter(
+      (col) => col.selector
+    );
     // Extract headers
-    const headers = filteredColumns.map((col) => ({ label: col.name, key: col.key }));
+    const headers = filteredColumns.map((col) => ({
+      label: col.name,
+      key: col.key,
+    }));
     // Map data rows based on filtered columns
     const data = explorerTable.map((row) =>
-    Object.fromEntries(
-      filteredColumns.map((col) => [col.key, col.selector(row)]) // Extract values dynamically
-    )
-  );
+      Object.fromEntries(
+        filteredColumns.map((col) => [col.key, col.selector(row)]) // Extract values dynamically
+      )
+    );
     return { headers, data };
   };
 
-  
   const [showAddModal, setShowAddModal] = useState(false);
   // const [showAddFolderModal, setShowAddFolderModal] = useState(false);
   // const [newFolder, setNewFolder] = useState("");
@@ -371,13 +388,16 @@ console.log(roleCheck)
     try {
       const formData = new FormData();
       newFiles.forEach((file) => {
-        formData.append('project_file', file); 
+        formData.append('project_file', file);
       });
-      
 
-      await axiosInstance.post(`/upload-ifc-files/${projectId}`, formData,{
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      await axiosInstance.post(
+        `/upload-ifc-files/${projectId}`,
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }
+      );
 
       Swal.fire({
         title: 'Success!',
@@ -398,8 +418,6 @@ console.log(roleCheck)
       });
     }
   };
-
-
 
   // const [newFileName, setNewFileName] = useState('')
   // const handleRenameFile = async () => {
@@ -426,15 +444,12 @@ console.log(roleCheck)
 
   // // Extract the base name and extension from the current file name
   // const fileNameParts = selectedRow?.fileName ? selectedRow.fileName.split('.') : [];
-  // const fileBaseName = fileNameParts.length > 1 
-  //   ? fileNameParts.slice(0, -1).join('.') 
+  // const fileBaseName = fileNameParts.length > 1
+  //   ? fileNameParts.slice(0, -1).join('.')
   //   : selectedRow?.fileName || 'Untitled';
-  // const fileExtension = fileNameParts.length > 1 
-  //   ? fileNameParts[fileNameParts.length - 1] 
+  // const fileExtension = fileNameParts.length > 1
+  //   ? fileNameParts[fileNameParts.length - 1]
   //   : 'ifc'; // Fallback to a default extension if not available
-  
-
-  
 
   // const handleAddNewFolder = async () => {
   //   console.log("Folder Added")
@@ -442,60 +457,63 @@ console.log(roleCheck)
 
   const handleDeleteFiles = async () => {
     try {
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "You won’t be able to revert this!.",
-      showCancelButton: true,
-      icon: 'warning',
-      confirmButtonColor: "#EC221F",
-      cancelButtonColor: "#00000000",
-      cancelTextColor: "#000000",
-      confirmButtonText: "Yes, delete it!",
-      customClass: {
-        container: "custom-container",
-        confirmButton: "custom-confirm-button",
-        cancelButton: "custom-cancel-button",
-        title: "custom-swal-title",
-      },
-    })
-
-    if (result.isConfirmed){
-    const filesToDelete = selectedFiles.map(index => explorerTable[index]);
-    for (const file of filesToDelete) {
-      await axiosInstance.delete(`/delete-file/${projectId}/${file.fileName}`);
-    }
-    setExplorerTable(prev =>
-      prev.filter((_, index) => !selectedFiles.includes(index))
-    );
-      setSelectedFiles([]); // Clear selected files
-      Swal.fire({
-        title: "Deleted!",
-        text: "Selected files have been deleted.",
-        icon: "success",
-        confirmButtonText: "OK",
+      const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: 'You won’t be able to revert this!.',
+        showCancelButton: true,
+        icon: 'warning',
+        confirmButtonColor: '#EC221F',
+        cancelButtonColor: '#00000000',
+        cancelTextColor: '#000000',
+        confirmButtonText: 'Yes, delete it!',
+        customClass: {
+          container: 'custom-container',
+          confirmButton: 'custom-confirm-button',
+          cancelButton: 'custom-cancel-button',
+          title: 'custom-swal-title',
+        },
       });
-      setRefreshKey((prevKey) => prevKey + 1);
-    }
+
+      if (result.isConfirmed) {
+        const filesToDelete = selectedFiles.map(
+          (index) => explorerTable[index]
+        );
+        for (const file of filesToDelete) {
+          await axiosInstance.delete(
+            `/delete-file/${projectId}/${file.fileName}`
+          );
+        }
+        setExplorerTable((prev) =>
+          prev.filter((_, index) => !selectedFiles.includes(index))
+        );
+        setSelectedFiles([]); // Clear selected files
+        Swal.fire({
+          title: 'Deleted!',
+          text: 'Selected files have been deleted.',
+          icon: 'success',
+          confirmButtonText: 'OK',
+        });
+        setRefreshKey((prevKey) => prevKey + 1);
+      }
     } catch (error) {
       Swal.fire({
-        title: "Error!",
+        title: 'Error!',
         text: error,
-        icon: "error",
-        confirmButtonText: "OK",
+        icon: 'error',
+        confirmButtonText: 'OK',
       });
     }
   };
 
   const handleShare = () => {
     if (recipients.length === 0) {
-      alert("Please select at least one recipient.");
+      alert('Please select at least one recipient.');
       return;
     }
-    console.log("Share data:", { recipients, releaseNote });
+    console.log('Share data:', { recipients, releaseNote });
     // Perform the share action (e.g., API call)
     handleCloseShareModal();
     showToast();
-
   };
 
   // const handleShare = async () => {
@@ -505,13 +523,13 @@ console.log(roleCheck)
   //     title: 'Share Data',
   //     html: `
   //       <div style="text-align: left;">
-          
+
   //         <label for="recipients" style="display: block; margin-bottom: 5px;">Choose recipient(s):</label>
   //         <div id="swal-recipient-select" style= "margin-bottom: 15px; width: 100%;"></div>
-  
+
   //         <label for="release-note" style="display: block; margin-bottom: 5px;">Note/Message</label>
   //         <textarea id="release-note" class="swal2-input" placeholder="Write a note..." style="
-  //           margin-bottom: 10px; width: 100%; 
+  //           margin-bottom: 10px; width: 100%;
   //           white-space: pre-wrap; word-wrap: break-word;
   //           background-color: #FFF; color: black;
   //         "></textarea>
@@ -527,29 +545,29 @@ console.log(roleCheck)
   //       const shareWith = document.getElementById('share-with').value.trim();
   //       const recipients = document.getElementById('recipients').value.trim();
   //       const releaseNote = document.getElementById('release-note').value.trim();
-  
+
   //       if (!shareWith || !recipients) {
   //         Swal.showValidationMessage('Please fill in all required fields.');
   //         return null;
   //       }
-  
+
   //       const recipientList = recipients.split(',').map((name) => name.trim());
-  
+
   //       if (recipientList.length === 0) {
   //         Swal.showValidationMessage('Please enter at least one recipient.');
   //         return null;
   //       }
-  
+
   //       return { shareWith, recipients: recipientList, releaseNote };
   //     },
-      
+
   //   }).then(async (result) => {
   //     if (result.isConfirmed) {
   //       document.querySelector(".offcanvas").removeAttribute("aria-hidden");
   //       document.querySelector(".offcanvas").removeAttribute("inert");
   //       const { shareWith, recipients, releaseNote } = result.value;
   //       return console.log("success", shareWith, recipients, releaseNote)
-        
+
   //       // try {
   //       //   await axiosInstance.post(`/share-data/${projectId}`, {
   //       //     shareWith,
@@ -561,7 +579,7 @@ console.log(roleCheck)
   //       //   Swal.fire('Error!', 'Failed to add the release. Try again.', 'error');
   //       //   console.error(error);
   //       // }
-        
+
   //     } else if (result.dismiss === Swal.DismissReason.cancel) {
   //       // If the user cancels, restore focus and remove inert attributes
   //       document.querySelector(".offcanvas").removeAttribute("aria-hidden");
@@ -571,20 +589,23 @@ console.log(roleCheck)
   //   });
   // };
 
-  const menuRef  = useRef(null);
+  const menuRef = useRef(null);
   useEffect(() => {
     const handleOutsideClick = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target)
+      ) {
         setMenuOpen(false);
         setOffcanvasMenuOpen(false);
-        setIsAddMenuOpen(false)
+        setIsAddMenuOpen(false);
       }
     };
 
-    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener('mousedown', handleOutsideClick);
 
     return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener('mousedown', handleOutsideClick);
     };
   }, []);
 
@@ -599,14 +620,25 @@ console.log(roleCheck)
       },
     });
     try {
-      const response = await axiosInstance.get(`/download-file/${projectId}/${fileName}`, {
-        responseType: 'blob', 
-      });
+      const response = await axiosInstance.get(
+        `/download-file/${projectId}/${fileName}`,
+        {
+          responseType: 'blob',
+        }
+      );
       const blob = new Blob([response.data]);
-      saveAs(blob, fileName); 
-      Swal.fire('Success!', `${fileName} has been downloaded`, 'success');
+      saveAs(blob, fileName);
+      Swal.fire(
+        'Success!',
+        `${fileName} has been downloaded`,
+        'success'
+      );
     } catch (error) {
-      Swal.fire('Error!', `Failed to download ${fileName}. Try again.`, 'error');
+      Swal.fire(
+        'Error!',
+        `Failed to download ${fileName}. Try again.`,
+        'error'
+      );
       console.error(error);
     } finally {
       Swal.close();
@@ -615,24 +647,27 @@ console.log(roleCheck)
   // console.log(selectedRow?.projectId || '')
 
   const getFileIcon = (fileName) => {
-    if (fileName.endsWith(".ifc")) return ifcIcon;
-    if (fileName.endsWith(".pdf")) return pdfIcon;
-    if (fileName.endsWith(".dxf")) return dxfIcon;
+    if (fileName.endsWith('.ifc')) return ifcIcon;
+    if (fileName.endsWith('.pdf')) return pdfIcon;
+    if (fileName.endsWith('.dxf')) return dxfIcon;
     return <FaFile size={24} color="#555" />;
   };
 
   const [currentPage, setCurrentPage] = useState(1);
   const filesPerPage = 9;
-  
+
   const indexOfLastFile = currentPage * filesPerPage;
   const indexOfFirstFile = indexOfLastFile - filesPerPage;
-  const currentFiles = explorerTable.slice(indexOfFirstFile, indexOfLastFile);
+  const currentFiles = explorerTable.slice(
+    indexOfFirstFile,
+    indexOfLastFile
+  );
 
   const totalPages = Math.ceil(explorerTable.length / filesPerPage);
-  
+
   return (
     <div className="container">
-      <h3 className="projectFolder-title" id="projectFolder-title" >
+      <h3 className="projectFolder-title" id="projectFolder-title">
         {ownerName}&apos;s {projectName}
       </h3>
 
@@ -641,27 +676,27 @@ console.log(roleCheck)
         id="project-folder-container"
       >
         <div className="projectFolder-sidebar-container">
-        {isMobile ? (
-          <SidebarOffcanvas projectId={projectId} />
-        ) : (
-          <ProjectSidebar projectId={projectId} />
-        )}
+          {isMobile ? (
+            <SidebarOffcanvas projectId={projectId} />
+          ) : (
+            <ProjectSidebar projectId={projectId} />
+          )}
         </div>
         <div className="projectFolder-display">
           <div className="main">
             <div className="container-fluid moduleFluid">
-            <div className="add-files-menu-container">
-            <button
-              id="addFiles-btn"
-              className="btn addFiles-btn btn-primary"
-              title="Add"
-              onClick={addMenuToggle}
-            >
-              <RiAddLargeFill/> 
-            </button>
-            {isAddMenuOpen && (
-              <div className="addFile-dropdown" ref={menuRef}>
-                {/* <div className="addFile-dd-item" 
+              <div className="add-files-menu-container">
+                <button
+                  id="addFiles-btn"
+                  className="btn addFiles-btn btn-primary"
+                  title="Add"
+                  onClick={addMenuToggle}
+                >
+                  <RiAddLargeFill />
+                </button>
+                {isAddMenuOpen && (
+                  <div className="addFile-dropdown" ref={menuRef}>
+                    {/* <div className="addFile-dd-item" 
                 onMouseEnter={() => setShowAddFolderSubMenu(true)}
                 onMouseLeave={() => setShowAddFolderSubMenu(false)}>
                   <FaChevronLeft className="submenu-indicator"/>
@@ -681,21 +716,26 @@ console.log(roleCheck)
                     </div>
                   )}
                 </div> */}
-                {/* <div className="addFile-dd-divider" /> */}
-                <div className="addFile-dd-item" onClick={() => setShowAddModal(true)}>
-                  <AiOutlineFileAdd className="addFile-dd-icon" />
-                  <span>Upload files</span>
-                </div>
+                    {/* <div className="addFile-dd-divider" /> */}
+                    <div
+                      className="addFile-dd-item"
+                      onClick={() => setShowAddModal(true)}
+                    >
+                      <AiOutlineFileAdd className="addFile-dd-icon" />
+                      <span>Upload files</span>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-            </div>
               <div className="project-content">
                 <div className="table-header d-flex justify-content-between align-items-center">
                   <div className="page-title">
                     <h2>Explorer</h2>
                   </div>
-                  <div className="button-group d-flex" id="explorer-buttons">
-                  
+                  <div
+                    className="button-group d-flex"
+                    id="explorer-buttons"
+                  >
                     <button
                       className={`btn btn-icon grid-view-btn ${
                         viewType === 'grid' ? 'active' : ''
@@ -723,40 +763,55 @@ console.log(roleCheck)
                         <BiDotsVertical />
                       </button>
                       {menuOpen && (
-                        <div className="dropdown-menu" 
-                             ref={menuRef}
-                             id="explorer-dropdown">
+                        <div
+                          className="dropdown-menu"
+                          ref={menuRef}
+                          id="explorer-dropdown"
+                        >
                           <div className="dropdown-item">
-                              <CSVLink
-                                {...handleExportToCSV()}
-                                filename={`${ownerName}'s ${projectName}_IFC-Files.csv`}
-                                className="exportToCSV"
-                                target="_blank"
-                              >
-                                Export to CSV
+                            <CSVLink
+                              {...handleExportToCSV()}
+                              filename={`${ownerName}'s ${projectName}_IFC-Files.csv`}
+                              className="exportToCSV"
+                              target="_blank"
+                            >
+                              Export to CSV
                             </CSVLink>
                           </div>
-                          {roleCheck.some(role => ['Admin', 'Superadmin'].includes(role)) && (
-                          <div className="dropdown-item" onClick={() => navigate(`/project-folder/multi-pdf-editor/${projectId}`)}>
+                          {roleCheck.some((role) =>
+                            ['Admin', 'Superadmin'].includes(role)
+                          ) && (
+                            <div
+                              className="dropdown-item"
+                              onClick={() =>
+                                navigate(
+                                  `/project-folder/multi-pdf-editor/${projectId}`
+                                )
+                              }
+                            >
                               Edit Multiple PDFs
-                          </div>
+                            </div>
                           )}
                         </div>
                       )}
                     </div>
-                    {roleCheck.some(role => ['Admin', 'Superadmin'].includes(role)) && (
-                     <button
-                      id="addbtn"
-                      className="btn btn-primary add-btn"
-                      title="Add"
-                      onClick={addMenuToggle}
-                    >
-                      Add 
-                    </button> 
+                    {roleCheck.some((role) =>
+                      ['Admin', 'Superadmin'].includes(role)
+                    ) && (
+                      <button
+                        id="addbtn"
+                        className="btn btn-primary add-btn"
+                        title="Add"
+                        onClick={addMenuToggle}
+                      >
+                        Add
+                      </button>
                     )}
                   </div>
                 </div>
-                {roleCheck.some(role => ['Admin', 'Superadmin'].includes(role)) && (
+                {roleCheck.some((role) =>
+                  ['Admin', 'Superadmin'].includes(role)
+                ) && (
                   <button
                     onClick={() => handleDeleteFiles(projectId)}
                     id="deleteUploadedfilesbtn"
@@ -767,41 +822,89 @@ console.log(roleCheck)
                   </button>
                 )}
 
-                <div className={`project-display ${viewType}`} >
+                <div className={`project-display ${viewType}`}>
                   {viewType === 'grid' ? (
-                     <div>
-                     <div className="grid-view">
-                       {currentFiles.map((row, index) => (
-                         <div key={index} className="grid-item" onClick={() => handleRowClick(row)}>
-                           <div className="file-icon mb-2">
-                             {typeof getFileIcon(row.fileName) === "string" ? (
-                               <img src={getFileIcon(row.fileName)} alt="file icon" className="icon-img" />
-                             ) : (
-                               getFileIcon(row.fileName)
-                             )}
-                           </div>
-                           <div className="file-info">
-                             <h5><strong> {row.fileName} </strong></h5>
-                             <p><span className="fileOwner"> File Owner:</span> <strong> {row.fileOwner} </strong></p>
-                             <p><span className="lastModified"> Last Modified:</span> <strong> {row.lastModified} </strong></p>
-                             <p><span className="fileSize"> File Size:</span> <strong> {row.fileSize} </strong></p>
-                           </div>
-                         </div>
-                       ))}
-                     </div>
-                     <div className="pagination-controls d-flex justify-content-center mt-4 mb-5 flex-row">
-                       <button className="btn btn-tertiary" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}><FaChevronCircleLeft/></button>
-                       <span className="mx-2"> Page {currentPage} of {totalPages} </span>
-                       <button className="btn btn-tertiary" disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}><FaChevronCircleRight/></button>
-                     </div>
-                   </div>
+                    <div>
+                      <div className="grid-view">
+                        {currentFiles.map((row, index) => (
+                          <div
+                            key={index}
+                            className="grid-item"
+                            onClick={() => handleRowClick(row)}
+                          >
+                            <div className="file-icon mb-2">
+                              {typeof getFileIcon(row.fileName) ===
+                              'string' ? (
+                                <img
+                                  src={getFileIcon(row.fileName)}
+                                  alt="file icon"
+                                  className="icon-img"
+                                />
+                              ) : (
+                                getFileIcon(row.fileName)
+                              )}
+                            </div>
+                            <div className="file-info">
+                              <h5>
+                                <strong> {row.fileName} </strong>
+                              </h5>
+                              <p>
+                                <span className="fileOwner">
+                                  {' '}
+                                  File Owner:
+                                </span>{' '}
+                                <strong> {row.fileOwner} </strong>
+                              </p>
+                              <p>
+                                <span className="lastModified">
+                                  {' '}
+                                  Last Modified:
+                                </span>{' '}
+                                <strong> {row.lastModified} </strong>
+                              </p>
+                              <p>
+                                <span className="fileSize">
+                                  {' '}
+                                  File Size:
+                                </span>{' '}
+                                <strong> {row.fileSize} </strong>
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="pagination-controls d-flex justify-content-center mt-4 mb-5 flex-row">
+                        <button
+                          className="btn btn-tertiary"
+                          disabled={currentPage === 1}
+                          onClick={() =>
+                            setCurrentPage(currentPage - 1)
+                          }
+                        >
+                          <FaChevronCircleLeft />
+                        </button>
+                        <span className="mx-2">
+                          {' '}
+                          Page {currentPage} of {totalPages}{' '}
+                        </span>
+                        <button
+                          className="btn btn-tertiary"
+                          disabled={currentPage === totalPages}
+                          onClick={() =>
+                            setCurrentPage(currentPage + 1)
+                          }
+                        >
+                          <FaChevronCircleRight />
+                        </button>
+                      </div>
+                    </div>
                   ) : (
                     <DataTable
                       className="dataTables_wrapperz mt-3"
                       id="explorer-table"
                       columns={noDeleteColumn}
                       data={explorerTable}
-                      pagination={explorerTable.length >=10}
+                      pagination={explorerTable.length >= 10}
                       paginationPerPage={10}
                       paginationRowsPerPageOptions={[10, 20, 30]}
                       onRowClicked={handleRowClick}
@@ -809,13 +912,13 @@ console.log(roleCheck)
                       noDataComponent={
                         <div className="noData mt-4">
                           <div className="circle">
-                          <MdFolderOff size={65} color="#9a9a9c"/>
+                            <MdFolderOff size={65} color="#9a9a9c" />
                           </div>
                           <div className="no-display-text mt-2">
                             No IFC files found.
                           </div>
                         </div>
-                        }
+                      }
                     />
                   )}
                 </div>
@@ -824,7 +927,10 @@ console.log(roleCheck)
           </div>
         </div>
       </div>
-      <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
+      <Modal
+        show={showAddModal}
+        onHide={() => setShowAddModal(false)}
+      >
         <Modal.Header closeButton>
           <Modal.Title>Upload Files</Modal.Title>
         </Modal.Header>
@@ -851,7 +957,9 @@ console.log(roleCheck)
                   <h6>Selected Files:</h6>
                   <ul>
                     {newFiles.map((file, index) => (
-                      <li style={{listStyle: "none"}}key={index}>{file.name}</li>
+                      <li style={{ listStyle: 'none' }} key={index}>
+                        {file.name}
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -867,7 +975,11 @@ console.log(roleCheck)
           >
             Close
           </Button>
-          <Button id="saveAdd" variant="primary" onClick={handleAddNewFile}>
+          <Button
+            id="saveAdd"
+            variant="primary"
+            onClick={handleAddNewFile}
+          >
             Upload
           </Button>
         </Modal.Footer>
@@ -911,46 +1023,58 @@ console.log(roleCheck)
         </Modal.Footer>
       </Modal> */}
 
-      <Modal show={isShareModalOpen} onHide={() => setIsShareModalOpen(false)} centered>
+      <Modal
+        show={isShareModalOpen}
+        onHide={() => setIsShareModalOpen(false)}
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>File Sharing</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <form onSubmit={(e) => e.preventDefault()}>
             <div className="mb-3">
-            <div style={{ marginBottom: "15px" }}>
-          <label htmlFor="recipients" style={{ marginBottom: "5px", display: "block" }}>
-            Choose recipient(s):
-          </label>
-          <Select
-            id="recipients"
-            options={availableEmails}
-            isMulti
-            onChange={(selectedOptions) => setRecipients(selectedOptions)}
-            className="basic-multi-select"
-            classNamePrefix="select"
-          />
-        </div>
+              <div style={{ marginBottom: '15px' }}>
+                <label
+                  htmlFor="recipients"
+                  style={{ marginBottom: '5px', display: 'block' }}
+                >
+                  Choose recipient(s):
+                </label>
+                <Select
+                  id="recipients"
+                  options={availableEmails}
+                  isMulti
+                  onChange={(selectedOptions) =>
+                    setRecipients(selectedOptions)
+                  }
+                  className="basic-multi-select"
+                  classNamePrefix="select"
+                />
+              </div>
 
-        <div style={{ marginBottom: "15px" }}>
-          <label htmlFor="release-note" style={{ marginBottom: "5px", display: "block" }}>
-            Note/Message
-          </label>
-          <textarea
-            id="release-note"
-            placeholder="Write a note..."
-            value={releaseNote}
-            onChange={(e) => setReleaseNote(e.target.value)}
-            style={{
-              width: "100%",
-              height: "80px",
-              padding: "8px",
-              resize: "none",
-              backgroundColor: "#FFF",
-              color: "black",
-            }}
-          ></textarea>
-        </div>
+              <div style={{ marginBottom: '15px' }}>
+                <label
+                  htmlFor="release-note"
+                  style={{ marginBottom: '5px', display: 'block' }}
+                >
+                  Note/Message
+                </label>
+                <textarea
+                  id="release-note"
+                  placeholder="Write a note..."
+                  value={releaseNote}
+                  onChange={(e) => setReleaseNote(e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: '80px',
+                    padding: '8px',
+                    resize: 'none',
+                    backgroundColor: '#FFF',
+                    color: 'black',
+                  }}
+                ></textarea>
+              </div>
             </div>
           </form>
         </Modal.Body>
@@ -962,77 +1086,110 @@ console.log(roleCheck)
           >
             Close
           </Button>
-          <Button id="saveAdd" variant="primary" onClick={handleShare}>
+          <Button
+            id="saveAdd"
+            variant="primary"
+            onClick={handleShare}
+          >
             Share
           </Button>
         </Modal.Footer>
       </Modal>
 
-      <Offcanvas 
-        show={showCanvas} 
-        onHide={handleCloseCanvas} 
-        placement="end" 
+      <Offcanvas
+        show={showCanvas}
+        onHide={handleCloseCanvas}
+        placement="end"
         //backdrop="static"
         className="offcanvas"
         id="explorer-offcanvas"
       >
-      <Offcanvas.Header className="offcanvas-head">
-        <Offcanvas.Title>
-        <div className="offcanvas-header d-flex justify-content-between align-items-center">
-          <span className="file-title">
-            {selectedRow ? selectedRow.fileName : "File Details"}
-          </span>
-          <div className="offcanvas-button-group">
-            {/* <button className="offcanvas-btn" title="Edit" onClick={handleEditClick}>
+        <Offcanvas.Header className="offcanvas-head">
+          <Offcanvas.Title>
+            <div className="offcanvas-header d-flex justify-content-between align-items-center">
+              <span className="file-title">
+                {selectedRow ? selectedRow.fileName : 'File Details'}
+              </span>
+              <div className="offcanvas-button-group">
+                {/* <button className="offcanvas-btn" title="Edit" onClick={handleEditClick}>
               <BiSolidEditAlt size={18} />
             </button> */}
-            <button
-              className="offcanvas-btn"
-              title="Close"
-              onClick={handleCloseCanvas}
-            >
-              <LiaTimesSolid size={18} />
-            </button>
-          </div>
-        </div>
-        </Offcanvas.Title>
-      </Offcanvas.Header>
+                <button
+                  className="offcanvas-btn"
+                  title="Close"
+                  onClick={handleCloseCanvas}
+                >
+                  <LiaTimesSolid size={18} />
+                </button>
+              </div>
+            </div>
+          </Offcanvas.Title>
+        </Offcanvas.Header>
         <Offcanvas.Body className="offcanvas-body">
-        <div className="offcanvas-button-group2 mb-3 flex-wrap">
-              <label htmlFor="buttons">  </label>
-              {selectedRow?.fileName?.endsWith('.ifc') ? (
-              <button className="btn ml-1 mr-auto"
-                      onClick={() =>
-                        navigate(`/ifc-viewer/${projectId}/${selectedRow.fileName}`, {
-                          state: {
-                            fileUrl: selectedRow.fileName
-                          },
-                        })
-                      }
-                      style={{fontSize: "12px"}}>
-                View Model 
+          <div className="offcanvas-button-group2 mb-3 flex-wrap">
+            <label htmlFor="buttons"> </label>
+            {selectedRow?.fileName?.endsWith('.frag') ? (
+              <button
+                className="btn ml-1 mr-auto"
+                onClick={() =>
+                  navigate(
+                    `/ifc-viewer/${projectId}/${selectedRow.fileName}`,
+                    {
+                      state: {
+                        fileUrl: selectedRow.fileName,
+                      },
+                    }
+                  )
+                }
+                style={{ fontSize: '12px' }}
+              >
+                View Model
               </button>
-              ) : (
-                <button className="btn ml-1 mr-auto"
-                        onClick={() => navigate(`/project-folder/pdf-viewer/${projectId}/${selectedRow.fileName}`)}
-                        style={{fontSize: "12px"}}>
-                  View PDF 
-                </button>
-              )}
-              {roleCheck.some(role => ['Admin', 'Superadmin'].includes(role)) && (
-                <button className="btn offcanvas-action-btn" onClick={handleOpenShareModal}><IoMdPersonAdd size={20}/></button>   
-              ) }
-
-              <button className="btn offcanvas-action-btn" onClick={() => downloadFile(selectedRow.fileName)} ><IoMdDownload size={20}/></button>
-
-           {roleCheck.some(role => ['Admin', 'Superadmin'].includes(role)) &&
-              (selectedRow?.fileName?.endsWith('.ifc') || selectedRow?.fileName?.endsWith('.pdf')) && (
-                <button className="btn offcanvas-action-btn mr-1" onClick={handleOpenQRCodeModal}>
-                  <BsQrCode size={20} />
-                </button>
+            ) : (
+              <button
+                className="btn ml-1 mr-auto"
+                onClick={() =>
+                  navigate(
+                    `/project-folder/pdf-viewer/${projectId}/${selectedRow.fileName}`
+                  )
+                }
+                style={{ fontSize: '12px' }}
+              >
+                View PDF
+              </button>
+            )}
+            {roleCheck.some((role) =>
+              ['Admin', 'Superadmin'].includes(role)
+            ) && (
+              <button
+                className="btn offcanvas-action-btn"
+                onClick={handleOpenShareModal}
+              >
+                <IoMdPersonAdd size={20} />
+              </button>
             )}
 
-              {/* <button className="btn " onClick={handleOCMenuToggle}><BiDotsVertical size={20}/></button>  
+            <button
+              className="btn offcanvas-action-btn"
+              onClick={() => downloadFile(selectedRow.fileName)}
+            >
+              <IoMdDownload size={20} />
+            </button>
+
+            {roleCheck.some((role) =>
+              ['Admin', 'Superadmin'].includes(role)
+            ) &&
+              (selectedRow?.fileName?.endsWith('.ifc') ||
+                selectedRow?.fileName?.endsWith('.pdf')) && (
+                <button
+                  className="btn offcanvas-action-btn mr-1"
+                  onClick={handleOpenQRCodeModal}
+                >
+                  <BsQrCode size={20} />
+                </button>
+              )}
+
+            {/* <button className="btn " onClick={handleOCMenuToggle}><BiDotsVertical size={20}/></button>  
               {offcanvasMenuOpen && (
                         <div className="dropdown-menu" id="offcanvas-dropdown" ref={menuRef}>
                            <div className="dropdown-item"
@@ -1054,36 +1211,51 @@ console.log(roleCheck)
                         </div>
                       )}             */}
           </div>
-        {selectedRow && (
-          <div style={{fontSize: "12px"}}>
-            <p><strong>Details: </strong></p>
-              <label style={{margin: "0", fontWeight: "300"}}>File Size:</label>
-                <p>{selectedRow.fileSize}</p>
-              <label style={{margin: "0", fontWeight: "300"}}>Date Created:</label>
-                <p>{selectedRow.created} by {selectedRow.fileOwner}</p>
-              <label style={{margin: "0", fontWeight: "300"}}>Last Modified:</label>
-                <p>{selectedRow.lastModified} by {selectedRow.fileOwner}</p>
-                <label style={{margin: "0", fontWeight: "300"}}>Last Accessed:</label>
-                <p>{selectedRow.lastAccessed} by {selectedRow.fileOwner}</p>
-          </div>
-        )}
+          {selectedRow && (
+            <div style={{ fontSize: '12px' }}>
+              <p>
+                <strong>Details: </strong>
+              </p>
+              <label style={{ margin: '0', fontWeight: '300' }}>
+                File Size:
+              </label>
+              <p>{selectedRow.fileSize}</p>
+              <label style={{ margin: '0', fontWeight: '300' }}>
+                Date Created:
+              </label>
+              <p>
+                {selectedRow.created} by {selectedRow.fileOwner}
+              </p>
+              <label style={{ margin: '0', fontWeight: '300' }}>
+                Last Modified:
+              </label>
+              <p>
+                {selectedRow.lastModified} by {selectedRow.fileOwner}
+              </p>
+              <label style={{ margin: '0', fontWeight: '300' }}>
+                Last Accessed:
+              </label>
+              <p>
+                {selectedRow.lastAccessed} by {selectedRow.fileOwner}
+              </p>
+            </div>
+          )}
         </Offcanvas.Body>
       </Offcanvas>
 
-
-{/* GENERATE QR MODAL */}
-      <Modal 
-        show={isGenerateQRCodeModalOpen} 
-        onHide={() => setIsGenerateQRCodeModalOpen(false)} 
+      {/* GENERATE QR MODAL */}
+      <Modal
+        show={isGenerateQRCodeModalOpen}
+        onHide={() => setIsGenerateQRCodeModalOpen(false)}
         centered
       >
         <Modal.Header>
           <Modal.Title> Share QR Code </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <QrCodeGenerator 
-             fileName={selectedRow?.fileName || ''}
-             projectId={selectedRow?.projectId || ''}
+          <QrCodeGenerator
+            fileName={selectedRow?.fileName || ''}
+            projectId={selectedRow?.projectId || ''}
           />
         </Modal.Body>
         <Modal.Footer>
@@ -1100,18 +1272,16 @@ console.log(roleCheck)
         </Modal.Footer>
       </Modal>
 
-{/* PDF PREVIEW MODAL */}
-      <Modal 
-        show={isPDFPreviewOpen} 
-        onHide={handleClosePDFPreview} 
+      {/* PDF PREVIEW MODAL */}
+      <Modal
+        show={isPDFPreviewOpen}
+        onHide={handleClosePDFPreview}
         centered
       >
         <Modal.Header>
           <Modal.Title> PDF Preview </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-         
-        </Modal.Body>
+        <Modal.Body></Modal.Body>
         <Modal.Footer>
           <Button
             id="closeAdd"
@@ -1145,7 +1315,7 @@ console.log(roleCheck)
         </Toast>
         </ToastContainer>
         </div> */}
-{/* 
+      {/* 
       <ToastContainer className="p-3" position={toastPosition}>
           <Toast className="success-toast-container" show={showEditToast} onClose={closeSuccessEdit} delay={5000} autohide>
             <Toast.Header className='success-toast-header justify-content-between'>
@@ -1156,7 +1326,6 @@ console.log(roleCheck)
             </Toast.Body>
           </Toast>
         </ToastContainer> */}
-        
     </div>
   );
 }
