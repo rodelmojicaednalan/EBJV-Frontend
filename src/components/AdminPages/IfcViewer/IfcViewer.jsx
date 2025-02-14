@@ -1,11 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react/prop-types */
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-} from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { useDoubleTap } from 'use-double-tap';
 
@@ -13,45 +9,15 @@ import { useDoubleTap } from 'use-double-tap';
 import * as OBC from '@thatopen/components';
 import * as BUI from '@thatopen/ui';
 import * as CUIT from '../../tables';
-import * as CUIB from '../../buttons';
 import * as OBF from '@thatopen/components-front';
 import * as OBCF from '@thatopen/components-front';
-import * as THREE from 'three';
 
 import axiosInstance from '../../../../axiosInstance';
-import StickyHeader from '../../SideBar/StickyHeader';
 import Loader from '../../Loaders/Loader';
 import Switch from './Switch';
 import './IfcViewer.css';
 
-// opacity
-import * as OPACITY from './fragmentOpacity';
-
-import {
-  FiUpload,
-  FiMessageCircle,
-  FiMaximize,
-  FiFolder,
-  FiZoomIn,
-  FiZoomOut,
-  FiArrowLeft,
-  FiRotateCw,
-  FiMousePointer,
-  FiSquare,
-  FiCrop,
-  FiScissors,
-  FiCamera,
-  FiCheckSquare,
-  // FiCube,
-  FiEye,
-  FiHelpCircle,
-  FiSettings,
-  FiColumns,
-  FiChevronDown,
-  FiEyeOff,
-  FiRotateCcw,
-} from 'react-icons/fi';
-import { FragmentsGroup } from '@thatopen/fragments';
+import { FiArrowLeft, FiEyeOff, FiRotateCcw } from 'react-icons/fi';
 
 BUI.Manager.init();
 
@@ -60,10 +26,7 @@ function IfcViewer() {
   const navigate = useNavigate();
   const containerRef = useRef(null);
   const measurementContainerRef = useRef(null);
-  const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
-  const [cameraControls, setCameraControls] = useState(false);
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [dimensions, setDimensions] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isHideContainerOpen, setIsHideContainerOpen] =
@@ -91,19 +54,15 @@ function IfcViewer() {
       setIsMobile(window.matchMedia('(max-width: 768px)').matches);
     };
 
-    // Initial check
     checkIsMobile();
 
-    // Add event listener to track window resizing
     window.addEventListener('resize', checkIsMobile);
 
-    // Cleanup on component unmount
     return () => {
       window.removeEventListener('resize', checkIsMobile);
     };
   }, []);
 
-  // const fileUrl = location.state?.fileUrl;
   const fileUrl = fileName;
 
   const togglePanel = () => {
@@ -117,12 +76,6 @@ function IfcViewer() {
       panelDiv.classList.add('hidden');
       app.style.gridTemplate = `"viewport"`;
     }
-
-    setIsPanelOpen((prevState) => !prevState);
-  };
-
-  const hanldeCameraControls = () => {
-    setCameraControls(!cameraControls);
   };
 
   const handleBack = () => {
@@ -164,9 +117,13 @@ function IfcViewer() {
         const grids = components.get(OBC.Grids);
         grids.create(world);
 
-        // const fragmentIfcLoader = components.get(OBC.IfcLoader);
-        // components.init();
+        // CULLER
+        const cullers = components.get(OBC.Cullers);
+        const culler = cullers.create(world);
 
+        culler.config.threshold = 10;
+
+        // LENGTH MEASUREMENTS
         const dimensionsInstance = components.get(
           OBCF.LengthMeasurement
         );
@@ -187,15 +144,8 @@ function IfcViewer() {
           }
         };
 
-        // const ifcLoader = components.get(OBC.IfcLoader);
         const fragmentsManager = components.get(OBC.FragmentsManager);
         let uuid = '';
-
-        // await ifcLoader.setup();
-
-        // fragmentsManager.onFragmentsLoaded.add((model) => {
-        //   if (world.scene) world.scene.three.add(model);
-        // });
 
         const [classificationsTree, updateClassificationsTree] =
           CUIT.tables.classificationTree({
@@ -204,14 +154,12 @@ function IfcViewer() {
           });
 
         //HIDER
-
         const hider = components.get(OBC.Hider);
         setHiderInstance(hider);
 
         const classifier = components.get(OBC.Classifier);
 
         fragmentsManager.onFragmentsLoaded.add(async (model) => {
-          classifier.byEntity(model);
           await classifier.byPredefinedType(model);
 
           const classifications = [
@@ -277,7 +225,20 @@ function IfcViewer() {
             uuid = model.uuid;
 
             const indexer = components.get(OBC.IfcRelationsIndexer);
-            await indexer.process(model, {});
+            await indexer.process(model);
+
+            // CULLERS
+            for (const fragment of model.items) {
+              culler.add(fragment.mesh);
+            }
+
+            culler.needsUpdate = true;
+            world.camera.controls.addEventListener(
+              'controlend',
+              () => {
+                culler.needsUpdate = true;
+              }
+            );
 
             setIsLoading(false);
           } catch (error) {
@@ -288,8 +249,6 @@ function IfcViewer() {
 
         loadIfc();
         const panel = BUI.Component.create(() => {
-          const [loadIfcBtn] = CUIB.buttons.loadIfc({ components });
-
           const onTextInput = (e) => {
             const input = e.target;
             propertiesTable.queryString =
@@ -375,8 +334,6 @@ function IfcViewer() {
 
         app.layout = 'main';
 
-        // Append the generated viewer and panel to the container
-        // document.body.append(measurementPanel);
         containerRef.current.appendChild(app);
         measurementContainerRef.current.appendChild(measurementPanel);
 
@@ -412,11 +369,8 @@ function IfcViewer() {
   return (
     <div className={`w-100`} ref={measurementContainerRef}>
       <TopBar
-        hanldeCameraControls={hanldeCameraControls}
-        cameraControls={cameraControls}
         handleBack={handleBack}
         handleTogglePanel={togglePanel}
-        isPanelOpen={isPanelOpen}
       />
       <div className="container" {...bind} ref={containerRef}>
         {/* <StickyHeader /> */}
@@ -450,19 +404,7 @@ function IfcViewer() {
 
 export default IfcViewer;
 
-function TopBar({
-  hanldeCameraControls,
-  cameraControls,
-  handleBack,
-  handleTogglePanel,
-  isPanelOpen,
-}) {
-  const [isModalOpen, setModalOpen] = useState(false);
-
-  const toggleModal = () => {
-    setModalOpen((prev) => !prev);
-  };
-
+function TopBar({ handleBack, handleTogglePanel }) {
   return (
     <div className="top-bar">
       <div className="top-bar-content">
@@ -475,74 +417,8 @@ function TopBar({
             Classification Tree
           </p>
           <Switch handleTogglePanel={handleTogglePanel} />
-          {/* <Tools
-            hanldeCameraControls={hanldeCameraControls}
-            toggleModal={toggleModal}
-            isModalOpen={isModalOpen}
-          /> */}
         </div>
       </div>
     </div>
-  );
-}
-
-function Tools({ hanldeCameraControls, toggleModal, isModalOpen }) {
-  return (
-    <>
-      {/* Hamburger Menu for Mobile */}
-      <div className="hamburger-menu" onClick={toggleModal}>
-        ☰
-      </div>
-
-      {/* Modal for Icons */}
-      <div
-        className={`icon-group-modal ${isModalOpen ? 'active' : ''}`}
-      >
-        <div onClick={hanldeCameraControls}>
-          <FiRotateCw />
-          {/* <FiChevronDown size={15} /> */}
-        </div>
-        {/* <FiMousePointer className="active-icon" /> */}
-        <FiMousePointer />
-        <FiSquare />
-        <FiMaximize />
-        <FiCrop />
-        <FiScissors />
-        <FiCamera />
-        <FiCheckSquare />
-        <FiEye />
-        {/* <span className="reset-model">Reset model</span> */}
-        <FiHelpCircle />
-        <FiSettings />
-        <FiColumns />
-      </div>
-
-      {/* Icon Group for Larger Screens */}
-      <div className="icon-group">
-        <div
-          onClick={hanldeCameraControls}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <FiRotateCw />
-          {/* <FiChevronDown size={15} /> */}
-        </div>
-        <FiMousePointer />
-        <FiSquare />
-        <FiMaximize />
-        <FiCrop />
-        <FiScissors />
-        <FiCamera />
-        <FiCheckSquare />
-        <FiEye />
-        {/* <span className="reset-model">Reset model</span> */}
-        <FiHelpCircle />
-        <FiSettings />
-        <FiColumns />
-      </div>
-    </>
   );
 }
