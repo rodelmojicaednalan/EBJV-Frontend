@@ -19,7 +19,7 @@ function QrCodeGenerator({ fileName, projectId }) {
   useEffect(() => {
     if (fileName && projectId) {
       let baseUrl = "https://cadstream.ebjv.e-fab.com.au";
-      if (fileName.endsWith(".ifc")) {
+      if (fileName.endsWith(".frag")) {
         setUrl(`${baseUrl}/ifc-viewer/${projectId}/${fileName}`);
       } else if (fileName.endsWith(".pdf")) {
         setUrl(`${baseUrl}/project-folder/pdf-viewer/${projectId}/${fileName}`);

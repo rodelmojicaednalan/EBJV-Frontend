@@ -1179,7 +1179,7 @@ function ProjectExplorer() {
             {roleCheck.some((role) =>
               ['Admin', 'Superadmin'].includes(role)
             ) &&
-              (selectedRow?.fileName?.endsWith('.ifc') ||
+              (selectedRow?.fileName?.endsWith('.frag') ||
                 selectedRow?.fileName?.endsWith('.pdf')) && (
                 <button
                   className="btn offcanvas-action-btn mr-1"
