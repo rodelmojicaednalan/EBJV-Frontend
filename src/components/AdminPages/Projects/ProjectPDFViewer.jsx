@@ -19,7 +19,7 @@ import { AuthContext } from '../../Authentication/authContext';
 function ProjectFolder() {
     const { user } = useContext(AuthContext);
     const userRoles = user?.roles?.map((role) => role.role_name) || [];
-    const isAdmin = userRoles.includes('Admin');
+    const isAdmin = userRoles.includes('Admin') || userRoles.includes('Superadmin');
     // console.log(isAdmin)
     const [isUserLoaded, setIsUserLoaded] = useState(false); 
   const defaultLayoutPluginInstance = defaultLayoutPlugin();

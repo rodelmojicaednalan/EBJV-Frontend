@@ -58,6 +58,7 @@ function ProjectContributors() {
       
   const [filteredContributors, setFilteredContributors] = useState([]);
   const filterRef = useRef(null);
+  const csvRef = useRef(null);
 
   const [toastPosition, setToastPosition] = useState('bottom-end')
   const [showSuccessToast, setShowSuccessToast] = useState(false);
@@ -678,6 +679,8 @@ useEffect(() => {
         const handleOutsideClick = (event) => {
           if (filterRef.current && !filterRef.current.contains(event.target)) {
             setActiveDropdown(null);
+          } else if (csvRef.current && !csvRef.current.contains(event.target)){
+            setMenuOpen(null);
           }
         };
     
@@ -941,7 +944,7 @@ useEffect(() => {
                                         <BiDotsVertical />
                                       </button>
                                       {menuOpen && (
-                                        <div className="dropdown-menu" id="contrib-dropdown">
+                                        <div className="dropdown-menu" id="contrib-dropdown" ref={csvRef}>
                                           <div className="dropdown-item">
                                               <CSVLink
                                                 {...handleExportToCSV()}
@@ -952,12 +955,12 @@ useEffect(() => {
                                                 Export to CSV
                                             </CSVLink>
                                           </div>
-                                          <div
+                                          {/* <div
                                             className="dropdown-item"
                                             onClick={() => handleMenuOptionClick("Import To Do")}
                                           >
                                             Import from CSV
-                                          </div>
+                                          </div> */}
                                         </div>
                                       )}
                                     </div>

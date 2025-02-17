@@ -12,6 +12,7 @@ import axiosInstance from "../../../../axiosInstance.js";
 import check from "../../../assets/images/check.png";
 import { useLoader } from "../../Loaders/LoaderContext";
 import useWindowWidth from "../Projects/ProjectFolderPages/windowWidthHook.jsx";
+
 function UserRoleManagement() {
   const navigate = useNavigate();
   const windowWidthHook = useWindowWidth();
@@ -122,6 +123,7 @@ function UserRoleManagement() {
       name: "Role Description",
       selector: (row) => row.role_description,
       sortable: true,
+      // hide: 'sm'
     },
     {
       name: "Action",
@@ -182,6 +184,7 @@ function UserRoleManagement() {
           <div style={{ height: "20px" }}></div>
           <div className="container-content">
             <DataTable
+              id="role-table"
               className="dataTables_wrapper"
               columns={columns}
               data={roles}
