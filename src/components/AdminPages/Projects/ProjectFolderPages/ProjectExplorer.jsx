@@ -692,7 +692,8 @@ function ProjectExplorer() {
                   id="addFiles-btn"
                   className="btn addFiles-btn btn-primary"
                   title="Add"
-                  onClick={addMenuToggle}
+                  onClick={() => setShowAddModal(true)}
+                  // onClick={addMenuToggle}
                 >
                   <RiAddLargeFill />
                 </button>
