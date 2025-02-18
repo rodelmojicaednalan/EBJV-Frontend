@@ -9,7 +9,7 @@ import { CSVLink } from 'react-csv';
 import Select from 'react-select';
 import '../../../../Custom.css';
 import '../ProjectStyles.css';
-import { BiDotsVertical, BiSolidEditAlt } from 'react-icons/bi';
+import { BiDotsVertical, BiSolidEditAlt} from 'react-icons/bi';
 import { LiaTimesSolid } from 'react-icons/lia';
 import { IoMdDownload, IoMdPersonAdd } from 'react-icons/io';
 import { IoGrid } from 'react-icons/io5';
@@ -22,11 +22,13 @@ import {
   FaFile,
   FaChevronCircleLeft,
   FaChevronCircleRight,
+  FaFileCsv 
 } from 'react-icons/fa';
 import { MdFolderOff } from 'react-icons/md';
 import { RiAddLargeFill } from 'react-icons/ri';
 import { AiOutlineFileAdd } from 'react-icons/ai';
 import { BsQrCode } from 'react-icons/bs';
+import { GrMultiple, GrDocumentCsv } from "react-icons/gr";
 import ifcIcon from '../../../../assets/images/ifc-icon.png';
 import pdfIcon from '../../../../assets/images/pdf-icon.png';
 import dxfIcon from '../../../../assets/images/dxf-icon.png';
@@ -737,6 +739,7 @@ function ProjectExplorer() {
                     id="explorer-buttons"
                   >
                     <button
+                      id="gridView-toggle"
                       className={`btn btn-icon grid-view-btn ${
                         viewType === 'grid' ? 'active' : ''
                       }`}
@@ -746,6 +749,7 @@ function ProjectExplorer() {
                       <IoGrid />
                     </button>
                     <button
+                      id="listView-toggle"
                       className={`btn btn-icon list-view-btn ${
                         viewType === 'list' ? 'active' : ''
                       }`}
@@ -754,7 +758,34 @@ function ProjectExplorer() {
                     >
                       <FaThList />
                     </button>
-                    <div className="menu-btn-container position-relative">
+                    {roleCheck.some((role) =>
+                            ['Admin', 'Superadmin'].includes(role)
+                          ) && (
+                            <button
+                              className="btn btn-icon"
+                              id="batchEdit-pdf"
+                              title="Edit Multiple PDFs"
+                              onClick={() =>
+                                navigate(
+                                  `/project-folder/multi-pdf-editor/${projectId}`
+                                )
+                              }
+                            >
+                             <GrMultiple/>
+                            </button>
+                          )}
+                          <button className="btn btn-icon" id="csv-export">
+                            <CSVLink
+                              {...handleExportToCSV()}
+                              filename={`${ownerName}'s ${projectName}_IFC-Files.csv`}
+                              className="exportToCSV"
+                              target="_blank"
+                              title="Export as CSV"
+                            >
+                             <GrDocumentCsv />
+                            </CSVLink>
+                          </button>
+                    {/* <div className="menu-btn-container position-relative">
                       <button
                         className="btn btn-icon menu-btn"
                         title="Menu"
@@ -778,23 +809,10 @@ function ProjectExplorer() {
                               Export to CSV
                             </CSVLink>
                           </div>
-                          {roleCheck.some((role) =>
-                            ['Admin', 'Superadmin'].includes(role)
-                          ) && (
-                            <div
-                              className="dropdown-item"
-                              onClick={() =>
-                                navigate(
-                                  `/project-folder/multi-pdf-editor/${projectId}`
-                                )
-                              }
-                            >
-                              Edit Multiple PDFs
-                            </div>
-                          )}
+                         
                         </div>
                       )}
-                    </div>
+                    </div> */}
                     {roleCheck.some((role) =>
                       ['Admin', 'Superadmin'].includes(role)
                     ) && (

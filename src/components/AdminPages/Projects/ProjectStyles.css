@@ -1738,6 +1738,9 @@ input[type=checkbox]#selectedPDF:checked:after {
 }
 
 @media (max-width: 768px) {
+  .multipdf-wrapper{
+    flex-direction: column !important;
+  }
   .pdf-iframe{
     height: 400px;
   }
@@ -1960,6 +1963,9 @@ input[type=checkbox]#selectedPDF:checked:after {
   .creator > p {
     width: 12rem;
   }
+  .multipdf-viewer{
+    max-width: 100%;
+  }
 }
 @media (max-width: 500px) and (min-width: 426px){
   .assignee > p{
@@ -2110,6 +2116,9 @@ input[type=checkbox]#selectedPDF:checked:after {
 }
 
 @media (max-width: 425px) {
+  .multipdf-viewer{
+    max-width: 100%;
+  }
   .add-download-btngroup{
     flex-direction: column;
     align-items: center;
@@ -2158,9 +2167,12 @@ input[type=checkbox]#selectedPDF:checked:after {
   .project-content{
     margin-top: 1rem;
   }
-  #explorer-buttons {
+  /* #explorer-buttons {
     display: none !important;
-  }
+  } */
+   #listView-toggle, #gridView-toggle {
+    display: none;
+   }
 
   .dataTables_wrapperz {
     font-size: 12px;
