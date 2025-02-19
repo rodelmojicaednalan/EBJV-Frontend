@@ -588,7 +588,6 @@ input[type="date"] {
     border: 1px solid #dfdfdf;
     /* margin-left: 0 !important; */
     margin-bottom: 10px;
-
   }
   .top-filter {
     padding: 0px 10px 20px 0px !important;
@@ -789,6 +788,9 @@ input[type="date"] {
    visibility: hidden;
   }
 
+  #search-bar {
+    width: 100%;
+  }
 }
 
 @media (max-width: 767px) and (min-width: 425px) {

@@ -903,6 +903,7 @@ useEffect(() => {
                                       {showSearchBox && (
                                         <div
                                           ref={searchBoxRef}
+                                          className="contributor-searchbar"
                                           style={{
                                             position: "absolute",
                                             left: -290,

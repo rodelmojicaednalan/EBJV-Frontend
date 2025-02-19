@@ -12,6 +12,7 @@ import axiosInstance from "../../../../axiosInstance.js";
 import check from "../../../assets/images/check.png";
 import { useLoader } from "../../Loaders/LoaderContext";
 import useWindowWidth from "../Projects/ProjectFolderPages/windowWidthHook.jsx";
+import { MdManageAccounts } from "react-icons/md";
 
 function UserRoleManagement() {
   const navigate = useNavigate();
@@ -45,6 +46,7 @@ function UserRoleManagement() {
       const roleData = response.data;
       setSelectedUserRole({
         role_name: roleData.role_name,
+        role_description: roleData.role_description,
         permissions: roleData.permissions,
       });
       setShowModal(true);
@@ -123,7 +125,7 @@ function UserRoleManagement() {
       name: "Role Description",
       selector: (row) => row.role_description,
       sortable: true,
-      // hide: 'sm'
+      hide: 'sm'
     },
     {
       name: "Action",
@@ -174,11 +176,16 @@ function UserRoleManagement() {
           {/* <h3 className="title-page">User Role Management</h3> */}
           <div className="top-filter">
             <button
-              onClick={() => navigate("/add-new-role")}
-              className="btn btn-primary float-start add-user-btn"
-            >
-              Add New Role
-            </button>
+                onClick={() => navigate("/add-new-role")}
+                className={`btn btn-primary float-end ${
+                  isMobile ? 'mobile-add-user-btn' : 'add-user-btn'
+                }`}
+                id="add-new-project-btn"
+              >
+                {/* <i className="fa fa-plus"></i>  */}
+                {isMobile ? <MdManageAccounts /> : <span> Add a role </span>}
+                {/* Add Project */}
+              </button>
             <br></br>
           </div>
           <div style={{ height: "20px" }}></div>
@@ -188,18 +195,20 @@ function UserRoleManagement() {
               className="dataTables_wrapper"
               columns={columns}
               data={roles}
+              responsive
             />
           </div>
         </div>
       </div>
 
       {selectedUserRole && (
-        <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal show={showModal} onHide={handleCloseModal} centered>
           <Modal.Header closeButton>
-            <Modal.Title>Role Details</Modal.Title>
+            <Modal.Title> {selectedUserRole.role_name} Permissions </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <h2>{selectedUserRole.role_name} Permissions</h2>
+            <label className="modal-role-desc">{selectedUserRole.role_description}</label> <br/>
+            <label> Permissions: </label>
              {selectedUserRole.permissions
               .map((permission, index) => (
                 <p key={index}>{permission.permission_name}</p>

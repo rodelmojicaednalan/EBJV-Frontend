@@ -9,13 +9,14 @@ import delete_icon from '../../../assets/images/delete-log.png';
 import check from '../../../assets/images/check.png';
 import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, Toast, ToastContainer } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import axiosInstance from '../../../../axiosInstance.js';
 import { useLoader } from '../../Loaders/LoaderContext';
 import { AuthContext } from '../../Authentication/authContext';
 import useWindowWidth from './ProjectFolderPages/windowWidthHook.jsx';
 import { TbCubePlus } from 'react-icons/tb';
+import { FaSearch } from 'react-icons/fa'
 
 import * as WEBIFC from 'web-ifc';
 import * as BUI from '@thatopen/ui';
@@ -36,6 +37,13 @@ function Projects() {
   const [projectLocation, setProjectLocation] = useState('');
 
   const [refreshKey, setRefreshKey] = useState(0);
+
+
+   const [toastPosition, setToastPosition] = useState('bottom-end')
+    const [showSuccessToast, setShowSuccessToast] = useState(false);
+    const [showErrorToast, setShowErrorToast] = useState(false);
+    const openSuccessToast = () => setShowSuccessToast(!showSuccessToast);
+    const openErrorToast = () => setShowErrorToast(!showErrorToast);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [newProject, setNewProject] = useState({
@@ -199,23 +207,13 @@ function Projects() {
 
       await axiosInstance.post('/create-project', formData);
 
-      Swal.fire({
-        title: 'Success!',
-        text: 'Project has been added successfully.',
-        icon: 'success',
-        confirmButtonText: 'OK',
-      });
-
+    
       setShowAddModal(false);
+      openSuccessToast();
       setNewProject({ title: '', location: '', file: null });
       setRefreshKey((prevKey) => prevKey + 1);
     } catch (error) {
-      Swal.fire({
-        title: error,
-        text: 'Failed to add the project. Please try again.',
-        icon: 'error',
-        confirmButtonText: 'OK',
-      });
+      openErrorToast()
     }
   };
 
@@ -401,6 +399,9 @@ function Projects() {
       <Modal
         show={showAddModal}
         onHide={() => setShowAddModal(false)}
+        centered
+        backdrop="static"
+
       >
         <Modal.Header closeButton>
           <Modal.Title>Add New Project</Modal.Title>
@@ -492,6 +493,28 @@ function Projects() {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <ToastContainer className="p-3" position={toastPosition}>
+                <Toast className="success-toast-container" show={showSuccessToast} onClose={openSuccessToast} delay={5000} autohide>
+                  <Toast.Header className='success-toast-header justify-content-between'>
+                 <span> Project Added Successfully! </span>   
+                  </Toast.Header>
+                  <Toast.Body className="success-toast-body">
+                    Enter the project folder to start exploring
+                  </Toast.Body>
+                </Toast>
+              </ToastContainer>
+      
+              <ToastContainer className="p-3" position={toastPosition}>
+                <Toast className="error-toast-container" show={showErrorToast} onClose={openErrorToast} delay={5000} autohide>
+                  <Toast.Header className='error-toast-header justify-content-between'>
+                  <span> Project Creation Failed </span>
+                  </Toast.Header>
+                  <Toast.Body className="error-toast-body">
+                    Please review the error details, check your configurations, and try again.
+                  </Toast.Body>
+                </Toast>
+              </ToastContainer>
     </div>
   );
 }

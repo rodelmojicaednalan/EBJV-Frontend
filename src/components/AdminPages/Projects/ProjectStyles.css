@@ -2302,7 +2302,15 @@ input[type=checkbox]#selectedPDF:checked:after {
     line-height: 2rem;
   }
   /* End of Mobile Menu */
-
+  .contributor-searchbar {
+    right: 0;
+    left: -220px !important;
+    top: -6px !important;
+    width: 220px;
+  }
+ .contributor-searchbar input{
+    width: 200px !important;
+ }
 }
 
 @media (max-width: 375px) {
