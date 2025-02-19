@@ -581,6 +581,7 @@ bim-panel {
 
 .container {
   padding: 0 0 0 0 !important;
+  margin: 0px;
 }
 
 .icon-group {
@@ -726,4 +727,14 @@ bim-grid {
 .tools-container>button:active,
 .hide-container>button:active {
   opacity: 90%;
+}
+
+@media (max-width: 768px) {
+  .asd {
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .asd.hidden {
+    transform: translateX(-100%);
+  }
 }

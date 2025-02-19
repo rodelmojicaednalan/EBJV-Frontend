@@ -9,6 +9,7 @@ import { useDoubleTap } from 'use-double-tap';
 import * as OBC from '@thatopen/components';
 import * as BUI from '@thatopen/ui';
 import * as CUIT from '../../tables';
+import * as CUIB from '../../buttons';
 import * as OBF from '@thatopen/components-front';
 import * as OBCF from '@thatopen/components-front';
 
@@ -68,13 +69,34 @@ function IfcViewer() {
   const togglePanel = () => {
     const panelDiv = document.querySelector('.asd');
     const app = document.querySelector('bim-grid');
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
     if (panelDiv.classList.contains('hidden')) {
       panelDiv.classList.remove('hidden');
-      app.style.gridTemplate = `"panel viewport" /368px 1fr`;
+
+      if (!isMobile) {
+        app.style.gridTemplate = `"panel viewport" /400px 1fr`;
+      } else {
+        panelDiv.style.position = 'absolute';
+        panelDiv.style.top = '50px';
+        panelDiv.style.left = '0';
+        panelDiv.style.width = '85%';
+        panelDiv.style.height = '100%';
+        panelDiv.style.background = 'rgba(255, 255, 255, 0.95)';
+        panelDiv.style.zIndex = '1000';
+      }
     } else {
       panelDiv.classList.add('hidden');
-      app.style.gridTemplate = `"viewport"`;
+
+      if (!isMobile) {
+        app.style.gridTemplate = `"viewport"`;
+      } else {
+        panelDiv.style.position = '';
+        panelDiv.style.width = '';
+        panelDiv.style.height = '';
+        panelDiv.style.background = '';
+        panelDiv.style.zIndex = '';
+      }
     }
   };
 
@@ -102,6 +124,7 @@ function IfcViewer() {
         const world = worlds.create();
 
         world.scene = new OBC.SimpleScene(components);
+
         world.renderer = new OBCF.PostproductionRenderer(
           components,
           viewport
@@ -113,6 +136,7 @@ function IfcViewer() {
         world.camera.controls.setLookAt(5, 5, 5, 0, 0, 0);
 
         world.scene.setup();
+        world.scene.three.background = null;
 
         const grids = components.get(OBC.Grids);
         grids.create(world);
@@ -120,6 +144,8 @@ function IfcViewer() {
         // CULLER
         const cullers = components.get(OBC.Cullers);
         const culler = cullers.create(world);
+
+        const indexer = components.get(OBC.IfcRelationsIndexer);
 
         culler.config.threshold = 10;
 
@@ -139,7 +165,7 @@ function IfcViewer() {
         }
 
         window.onkeydown = (event) => {
-          if (event.code === 'Delete' || event.code === 'Backspace') {
+          if (event.code === 'Delete') {
             dimensions.delete();
           }
         };
@@ -175,6 +201,13 @@ function IfcViewer() {
             components,
             fragmentIdMap: {},
           });
+
+        const [relationsTree] = CUIT.tables.relationsTree({
+          components,
+          models: [],
+        });
+
+        relationsTree.preserveStructureOnFilter = true;
 
         propertiesTable.preserveStructureOnFilter = true;
         propertiesTable.indentationInText = false;
@@ -224,7 +257,6 @@ function IfcViewer() {
             world.meshes.add(model);
             uuid = model.uuid;
 
-            const indexer = components.get(OBC.IfcRelationsIndexer);
             await indexer.process(model);
 
             // CULLERS
@@ -266,6 +298,11 @@ function IfcViewer() {
               : 'Expand';
           };
 
+          const onSearch = (e) => {
+            const input = e.target;
+            relationsTree.queryString = input.value;
+          };
+
           return BUI.html`
           <bim-panel class="asd hidden" label="Classifications Tree" class="options-menu">
           <bim-panel-section label="Classifications">
@@ -280,9 +317,15 @@ function IfcViewer() {
           <bim-text-input @input=${onTextInput} placeholder="Search Property" debounce="250"></bim-text-input>
           ${propertiesTable}
           </bim-panel-section>
+           
           </bim-panel> 
           `;
         });
+
+        //     <bim-panel-section label="Assembly">
+        //   <bim-text-input @input=${onSearch} placeholder="Search..." debounce="200"></bim-text-input>
+        //   ${relationsTree}
+        // </bim-panel-section>
 
         const measurementPanel = BUI.Component.create(() => {
           return BUI.html`

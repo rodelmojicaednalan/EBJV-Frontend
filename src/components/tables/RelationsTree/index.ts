@@ -1,6 +1,9 @@
-import * as OBC from "@thatopen/components";
-import * as BUI from "@thatopen/ui";
-import { RelationsTreeUIState, relationsTreeTemplate } from "./src/template";
+import * as OBC from '@thatopen/components';
+import * as BUI from '@thatopen/ui';
+import {
+  RelationsTreeUIState,
+  relationsTreeTemplate,
+} from './src/template';
 
 /**
  * Creates a relations tree component with the given state and optional auto-update feature.
@@ -19,19 +22,20 @@ import { RelationsTreeUIState, relationsTreeTemplate } from "./src/template";
  */
 export const relationsTree = (
   state: RelationsTreeUIState,
-  autoUpdate = true,
+  autoUpdate = true
 ) => {
-  const element = BUI.Component.create<BUI.Table, RelationsTreeUIState>(
-    relationsTreeTemplate,
-    state,
-  );
+  const element = BUI.Component.create<
+    BUI.Table,
+    RelationsTreeUIState
+  >(relationsTreeTemplate, state);
 
   if (autoUpdate) {
     const [, updateElement] = element;
     const { components } = state;
     const manager = components.get(OBC.FragmentsManager);
     const indexer = components.get(OBC.IfcRelationsIndexer);
-    const updateTree = () => updateElement({ models: manager.groups.values() });
+    const updateTree = () =>
+      updateElement({ models: manager.groups.values() });
     indexer.onRelationsIndexed.add(updateTree);
     manager.onFragmentsDisposed.add(updateTree);
   }
