@@ -9,6 +9,7 @@ import { useDoubleTap } from 'use-double-tap';
 import * as OBC from '@thatopen/components';
 import * as BUI from '@thatopen/ui';
 import * as CUIT from '../../tables';
+import * as THREE from 'three';
 import * as CUIB from '../../buttons';
 import * as OBF from '@thatopen/components-front';
 import * as OBCF from '@thatopen/components-front';
@@ -82,7 +83,6 @@ function IfcViewer() {
         panelDiv.style.left = '0';
         panelDiv.style.width = '85%';
         panelDiv.style.height = '100%';
-        panelDiv.style.background = 'rgba(255, 255, 255, 0.95)';
         panelDiv.style.zIndex = '1000';
       }
     } else {
@@ -94,7 +94,6 @@ function IfcViewer() {
         panelDiv.style.position = '';
         panelDiv.style.width = '';
         panelDiv.style.height = '';
-        panelDiv.style.background = '';
         panelDiv.style.zIndex = '';
       }
     }
@@ -136,7 +135,7 @@ function IfcViewer() {
         world.camera.controls.setLookAt(5, 5, 5, 0, 0, 0);
 
         world.scene.setup();
-        world.scene.three.background = null;
+        world.scene.three.background = new THREE.Color(0xe4e4e4);
 
         const grids = components.get(OBC.Grids);
         grids.create(world);
