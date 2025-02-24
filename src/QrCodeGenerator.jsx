@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 // other previous imports
 import * as htmlToImage from "html-to-image";
 import QRCode from 'react-qr-code'
+import Swal from 'sweetalert2';
 import './QRCodeStyle.css'
 import {Toast, ToastContainer} from 'react-bootstrap'
 import insideQRImage from './assets/images/ebjv-logo-fab.png'
@@ -18,7 +19,9 @@ function QrCodeGenerator({ fileName, projectId }) {
   
   useEffect(() => {
     if (fileName && projectId) {
-      let baseUrl = "https://cadstream.ebjv.e-fab.com.au";
+      // let baseUrl = "https://cadstream.ebjv.e-fab.com.au";
+      // let baseUrl = "http://localhost:5173";
+      let baseUrl = "https://app.ebjv.com.au.e-fab.com.au";
       if (fileName.endsWith(".frag")) {
         setUrl(`${baseUrl}/ifc-viewer/${projectId}/${fileName}`);
       } else if (fileName.endsWith(".pdf")) {
@@ -48,7 +51,17 @@ function QrCodeGenerator({ fileName, projectId }) {
     if (!fileName) return;
   
     const scale = 3; // Increase scale for higher resolution (e.g., 2x, 3x, 4x)
-    const fileType = fileName.endsWith(".ifc") ? "IFC" : fileName.endsWith(".pdf") ? "PDF" : "OTHER";
+    const fileType = fileName.endsWith(".frag") ? "IFC" : fileName.endsWith(".pdf") ? "PDF" : "OTHER";
+  
+    // Show loading Swal
+    Swal.fire({
+      title: "Downloading QR Code...",
+      text: "Please wait.",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
   
     htmlToImage
       .toCanvas(qrCodeRef.current, { pixelRatio: scale })
@@ -57,11 +70,19 @@ function QrCodeGenerator({ fileName, projectId }) {
         link.href = canvas.toDataURL("image/png"); // Convert canvas to high-quality PNG
         link.download = `EBJV-QR_${fileName}.png`;
         link.click();
+  
+        // Show success message
+        Swal.fire("Success!", `QR Code for ${fileName} has been downloaded`, "success");
       })
       .catch((error) => {
         console.error("Error generating high-resolution QR code:", error);
+        Swal.fire("Error!", "Failed to generate QR Code. Try again.", "error");
+      })
+      .finally(() => {
+        Swal.close(); // Close loader regardless of success or failure
       });
   };
+  
   
 
   

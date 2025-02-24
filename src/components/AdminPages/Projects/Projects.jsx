@@ -18,6 +18,7 @@ import useWindowWidth from './ProjectFolderPages/windowWidthHook.jsx';
 import { TbCubePlus } from 'react-icons/tb';
 import { FaSearch } from 'react-icons/fa'
 
+
 import * as WEBIFC from 'web-ifc';
 import * as BUI from '@thatopen/ui';
 import * as OBC from '@thatopen/components';
@@ -28,6 +29,7 @@ function Projects() {
   const navigate = useNavigate();
   const windowWidthHook = useWindowWidth();
   const isMobile = windowWidthHook <= 425;
+  const is320 = windowWidthHook <= 320;
   const [data, setData] = useState([]);
   const [selectedprojectId, setSelectedprojectId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -53,51 +55,97 @@ function Projects() {
     properties: null,
   });
 
+  console.log(newProject.file)
+
   const [roleCheck, setRoleCheck] = useState([]);
   const [fragFile, setFragFile] = useState(null);
   const [propertiesJSON, setPropertiesJSON] = useState('');
   const [components] = useState(() => new OBC.Components());
+
   useEffect(() => {
-    const fragments = components.get(OBC.FragmentsManager);
-    const fragmentIfcLoader = components.get(OBC.IfcLoader);
-
-    fragmentIfcLoader.setup();
-
-    fragments.onFragmentsLoaded.add(async (model) => {
-      const group = Array.from(fragments.groups.values())[0];
-      const data = fragments.export(group);
-      const file_name = await newProject.file.name.split('.')[0];
-      const dateID = Date.now();
-      setFragFile(
-        new File([new Blob([data])], `${dateID}-${file_name}.frag`)
-      );
-      const properties = group.getLocalProperties();
-      if (properties) {
-        setPropertiesJSON(
-          new File(
-            [JSON.stringify(properties)],
-            `${dateID}-${file_name}.json`
-          )
-        );
-      }
+    if (!newProject.file) return;
+  
+    Swal.fire({
+      title: "Converting IFC File...",
+      text: "Please wait.",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
     });
+  
+    const initFragments = async () => {
+      try {
+        const fragments = components.get(OBC.FragmentsManager);
+        const fragmentIfcLoader = components.get(OBC.IfcLoader);
+  
+        // ✅ Ensure the WASM module is loaded first
+        await fragmentIfcLoader.setup();
+  
+        fragments.onFragmentsLoaded.add(async (model) => {
+          try {
+            const group = Array.from(fragments.groups.values())[0];
+            const data = fragments.export(group);
+            const file_name = newProject.file.name.split('.')[0];
+            const dateID = Date.now();
+  
+            setFragFile(new File([new Blob([data])], `${dateID}-${file_name}.frag`));
+  
+            const properties = group.getLocalProperties();
+            if (properties) {
+              setPropertiesJSON(
+                new File([JSON.stringify(properties)], `${dateID}-${file_name}.json`)
+              );
+            }
+  
+            // ✅ Close Swal Loader on Success
+            Swal.fire({
+              title: "IFC File Converted Successfully!", // Only header
+              icon: "success", // Success icon
+              confirmButtonText: "Continue", // Custom button text
+              customClass: {
+                confirmButton: "btn btn-primary", // Apply custom CSS class
+              },
+            });
+  
+          } catch (error) {
+            console.error("Error processing IFC:", error);
+  
+            // Show error message if conversion fails
+            Swal.fire("Error!", "Failed to convert IFC file. Try again.", "error");
+          }
+        });
+      } catch (error) {
+        console.error("Error initializing Fragments:", error);
+        Swal.fire("Error!", "Failed to initialize IFC Loader.", "error");
+      }
+    };
+  
+    initFragments();
   }, [components, newProject.file]);
+  
   const loadIfc = async (file) => {
     if (!file) return;
     try {
       const data = await file.arrayBuffer();
       const buffer = new Uint8Array(data);
       const fragmentIfcLoader = components.get(OBC.IfcLoader);
+      
+      // ✅ Ensure the IFC Loader is properly initialized
+      await fragmentIfcLoader.setup();
+      
       await fragmentIfcLoader.load(buffer);
     } catch (error) {
-      console.error('Error loading IFC:', error);
+      console.error("Error loading IFC:", error);
     }
   };
+  
   useEffect(() => {
     if (newProject.file) {
       loadIfc(newProject.file);
     }
   }, [newProject.file]);
+  
 
   useEffect(() => {
     if (user && user.id) {
@@ -187,35 +235,65 @@ function Projects() {
   // add project
   const handleAddNewProject = async () => {
     try {
+      // Show Swal Loader while uploading
+      Swal.fire({
+        title: "Uploading Project...",
+        text: "Please wait.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+  
       if (!fragFile) {
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
-
+  
       const formData = new FormData();
-      formData.append('project_name', newProject.projectName);
-      formData.append('user_id', projectOwner);
-      formData.append(
-        'project_location',
-        projectLocation /*newProject.location*/
-      );
+      formData.append("project_name", newProject.projectName);
+      formData.append("user_id", projectOwner);
+      formData.append("project_location", projectLocation);
       if (fragFile) {
-        formData.append('project_file', fragFile);
-        formData.append('properties', propertiesJSON);
+        formData.append("project_file", fragFile);
+        formData.append("properties", propertiesJSON);
       } else {
-        console.warn('No frag file available');
+        console.warn("No frag file available");
       }
-
-      await axiosInstance.post('/create-project', formData);
-
-    
+  
+      await axiosInstance.post("/create-project", formData);
+  
+      // ✅ Close Swal loader & show success message
+      Swal.fire({
+        title: "Project Uploaded Successfully!",
+        icon: "success",
+        confirmButtonText: "OK",
+        customClass: {
+          confirmButton: "btn btn-primary",
+        },
+      });
+  
       setShowAddModal(false);
       openSuccessToast();
-      setNewProject({ title: '', location: '', file: null });
+      setNewProject({ title: "", location: "", file: null });
       setRefreshKey((prevKey) => prevKey + 1);
     } catch (error) {
-      openErrorToast()
+      console.error("Upload failed:", error);
+  
+      // ❌ Close Swal loader & show error message
+      Swal.fire({
+        title: "Upload Failed!",
+        text: "Something went wrong. Please try again.",
+        icon: "error",
+        confirmButtonText: "Retry",
+        customClass: {
+          confirmButton: "btn btn-danger",
+        },
+      });
+  
+      openErrorToast();
     }
   };
+  
 
   //handle deleting of project
   const handleDeleteprojectClick = async (projectId) => {
@@ -274,17 +352,15 @@ function Projects() {
   const columns = [
     {
       name: 'Project Name',
-      width: '50%',
+      width: 'auto',
       selector: (row) => row.project_name,
       sortable: true,
     },
-    {
+    !is320 && { // ✅ Conditionally include the column
       name: 'Project Owner',
       selector: (row) => row.project_owner,
       sortable: true,
-      hide: 'md',
     },
-
     {
       name: 'Action',
       selector: (row) => (
@@ -299,7 +375,8 @@ function Projects() {
             onClick={() => handleViewProjectFolder(row.id)}
             style={{ cursor: 'pointer' }}
           />
-          {row.project_file && row.project_file.length > 0 && (
+ 
+          {/* {row.project_file && row.project_file.length > 0 && (
             <img
               className="ifc-viewer-icon ml-3"
               src={view_model}
@@ -322,7 +399,7 @@ function Projects() {
               }
               style={{ cursor: 'pointer' }}
             />
-          )}
+          )} */}
           {roleCheck.some((role) =>
             ['Admin', 'Superadmin'].includes(role)
           ) && (
@@ -336,7 +413,9 @@ function Projects() {
               width="25"
               height="25"
             />
+
           )}
+       
         </div>
       ),
       sortable: false,

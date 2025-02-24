@@ -25,7 +25,7 @@ import {
   FaFileCsv 
 } from 'react-icons/fa';
 import { MdFolderOff } from 'react-icons/md';
-import { RiAddLargeFill } from 'react-icons/ri';
+import { RiAddLargeFill, RiEdit2Fill  } from 'react-icons/ri';
 import { AiOutlineFileAdd } from 'react-icons/ai';
 import { BsQrCode, BsFillFolderFill } from 'react-icons/bs';
 import { GrMultiple, GrDocumentCsv } from "react-icons/gr";
@@ -37,6 +37,7 @@ import {
   Button,
   ToastContainer,
   Toast,
+  Breadcrumb
 } from 'react-bootstrap';
 import ProjectSidebar from '../ProjectFolderSidebar';
 import SidebarOffcanvas from '../MobileSidebar';
@@ -45,16 +46,24 @@ import useWindowWidth from './windowWidthHook.jsx';
 
 // import useDrivePicker from 'react-google-drive-picker';
 
+// import * as htmlToImage from "html-to-image";
+// import QRCode from 'react-qr-code';
+// import '../../../../QRCodeStyle.css'
 import QrCodeGenerator from '../../../../QrCodeGenerator.jsx';
 
-function ProjectExplorer() {
+function SubFolder() {
   // const [openPicker, data, authResponse] = useDrivePicker();
 
   const windowWidthHook = useWindowWidth();
   const isMobile = windowWidthHook <= 425;
-  const { projectId } = useParams();
+  const { projectId, folderName } = useParams();
+  const decodedFolderName = decodeURIComponent(folderName);
+  const formattedFolderName = decodedFolderName.split('/').pop();
+  const extractedRootFolder = decodedFolderName.split('/')[0];
+  console.log(extractedRootFolder);
   const [projectName, setProjectName] = useState('');
   const [ownerName, setOwnerName] = useState('');
+  const [currentFolder, setCurrentFolder] = useState(null);
 
   const [viewType, setViewType] = useState('list');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -62,7 +71,6 @@ function ProjectExplorer() {
   const [offcanvasMenuOpen, setOffcanvasMenuOpen] = useState(false);
 
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
-  const [showAddFolderSubMenu, setShowAddFolderSubMenu] = useState(false);
 
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [availableEmails, setAvailableEmails] = useState([]);
@@ -91,28 +99,11 @@ function ProjectExplorer() {
     setIsAddMenuOpen(!isAddMenuOpen);
   };
 
-  const handleOCMenuToggle = () => {
-    setOffcanvasMenuOpen(!offcanvasMenuOpen);
-  };
-
-  const handleOCMenuOptionClick = (option) => {
-    setOffcanvasMenuOpen(false);
-    Swal.fire(`Function to ${option}`);
-  };
-
   const [explorerSubfolders, setExplorerSubfolders] = useState([]);
   const [explorerTable, setExplorerTable] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const navigate = useNavigate();
 
-  const handleMenuToggle = () => {
-    setMenuOpen(!menuOpen);
-  };
-
-  const handleMenuOptionClick = (option) => {
-    setMenuOpen(false);
-    Swal.fire(`Function to: ${option}`);
-  };
 
   const [showCanvas, setShowCanvas] = useState(false);
   const handleCloseCanvas = () => setShowCanvas(false);
@@ -126,83 +117,6 @@ function ProjectExplorer() {
     handleShowCanvas(); // Show the Offcanvas
   };
 
-  const handleEditClick = () => {
-    setShowEditCanvas(true);
-  };
-
-  // const handleOpenPicker = () => {
-  //   openPicker({
-  //     clientId: '1043565058642-l6jbl5nq0i519h8dctpoo0i1ru2vp5s6.apps.googleusercontent.com',
-  //     developerKey: "AIzaSyCeFx5pGWMSp1kGmkFdCj5BTU8bCqP-ORo",
-  //     viewId:"FOLDERS",
-  //     showUploadView: true,
-  //     showUploadFolders: true,
-  //     supportDrives: true,
-  //     multiselect: false,
-  //     callbackFunction: (response) => {
-  //       if (response.action === "picked") {
-  //         const folderId = response.docs[0]?.id; // Get the selected folder ID
-  //         console.log("Selected Folder ID:", folderId);
-  //         fetchFolderContents(folderId); // Call a function to fetch folder contents
-  //       } else {
-  //         console.log("No folder selected.");
-  //       }
-  //     },
-  //     onError: (error) => {
-  //       console.error("Picker Error: ", error);
-  //     },
-  //   });
-  // }
-
-  // useEffect(() => {
-  //   if (data && data.folders) {
-  //     data.folders.map((i) => console.log(i));
-  //   }
-  // }, [data]);
-
-  // const fetchFolderContents = async (folderId) => {
-  //   const accessToken = authResponse.access_token; // Assuming you get this from the Picker's authResponse
-  //   const apiUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&fields=files(id,name,mimeType)`;
-
-  //   try {
-  //     const response = await fetch(apiUrl, {
-  //       headers: {
-  //         Authorization: `Bearer ${accessToken}`,
-  //       },
-  //     });
-  //     const data = await response.json();
-  //     console.log("Folder Contents:", data.files);
-
-  //     // Example: Copy a file
-  //     if (data.files.length > 0) {
-  //       copyFile(data.files[0].id, "New File Name", folderId, accessToken);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching folder contents:", error);
-  //   }
-  // };
-
-  // const copyFile = async (fileId, newName, parentFolderId, accessToken) => {
-  //   const apiUrl = `https://www.googleapis.com/drive/v3/files/${fileId}/copy`;
-  //   try {
-  //     const response = await fetch(apiUrl, {
-  //       method: "POST",
-  //       headers: {
-  //         Authorization: `Bearer ${accessToken}`,
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         name: newName,
-  //         parents: [parentFolderId], // Copy into the same folder
-  //       }),
-  //     });
-  //     const data = await response.json();
-  //     console.log("File copied:", data);
-  //   } catch (error) {
-  //     console.error("Error copying file:", error);
-  //   }
-  // };
-
   // Fetch project details and populate fields
   const fetchProjectDetails = async () => {
     try {
@@ -212,13 +126,32 @@ function ProjectExplorer() {
       setProjectName(project_name);
       setOwnerName(`${owner.first_name} ${owner.last_name}`);
   
-      // ✅ Extract ONLY top-level files, no deep recursion
-      const extractTopLevelFiles = (folderNode) => {
-        if (!folderNode.files || folderNode.files.length === 0) return [];
+      // 🔍 Function to find a folder by name in the tree
+      const findFolderInTree = (folderNode, targetName) => {
+        if (!folderNode) return null;
   
-        return folderNode.files
-        .filter((file) => !file.fileName.endsWith('.json'))
-        .map((file) => ({
+        // If this is the target folder, return it
+        if (folderNode.folderName === targetName) return folderNode;
+  
+        // Recursively search in subfolders
+        if (folderNode.subfolders && folderNode.subfolders.length > 0) {
+          for (let subfolder of folderNode.subfolders) {
+            const found = findFolderInTree(subfolder, targetName);
+            if (found) return found;
+          }
+        }
+  
+        return null;
+      };
+  
+      // 🔍 Locate the specific folder
+      const targetFolder = findFolderInTree(folderTree, formattedFolderName);
+  
+      // ✅ Extract files from the found folder
+      const extractFiles = (folderNode) => {
+        if (!folderNode || !folderNode.files || folderNode.files.length === 0) return [];
+  
+        return folderNode.files.map((file) => ({
           projectId: id,
           fileName: file.fileName,
           fileSize: `${(file.fileSize / (1024 * 1024)).toFixed(2)} MB`,
@@ -241,7 +174,7 @@ function ProjectExplorer() {
         }));
       };
   
-      // ✅ Extract ONLY direct subfolders, no recursion
+      // ✅ Extract subfolders of the found folder (if needed)
       const extractDirectSubfolders = (folderNode, parentPath = "") => {
         if (!folderNode.subfolders || folderNode.subfolders.length === 0) return [];
     
@@ -251,19 +184,21 @@ function ProjectExplorer() {
         }));
     };
   
-      const topLevelFiles = extractTopLevelFiles(folderTree);
-      const directSubfolders = extractDirectSubfolders(folderTree, folderTree.folderName);
+      const filesInTargetFolder = extractFiles(targetFolder);
+      const subfoldersInTargetFolder = extractDirectSubfolders(folderTree, folderTree.folderName);
   
-      setExplorerSubfolders(directSubfolders); // Only direct subfolders
-      setExplorerTable(topLevelFiles); // Only top-level files
+      setExplorerSubfolders(subfoldersInTargetFolder);
+      setExplorerTable(filesInTargetFolder);
   
-      console.table(topLevelFiles);
-      console.table(directSubfolders);
+      console.log(`Fetching files from folder: ${formattedFolderName}`);
+      // console.table(filesInTargetFolder);
+      // console.table(subfoldersInTargetFolder);
     } catch (error) {
       console.error('Error fetching project details:', error);
     }
   };
   
+
 
   const fetchAvailableUsers = async () => {
     try {
@@ -307,7 +242,7 @@ function ProjectExplorer() {
   useEffect(() => {
     fetchAvailableUsers();
     fetchProjectDetails();
-  }, [projectId, refreshKey]);
+  }, [projectId, refreshKey, formattedFolderName]);
 
   // Define columns for the table
   const explorerColumn = [
@@ -393,10 +328,6 @@ function ProjectExplorer() {
   };
 
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showAddFolderModal, setShowAddFolderModal] = useState(false);
-  const [selectedSubfolders, setSelectedSubfolders] = useState([]);
-  const [deleteFolderMode, setDeleteFolderMode] =  useState(false);
-  const [newFolder, setNewFolder] = useState("");
   const [newFiles, setNewFiles] = useState([]);
 
   const handleAddNewFile = async () => {
@@ -407,12 +338,13 @@ function ProjectExplorer() {
       });
 
       await axiosInstance.post(
-        `/upload-ifc-files/${projectId}`,
+        `/upload-ifc-files/${projectId}/${encodeURIComponent(formattedFolderName)}`, // Encode special characters
         formData,
         {
           headers: { 'Content-Type': 'multipart/form-data' },
         }
       );
+      
 
       Swal.fire({
         title: 'Success!',
@@ -434,118 +366,38 @@ function ProjectExplorer() {
     }
   };
 
-  // const [newFileName, setNewFileName] = useState('')
-  // const handleRenameFile = async () => {
-  //   if (!newFileName.trim()) {
-  //     alert('New file name cannot be empty.');
-  //     return;
-  //   }
+  const [newFolderName, setNewFolderName] = useState(null)
+  const [openFolderRenamer, setOpenFolderRenamer] = useState(false);
 
-  //   try {
-  //     const response = await axiosInstance.post(`/rename-file/${projectId}`, {
-  //       oldFileName: selectedRow.fileName,
-  //       newFileName: newFileName,
-  //     });
 
-  //     if (response.status === 200) {
-  //       setRefreshKey((prevKey) => prevKey + 1); //Trigger a refresh or update
-  //       handleCloseEditCanvas(); // Close the Offcanvas
-  //     }
-  //   } catch (error) {
-  //     console.error('Error renaming file:', error);
-  //     alert('Failed to rename the file. Please try again.');
-  //   }
-  // };
-
-  // // Extract the base name and extension from the current file name
-  // const fileNameParts = selectedRow?.fileName ? selectedRow.fileName.split('.') : [];
-  // const fileBaseName = fileNameParts.length > 1
-  //   ? fileNameParts.slice(0, -1).join('.')
-  //   : selectedRow?.fileName || 'Untitled';
-  // const fileExtension = fileNameParts.length > 1
-  //   ? fileNameParts[fileNameParts.length - 1]
-  //   : 'ifc'; // Fallback to a default extension if not available
-
-  const handleAddNewFolder = async () => {
-    if (!newFolder.trim()) {
-      Swal.fire({
-        title: 'Error!',
-        text: 'Folder name cannot be empty.',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-  
+  const handleRenameFolder = async () => {
     try {
-      await axiosInstance.post(`/create-folder/${projectId}`, {
-        folder_name: newFolder.trim(),
+      await axiosInstance.post(
+        `/rename-folder/${projectId}/${encodeURIComponent(decodedFolderName)}/${encodeURIComponent(newFolderName)}`
+      );
+  
+      Swal.fire({
+        title: 'Success!',
+        text: 'Folder has been renamed successfully.',
+        icon: 'success',
+        confirmButtonText: 'OK',
+      }).then(() => {
+        // Navigate only after the user clicks "OK"
+        navigate(`/project-folder/${projectId}/data/project-explorer`);
       });
   
-      showToast();  // Show success message
-      setShowAddFolderModal(false);
-      setNewFolder('');
-      setRefreshKey((prevKey) => prevKey + 1); // Refresh UI
+      setOpenFolderRenamer(false);
+      setRefreshKey((prevKey) => prevKey + 1);
     } catch (error) {
       Swal.fire({
         title: 'Error!',
-        text: error.response?.data?.error || 'Failed to create folder',
+        text: error.response?.data?.error || 'Failed to rename folder.',
         icon: 'error',
         confirmButtonText: 'OK',
       });
     }
   };
   
-
-const toggleSelectSubfolder = (folderPath) => {
-  setSelectedSubfolders((prevSelected) =>
-    prevSelected.includes(folderPath)
-      ? prevSelected.filter((item) => item !== folderPath) // Deselect
-      : [...prevSelected, folderPath] // Select
-  );
-};
-
-const deleteSelectedSubfolders = async () => {
-  if (selectedSubfolders.length === 0) return;
-
-  const confirmed = await Swal.fire({
-    title: "Are you sure?",
-    text: `You are about to delete ${selectedSubfolders.length} folder(s). This action cannot be undone.`,
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Delete",
-    cancelButtonText: "Cancel",
-    customClass: {
-      confirmButton: "btn btn-danger",
-      cancelButton: "btn btn-secondary",
-    },
-  });
-
-  if (confirmed.isConfirmed) {
-    try {
-      await axiosInstance.post(`/delete-folders/${projectId}`, { folderPaths: selectedSubfolders });
-
-      // Show success message
-      Swal.fire({
-        title: "Deleted!",
-        text: "The selected folders have been deleted.",
-        icon: "success",
-        confirmButtonText: "OK",
-      });
-
-      // Clear selection
-      setSelectedSubfolders([]);
-      setDeleteFolderMode(false);
-
-      // Refresh folder list
-      setRefreshKey((prevKey) => prevKey + 1);
-    } catch (error) {
-      console.error("Error deleting folders:", error);
-      Swal.fire("Error", "Failed to delete subfolders. Try again.", "error");
-    }
-  }
-};
-
   const handleDeleteFiles = async () => {
     try {
       const result = await Swal.fire({
@@ -701,7 +553,7 @@ const deleteSelectedSubfolders = async () => {
   }, []);
 
   const downloadFile = async (fileName) => {
-    // console.log(fileName);
+    console.log(fileName);
     Swal.fire({
       title: 'Fetching file...',
       text: 'Please wait.',
@@ -781,35 +633,13 @@ const deleteSelectedSubfolders = async () => {
                   id="addFiles-btn"
                   className="btn addFiles-btn btn-primary"
                   title="Add"
-                  // onClick={() => setShowAddModal(true)}
-                  onClick={addMenuToggle}
+                  onClick={() => setShowAddModal(true)}
+                  // onClick={addMenuToggle}
                 >
                   <RiAddLargeFill />
                 </button>
                 {isAddMenuOpen && (
                   <div className="addFile-dropdown" ref={menuRef}>
-                    <div className="addFile-dd-item" 
-                // onMouseEnter={() => setShowAddFolderSubMenu(true)}
-                // onMouseLeave={() => setShowAddFolderSubMenu(false)}
-                onClick={setShowAddFolderModal}>
-                  <FaChevronLeft className="submenu-indicator"/>
-                  <FaFolderPlus className="addFile-dd-icon" />
-                  <span>Create folder</span>
-                  {/* {showAddFolderSubMenu && (
-                    <div className="addFolder-subDropdown">
-                      <div className="addFolder-subdd-item" onClick={handleOpenPicker}>
-                        <FaGoogleDrive className="addFile-dd-icon" />
-                        <span>Get Folder From Drive</span>
-                      </div>
-                      <div className="addFile-dd-divider" />
-                      <div className="addFolder-subdd-item" onClick={setShowAddFolderModal}>
-                        <FaEdit className="addFile-dd-icon" />
-                        <span>Manually Create Folder</span>
-                      </div>
-                    </div>
-                  )} */}
-                </div>
-                    <div className="addFile-dd-divider" />
                     <div
                       className="addFile-dd-item"
                       onClick={() => setShowAddModal(true)}
@@ -823,7 +653,12 @@ const deleteSelectedSubfolders = async () => {
               <div className="project-content">
                 <div className="table-header d-flex justify-content-between align-items-center">
                   <div className="page-title">
-                    <h2>Explorer</h2>
+                  <Breadcrumb>
+                    <Breadcrumb.Item className="d-flex flex-row align-items-center" onClick={() => navigate(`/project-folder/${projectId}/data/project-explorer`)}> <FaChevronLeft/> {projectName}</Breadcrumb.Item>
+                    <Breadcrumb.Item active className="d-flex align-items-center">
+                    {formattedFolderName} <RiEdit2Fill className="ml-2" size={18} onClick={() => setOpenFolderRenamer(true)} /> 
+                    </Breadcrumb.Item>
+                </Breadcrumb>
                   </div>
                   <div
                     className="button-group d-flex"
@@ -858,7 +693,7 @@ const deleteSelectedSubfolders = async () => {
                               title="Edit Multiple PDFs"
                               onClick={() =>
                                 navigate(
-                                  `/project-folder/multi-pdf-editor/${projectId}`
+                                  `/project-folder/multi-pdf-editor/${projectId}/${encodeURIComponent(decodedFolderName)}`
                                 )
                               }
                             >
@@ -918,8 +753,6 @@ const deleteSelectedSubfolders = async () => {
                     )}
                   </div>
                 </div>
-
-                <div className="d-flex flex-row yess">
                 {roleCheck.some((role) =>
                   ['Admin', 'Superadmin'].includes(role)
                 ) && (
@@ -932,47 +765,8 @@ const deleteSelectedSubfolders = async () => {
                     Delete Files
                   </button>
                 )}
-                  
-                <button className="btn mr-2 deleteModeBtn" onClick={() => setDeleteFolderMode(!deleteFolderMode)}>
-                    {deleteFolderMode ? "Cancel" : "Delete Folders"}
-                  </button>
-
-                  {deleteFolderMode && selectedSubfolders.length > 0 && (
-                    <button className="btn deleteFoldersBtn" onClick={deleteSelectedSubfolders}>
-                      Confirm Delete ({selectedSubfolders.length})
-                    </button>
-                  )}
-                </div>
-
 
                 <div className={`project-display ${viewType}`}>
-                <div className="project_subfolders">
-                  <label> Folders: </label>
-                  {explorerSubfolders.length > 0 ? (
-                    <div className="subFolder-card d-flex flex-row justify-content-evenly">
-                      {explorerSubfolders.map((subfolder, index) => (
-                        <div
-                          key={index}
-                          className={`subfolder-item ${selectedSubfolders.includes(subfolder.folderPath) ? "selected" : ""}`}
-                          onClick={(e) => {
-                            if (deleteFolderMode) {
-                              toggleSelectSubfolder(subfolder.folderPath);
-                              e.stopPropagation(); // Prevent navigation
-                            } else {
-                              navigate(`/project-folder/${projectId}/data/project-explorer/subfolder/${encodeURIComponent(subfolder.folderPath)}`);
-                            }
-                          }}
-                        >
-                          <BsFillFolderFill className="subfolder-icon" /> {subfolder.folderName}
-                          {deleteFolderMode && <input type="checkbox" checked={selectedSubfolders.includes(subfolder.folderPath)} readOnly />}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div>No Folders Found</div>
-                  )}
-                </div>
-
                   {viewType === 'grid' ? (
                     <div>
                       <div className="grid-view">
@@ -1054,7 +848,7 @@ const deleteSelectedSubfolders = async () => {
                       id="explorer-table"
                       columns={noDeleteColumn}
                       data={explorerTable}
-                      pagination={explorerTable.length >= 20}
+                      pagination={explorerTable.length >= 10}
                       paginationPerPage={20}
                       paginationRowsPerPageOptions={[10, 20, 30, 40]}
                       onRowClicked={handleRowClick}
@@ -1131,41 +925,6 @@ const deleteSelectedSubfolders = async () => {
             onClick={handleAddNewFile}
           >
             Upload
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      <Modal show={showAddFolderModal} onHide={() => setShowAddFolderModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Create Folder</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <form onSubmit={(e) => e.preventDefault()}>
-            <div className="mb-3">
-              <label htmlFor="projectFolder" className="form-label">
-                Please enter a name for the new folder:
-              </label>
-              <input
-                type="text"
-                name="projectFolders"
-                className="form-control"
-                id="projectFolder"
-                placeholder='Folder name'
-                onChange={(e) => setNewFolder(e.target.value)}
-              />
-            </div>
-          </form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            id="closeAdd"
-            variant="secondary"
-            onClick={() => setShowAddFolderModal(false)}
-          >
-            Close
-          </Button>
-          <Button id="saveAdd" variant="primary" onClick={handleAddNewFolder}>
-            Create
           </Button>
         </Modal.Footer>
       </Modal>
@@ -1335,28 +1094,6 @@ const deleteSelectedSubfolders = async () => {
                   <BsQrCode size={20} />
                 </button>
               )}
-
-            {/* <button className="btn " onClick={handleOCMenuToggle}><BiDotsVertical size={20}/></button>  
-              {offcanvasMenuOpen && (
-                        <div className="dropdown-menu" id="offcanvas-dropdown" ref={menuRef}>
-                           <div className="dropdown-item"
-                                onClick={() => handleOCMenuOptionClick('Add Tags')}>
-                            Add Tags
-                          </div>
-                           <div className="dropdown-item"
-                                onClick={() => handleOCMenuOptionClick('Checkin')}>
-                            Checkin Files
-                          </div>
-                          <div className="dropdown-item"
-                               onClick={() => handleOCMenuOptionClick('Checkout')}>
-                            Checkout Files
-                          </div>
-                          <div className="dropdown-item"
-                               onClick={() => handleOCMenuOptionClick('Export to Excel')}>
-                            Export to Excel
-                          </div>
-                        </div>
-                      )}             */}
           </div>
           {selectedRow && (
             <div style={{ fontSize: '12px' }}>
@@ -1396,9 +1133,9 @@ const deleteSelectedSubfolders = async () => {
         onHide={() => setIsGenerateQRCodeModalOpen(false)}
         centered
       >
-        <Modal.Header>
+        <Modal.Header closeButton>
           <Modal.Title> Share QR Code </Modal.Title>
-        </Modal.Header>
+        </Modal.Header >
         <Modal.Body>
           <QrCodeGenerator
             fileName={selectedRow?.fileName || ''}
@@ -1419,36 +1156,43 @@ const deleteSelectedSubfolders = async () => {
         </Modal.Footer>
       </Modal>
 
-      {/* 
-        <div
-        className="position-relative toast-block"
-        style={{ minHeight: '240px' }}> 
-        <ToastContainer
-          className="p-3"
-          position={toastPosition}
-          style={{ zIndex: 1046, position: 'fixed', maxWidth: '300px' }}
-        >
-        <Toast show={showSuccessToast} onClose={showToast} style={{backgroundColor: "#fec19db8"}} delay={5000} autohide>
-          <Toast.Header className='justify-content-between' style={{backgroundColor: "#ee8a50b8"}}>
-            <small > File Shared Successfully </small>
-          </Toast.Header>
-          <Toast.Body style={{fontSize: '.785rem'}}>
-          &quot;Your file(s) have been shared with the selected recipient(s). They will receive an email notification shortly.&quot;
-          </Toast.Body>
-        </Toast>
-        </ToastContainer>
-        </div> */}
-      {/* 
-      <ToastContainer className="p-3" position={toastPosition}>
-          <Toast className="success-toast-container" show={showEditToast} onClose={closeSuccessEdit} delay={5000} autohide>
-            <Toast.Header className='success-toast-header justify-content-between'>
-           <span> File Renamed Successfully! </span>   
-            </Toast.Header>
-            <Toast.Body className="success-toast-body">
-              Review the details, share with your team, and proceed with the discussion on the topic.
-            </Toast.Body>
-          </Toast>
-        </ToastContainer> */}
+      {/* Folder Rename Modal */}
+      <Modal
+        show={openFolderRenamer}
+        onHide={() => setOpenFolderRenamer(false)}
+        centered
+
+      >
+        <Modal.Header>
+          <Modal.Title> Rename Folder </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+        <input
+                type="text"
+                className="form-control"
+                id="folderName"
+                placeholder='Enter new folder name...'
+                onChange={(e) => setNewFolderName(e.target.value)}
+              />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            id="closeAdd"
+            variant="secondary"
+            onClick={() => setOpenFolderRenamer(false)}
+          >
+            Close
+          </Button>
+          <Button
+            id="saveAdd"
+            variant="primary"
+            onClick={handleRenameFolder}
+          >
+            Rename
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
         <ToastContainer
           className="p-3"
           position={toastPosition}
@@ -1467,4 +1211,4 @@ const deleteSelectedSubfolders = async () => {
   );
 }
 
-export default ProjectExplorer;
+export default SubFolder;

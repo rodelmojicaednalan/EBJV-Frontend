@@ -7,13 +7,17 @@ import {
   setCookie,
 } from './src/components/Authentication/getCookie';
 
-const axiosInstance = axios.create({
-  baseURL: 'https://www.ebjv.api.e-fab.com.au/api',
-});
+// const axiosInstance = axios.create({
+//   baseURL: 'https://www.ebjv.api.e-fab.com.au/api',
+// });
 
 // const axiosInstance = axios.create({
 //   baseURL: 'http://localhost:3000/api',
 // });
+
+const axiosInstance = axios.create({
+  baseURL: `https://www.api-cadstream.ebjv.e-fab.com.au/api`
+})
 
 let isRefreshing = false;
 let refreshUser = [];

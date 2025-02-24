@@ -66,6 +66,7 @@
   display: flex;
   align-items: center;
   padding: 0px 5px 1px 5px;
+  transition: ease-in-out .1s;
 }
 
 .nav-toggle-icon {
@@ -329,7 +330,42 @@
   color: #FFF;
   text-decoration: none;
 }
-
+.subFolder-card{
+  padding: .5rem;
+  /* border: 1px solid #ccc; */
+  flex-wrap: wrap;
+  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
+}
+.subfolder-item{
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.1s ease-in-out;
+}
+.subfolder-item:hover{
+  transform: scale(1.01);
+  /* background-color: #fec19db8; */
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid #eb6314;
+}
+.subfolder-icon{
+  margin-right: 10px;
+  width: 20px;
+  height: auto;
+  color: #eb6314;
+}
+.breadcrumb-item{
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+.breadcrumb-item a{
+  color: #eb6314;
+  text-transform: capitalize;
+  text-decoration: none;
+}
 .project-display.grid .grid-view {
   display: flex;
   flex-wrap: wrap;
@@ -1426,6 +1462,20 @@
   background-color: transparent;
   font-size: 14px;
   color: #212A31;
+}
+
+.deleteModeBtn, .deleteFoldersBtn{
+  font-size: 14px;
+  color: #212A31;
+}
+.deleteModeBtn:hover, .deleteFoldersBtn:hover{
+  color: rgb(168, 0, 34);
+  text-decoration: underline;
+  transform: none !important;
+  box-shadow: none !important;
+}
+.deleteModeBtn:focus, .deleteFoldersBtn:focus{
+  box-shadow: none !important;
 }
 
 #deleteUploadedfilesbtn:hover {

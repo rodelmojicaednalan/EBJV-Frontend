@@ -7,8 +7,6 @@ import SideBar from './components/SideBar/Navbar'
 import UsersList from './components/AdminPages/UsersList/UsersLIst';
 
 import Projects from './components/AdminPages/Projects/Projects';
-import AddProject from './components/AdminPages/Projects/AddProject';
-import EditProject from './components/AdminPages/Projects/EditProjects';
 import ProjectPDFViewer from './components/AdminPages/Projects/ProjectPDFViewer';
 import MultiPDFEditor from './components/AdminPages/Projects/MultiPDFPage';
 
@@ -17,6 +15,7 @@ import MultiPDFEditor from './components/AdminPages/Projects/MultiPDFPage';
 // import ProjectToDo from './components/AdminPages/Projects/ProjectFolderPages/ProjectToDo';
 // import ProjectReleases from './components/AdminPages/Projects/ProjectFolderPages/ProjectReleases';
 import ProjectExplorer from './components/AdminPages/Projects/ProjectFolderPages/ProjectExplorer';
+import SubFolders from './components/AdminPages/Projects/ProjectFolderPages/SubFolders';
 import ProjectContributors from './components/AdminPages/Projects/ProjectFolderPages/ProjectContributors';
 import ProjectActivity from './components/AdminPages/Projects/ProjectFolderPages/ProjectActivity';
 
@@ -97,13 +96,12 @@ function Layout() {
         {/* <Route path="/staff-logs" element={<ProtectedRoute element={<StaffLogs />} allowedRoles={['Admin',]} />} /> */}
 
         <Route path="/projects" element={<ProtectedRoute element={<Projects />} allowedRoles={['Superadmin', 'Admin', 'Client']} />} />
-        {/* <Route path="/add-project" element={<ProtectedRoute element={<AddProject />} allowedRoles={['Admin', 'Superadmin']} />} />
-        <Route path="/edit-project/:projectId" element={<ProtectedRoute element={<EditProject />} allowedRoles={['Admin', 'Superadmin']} />} /> */}
         {/* <Route path="/project-folder/pdf-viewer/:projectId/:fileName" element={<ProtectedRoute element={<ProjectPDFViewer />} allowedRoles={['Admin', 'Client']} />} /> */}
         <Route path="/project-folder/pdf-viewer/:projectId/:fileName" element={<ProjectPDFViewer/>}/>
-        <Route path="/project-folder/multi-pdf-editor/:projectId" element={<MultiPDFEditor/>}/>
+        <Route path="/project-folder/multi-pdf-editor/:projectId/:folderName?" element={<MultiPDFEditor/>}/>
 
         <Route path="/project-folder/:projectId/data/project-explorer" element={<ProtectedRoute element={<ProjectExplorer />} allowedRoles={['Superadmin', 'Admin', 'Client']} />} />
+        <Route path="/project-folder/:projectId/data/project-explorer/subfolder/:folderName" element={<ProtectedRoute element={<SubFolders />} allowedRoles={['Superadmin', 'Admin', 'Client']} />} />
         {/* <Route path="/project-folder/:projectId/data/project-views" element={<ProtectedRoute element={<ProjectViews />} allowedRoles={['Admin', 'Client']} />} /> */}
         {/* <Route path="/project-folder/:projectId/data/project-releases" element={<ProtectedRoute element={<ProjectReleases />} allowedRoles={['Admin', 'Client']} />} /> */}
         <Route path="/project-folder/:projectId/project-activity" element={<ProtectedRoute element={<ProjectActivity />} allowedRoles={['Superadmin', 'Admin']} />} />
