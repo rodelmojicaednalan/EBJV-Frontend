@@ -334,6 +334,7 @@
   padding: .5rem;
   /* border: 1px solid #ccc; */
   flex-wrap: wrap;
+  gap: .5rem;
   /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
 }
 .subfolder-item{
@@ -1791,10 +1792,17 @@ input[type=checkbox]#selectedPDF:checked:after {
   .multipdf-wrapper{
     flex-direction: column !important;
   }
+  .multipdf-viewer {
+    width: 100% !important;
+    max-width: 760px;
+    height: 400px;
+  }
   .pdf-iframe{
     height: 400px;
   }
-
+  .multipdf-controls > input{
+    max-width: 500px;
+  }
   .project-folder-icon, .ifc-viewer-icon, .delete-project-icon{
     width: 1.3rem;
     height: auto;
@@ -2166,6 +2174,18 @@ input[type=checkbox]#selectedPDF:checked:after {
 }
 
 @media (max-width: 425px) {
+  .multipdf-controls > input {
+    max-width: 200px;
+}
+  .subfolder-item{
+    font-size: 14px;
+  }
+  .subfolderName{
+    margin-right: 5px;
+  }
+  .subfolder-icon{
+    display: none;
+  }
   .multipdf-viewer{
     max-width: 100%;
   }

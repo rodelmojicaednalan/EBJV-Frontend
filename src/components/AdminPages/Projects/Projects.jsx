@@ -55,7 +55,7 @@ function Projects() {
     properties: null,
   });
 
-  console.log(newProject.file)
+  // console.log(newProject.file)
 
   const [roleCheck, setRoleCheck] = useState([]);
   const [fragFile, setFragFile] = useState(null);
@@ -319,7 +319,7 @@ function Projects() {
           setData(data.filter((project) => project.id !== projectId));
           Swal.fire({
             title: 'Success!',
-            text: 'project has been deleted.',
+            text: 'Project has been deleted.',
             imageUrl: check,
             imageWidth: 100,
             imageHeight: 100,

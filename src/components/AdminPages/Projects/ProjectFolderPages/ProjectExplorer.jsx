@@ -257,8 +257,8 @@ function ProjectExplorer() {
       setExplorerSubfolders(directSubfolders); // Only direct subfolders
       setExplorerTable(topLevelFiles); // Only top-level files
   
-      console.table(topLevelFiles);
-      console.table(directSubfolders);
+      // console.table(topLevelFiles);
+      // console.table(directSubfolders);
     } catch (error) {
       console.error('Error fetching project details:', error);
     }
@@ -919,7 +919,7 @@ const deleteSelectedSubfolders = async () => {
                   </div>
                 </div>
 
-                <div className="d-flex flex-row yess">
+                <div className="d-flex flex-row deleteButtonGroup">
                 {roleCheck.some((role) =>
                   ['Admin', 'Superadmin'].includes(role)
                 ) && (
@@ -949,7 +949,7 @@ const deleteSelectedSubfolders = async () => {
                 <div className="project_subfolders">
                   <label> Folders: </label>
                   {explorerSubfolders.length > 0 ? (
-                    <div className="subFolder-card d-flex flex-row justify-content-evenly">
+                    <div className="subFolder-card d-flex flex-row ">
                       {explorerSubfolders.map((subfolder, index) => (
                         <div
                           key={index}
@@ -963,7 +963,7 @@ const deleteSelectedSubfolders = async () => {
                             }
                           }}
                         >
-                          <BsFillFolderFill className="subfolder-icon" /> {subfolder.folderName}
+                          <BsFillFolderFill className="subfolder-icon" /> <span className="subfolderName"> {subfolder.folderName} </span> 
                           {deleteFolderMode && <input type="checkbox" checked={selectedSubfolders.includes(subfolder.folderPath)} readOnly />}
                         </div>
                       ))}

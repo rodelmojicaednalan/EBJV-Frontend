@@ -14,16 +14,21 @@ import './ProjectStyles.css';
 import JSZip from "jszip";
 import FileSaver from "file-saver";
 import { GiDivergence } from "react-icons/gi";
-
+import { RiFileZipFill } from "react-icons/ri";
+import { BsQrCode } from "react-icons/bs";
+import useWindowWidth from './ProjectFolderPages/windowWidthHook.jsx';
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js`;
 
 function MultiPDFEditor() {
+    const windowWidthHook = useWindowWidth();
+    const isMobile = windowWidthHook <= 425;
+    const isTablet = windowWidthHook <= 768;
     const { user } = useContext(AuthContext);
     const userRoles = user?.roles?.map(role => role.role_name) || [];
     const isAdmin = userRoles.includes('Admin') || userRoles.includes('Superadmin');
     const { projectId, folderName } = useParams();
     const decodedFolderName = folderName ? decodeURIComponent(folderName): "";
-    console.log(folderName)
+    // console.log(folderName)
     const navigate = useNavigate();
     const [pdfFiles, setPdfFiles] = useState([]);
     const [selectedFiles, setSelectedFiles] = useState([]);
@@ -54,7 +59,7 @@ function MultiPDFEditor() {
     
             setPdfFiles(pdfs);
             setSelectedFiles(pdfs); // ✅ Update with the correct list
-            console.log("Fetched PDFs:", pdfs);
+            // console.log("Fetched PDFs:", pdfs);
         } catch (error) {
             console.error("Error fetching PDF files:", error);
         }
@@ -231,15 +236,15 @@ function MultiPDFEditor() {
                 )}
                 </div>
                 {isAdmin && (
-              <div className="d-flex flex-column mt-4">
+              <div className="d-flex flex-column mt-4 pdfAction-btnGroup">
                 <div className="multipdf-controls mt-2">
                   <input type="file" accept="image/png, image/jpeg" onChange={handleImageUpload} />
                   <input className="extractedUrl" type="text"  value={qrUrl} onChange={(e) => setQrUrl(e.target.value)} />
-                  <button className="addqr-btn" onClick={modifyPDFs}>Add QR to Selected PDFs</button>
+                  <button className="addqr-btn" onClick={modifyPDFs}>{isMobile ? <span className="d-flex align-items-center"> <BsQrCode className="mr-1"/>Add to PDF</span> : "Add QR to Selected PDFs"}</button>
                 </div>
                 
                 <div className="d-flex justify-content-end mt-3">
-                 <button className="btn btn-primary" onClick={downloadPDFs}>Download Modified PDFs</button>
+                 <button className="btn btn-primary" onClick={downloadPDFs}>{isMobile ? <span className="d-flex align-items-center"> <RiFileZipFill className="mr-1"/> Download </span> : "Download Modified PDFs"}</button>
                 </div>
   
               </div>
