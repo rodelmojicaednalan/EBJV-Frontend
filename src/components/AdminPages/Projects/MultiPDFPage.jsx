@@ -205,7 +205,7 @@ function MultiPDFEditor() {
     return (
         <div className="multipdf-container d-flex flex-column pb-2">
              <div className="pdf-preview-header d-flex flex-row ml-2 ">
-                <span className="back-btn ml-3" onClick={() => navigate(`/project-folder/${projectId}/data/project-explorer`)}>
+                <span className="back-btn ml-3" onClick={() => navigate(-1)}>
                   <FaCircleArrowLeft size={28} className="icon-left mr-2 align-items-center"/> Go Back
                 </span>
               </div>  

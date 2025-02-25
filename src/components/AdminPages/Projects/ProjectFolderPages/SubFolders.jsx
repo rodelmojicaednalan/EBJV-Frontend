@@ -50,6 +50,10 @@ import useWindowWidth from './windowWidthHook.jsx';
 // import QRCode from 'react-qr-code';
 // import '../../../../QRCodeStyle.css'
 import QrCodeGenerator from '../../../../QrCodeGenerator.jsx';
+import * as WEBIFC from 'web-ifc';
+import * as BUI from '@thatopen/ui';
+import * as OBC from '@thatopen/components';
+import { FragmentsGroup } from '@thatopen/fragments';
 
 function SubFolder() {
   // const [openPicker, data, authResponse] = useDrivePicker();
@@ -60,7 +64,7 @@ function SubFolder() {
   const decodedFolderName = decodeURIComponent(folderName);
   const formattedFolderName = decodedFolderName.split('/').pop();
   const extractedRootFolder = decodedFolderName.split('/')[0];
-  console.log(extractedRootFolder);
+  // console.log(extractedRootFolder);
   const [projectName, setProjectName] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [currentFolder, setCurrentFolder] = useState(null);
@@ -151,7 +155,9 @@ function SubFolder() {
       const extractFiles = (folderNode) => {
         if (!folderNode || !folderNode.files || folderNode.files.length === 0) return [];
   
-        return folderNode.files.map((file) => ({
+        return folderNode.files
+        .filter((file) => !file.fileName.endsWith('.json'))
+        .map((file) => ({
           projectId: id,
           fileName: file.fileName,
           fileSize: `${(file.fileSize / (1024 * 1024)).toFixed(2)} MB`,
@@ -190,7 +196,7 @@ function SubFolder() {
       setExplorerSubfolders(subfoldersInTargetFolder);
       setExplorerTable(filesInTargetFolder);
   
-      console.log(`Fetching files from folder: ${formattedFolderName}`);
+      // console.log(`Fetching files from folder: ${formattedFolderName}`);
       // console.table(filesInTargetFolder);
       // console.table(subfoldersInTargetFolder);
     } catch (error) {
@@ -329,42 +335,199 @@ function SubFolder() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [newFiles, setNewFiles] = useState([]);
+  const [components] = useState(() => new OBC.Components());
 
   const handleAddNewFile = async () => {
     try {
-      const formData = new FormData();
-      newFiles.forEach((file) => {
-        formData.append('project_file', file);
-      });
-
-      await axiosInstance.post(
-        `/upload-ifc-files/${projectId}/${encodeURIComponent(formattedFolderName)}`, // Encode special characters
-        formData,
-        {
-          headers: { 'Content-Type': 'multipart/form-data' },
+        console.log("Starting file processing...");
+        if (!newFiles.length) {
+            console.warn("No new files to process.");
+            return;
         }
-      );
+
+        Swal.fire({
+            title: "Processing Files...",
+            text: "Please wait.",
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading(),
+        });
+
+        const formData = new FormData();
+        const fragments = components.get(OBC.FragmentsManager);
+        const fragmentIfcLoader = components.get(OBC.IfcLoader);
+
+        console.log("Filtering files...");
+        const pdfFiles = newFiles.filter((file) => file.type === "application/pdf");
+        const ifcFiles = newFiles.filter((file) => file.type !== "application/pdf");
+
+        // Handle PDF Upload Immediately
+        if (pdfFiles.length > 0) {
+            console.log("📄 Found PDF files, uploading directly...");
+            pdfFiles.forEach((file) => {
+                formData.append("project_file", file);
+            });
+
+            await axiosInstance.post(`/upload-pdf-files/${projectId}/${encodeURIComponent(formattedFolderName)}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            console.log("✅ PDF files uploaded successfully.");
+        }
+
+        // Skip IFC processing if no IFC files exist
+        if (ifcFiles.length === 0) {
+            Swal.fire({
+                title: "Success!",
+                text: "PDF files uploaded successfully.",
+                icon: "success",
+                confirmButtonText: "OK",
+            });
+
+            setShowAddModal(false);
+            setNewFiles([]);
+            setRefreshKey((prevKey) => prevKey + 1);
+            return;
+        }
+
+        console.log("Setting up IFC loader...");
+        await fragmentIfcLoader.setup();
+
+        for (const file of ifcFiles) {
+            try {
+                console.log(`Processing IFC file: ${file.name}`);
+                const data = await file.arrayBuffer();
+                const buffer = new Uint8Array(data);
+                console.log("File converted to Uint8Array.");
+
+                console.log("Adding onFragmentsLoaded listener...");
+                const onLoadHandler = async (model) => {
+                    try {
+                        console.log("🚀 Fragments loaded event triggered!");
+
+                        const groupsArray = Array.from(fragments.groups.values());
+                        console.log("Fragments Groups Found:", groupsArray.length);
+
+                        if (groupsArray.length === 0) {
+                            console.warn("⚠️ No fragment groups found!");
+                            return;
+                        }
+
+                        const group = groupsArray[0];
+                        console.log("Extracting fragment data...");
+                        const fragData = fragments.export(group);
+                        console.log("Fragment data extracted, size:", fragData?.length);
+
+                        const fileName = file.name.split('.')[0];
+                        const dateID = Date.now();
+
+                        const fragBlob = new Blob([fragData]);
+                        console.log("Fragment Blob created, size:", fragBlob.size);
+
+                        const fragFile = new File([fragBlob], `${dateID}-${fileName}.frag`);
+                        console.log("Fragment file created:", fragFile.name, "Size:", fragFile.size);
+
+                        const properties = group.getLocalProperties();
+                        console.log("Extracted properties:", properties);
+
+                        let propertiesFile = null;
+                        if (properties) {
+                            const propertiesBlob = new Blob([JSON.stringify(properties)]);
+                            console.log("Properties Blob created, size:", propertiesBlob.size);
+
+                            propertiesFile = new File([propertiesBlob], `${dateID}-${fileName}.json`);
+                            console.log("Properties file created:", propertiesFile.name, "Size:", propertiesFile.size);
+                        }
+
+                        console.log("Appending to FormData...");
+                        formData.append("project_file", fragFile);
+                        console.log("✅ FormData after adding fragFile:", [...formData.entries()]);
+
+                        if (propertiesFile) {
+                            formData.append("properties", propertiesFile);
+                            console.log("✅ FormData after adding propertiesFile:", [...formData.entries()]);
+                        }
+
+                        console.log("✅ Completed processing for file:", file.name);
+                        fragments.onFragmentsLoaded.remove(onLoadHandler);
+                    } catch (error) {
+                        console.error("❌ Error processing IFC fragments:", error);
+                        fragments.onFragmentsLoaded.remove(onLoadHandler);
+                    }
+                };
+
+                fragments.onFragmentsLoaded.add(onLoadHandler, { once: true });
+
+                console.log("🚀 Loading IFC file...");
+                await fragmentIfcLoader.load(buffer);
+                console.log("✅ IFC file loaded successfully.");
+            } catch (error) {
+                console.error("❌ Error loading IFC file:", error);
+            }
+        }
+
+        console.log("🔄 Final FormData entries before sending:", [...formData.entries()]);
+
+        console.log("📤 Sending IFC FormData to server...");
+        await axiosInstance.post(`/upload-ifc-files/${projectId}/${encodeURIComponent(formattedFolderName)}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+        console.log("✅ IFC files uploaded successfully.");
+
+        Swal.fire({
+            title: "Success!",
+            text: "Files have been added successfully.",
+            icon: "success",
+            confirmButtonText: "OK",
+        });
+
+        setShowAddModal(false);
+        setNewFiles([]);
+        setRefreshKey((prevKey) => prevKey + 1);
+    } catch (error) {
+        console.error("❌ Error during file upload:", error);
+        Swal.fire({
+            title: "Error!",
+            text: "Failed to upload files. Try again.",
+            icon: "error",
+            confirmButtonText: "OK",
+        });
+    }
+};
+
+  // const handleAddNewFile = async () => {
+  //   try {
+  //     const formData = new FormData();
+  //     newFiles.forEach((file) => {
+  //       formData.append('project_file', file);
+  //     });
+
+  //     await axiosInstance.post(
+  //       `/upload-ifc-files/${projectId}/${encodeURIComponent(formattedFolderName)}`, // Encode special characters
+  //       formData,
+  //       {
+  //         headers: { 'Content-Type': 'multipart/form-data' },
+  //       }
+  //     );
       
 
-      Swal.fire({
-        title: 'Success!',
-        text: 'File(s) has been added successfully.',
-        icon: 'success',
-        confirmButtonText: 'OK',
-      });
+  //     Swal.fire({
+  //       title: 'Success!',
+  //       text: 'File(s) has been added successfully.',
+  //       icon: 'success',
+  //       confirmButtonText: 'OK',
+  //     });
 
-      setShowAddModal(false);
-      setNewFiles({ file: null });
-      setRefreshKey((prevKey) => prevKey + 1);
-    } catch (error) {
-      Swal.fire({
-        title: 'Error!',
-        text: error,
-        icon: 'error',
-        confirmButtonText: 'OK',
-      });
-    }
-  };
+  //     setShowAddModal(false);
+  //     setNewFiles({ file: null });
+  //     setRefreshKey((prevKey) => prevKey + 1);
+  //   } catch (error) {
+  //     Swal.fire({
+  //       title: 'Error!',
+  //       text: error,
+  //       icon: 'error',
+  //       confirmButtonText: 'OK',
+  //     });
+  //   }
+  // };
 
   const [newFolderName, setNewFolderName] = useState(null)
   const [openFolderRenamer, setOpenFolderRenamer] = useState(false);

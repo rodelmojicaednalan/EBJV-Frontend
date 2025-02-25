@@ -239,8 +239,8 @@ const activeFileUrl = pdfPreviewUrl || `https://www.api-cadstream.ebjv.e-fab.com
                     <div className="container-fluid moduleFluid">
                       <div className="pdf-preview-header">
                         <span className="d-flex flex-row align-items-center pdf-name"
-                              onClick={() => navigate(`/project-folder/${projectId}/data/project-explorer`)}>    
-                          <FaChevronLeft className="mr-2"/> Go Back to Project Explorer 
+                              onClick={() => navigate(-1)}>    
+                          <FaChevronLeft className="mr-2"/> Go Back 
                         </span>
                       </div>
 
