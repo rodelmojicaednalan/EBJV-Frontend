@@ -171,6 +171,7 @@ const processContainerRelations = async (
     expressID,
     'ContainedInStructure'
   );
+
   if (contianerRelations && contianerRelations[0]) {
     const containerID = contianerRelations[0];
     const container = await model.getProperties(containerID);
@@ -182,22 +183,22 @@ const processContainerRelations = async (
     }
   }
 
-  const assembly = indexer.getEntityRelations(
-    model,
-    expressID,
-    'Decomposes'
-  );
+  // const assembly = indexer.getEntityRelations(
+  //   model,
+  //   expressID,
+  //   'Decomposes'
+  // );
 
-  if (assembly && assembly[0]) {
-    const containerID = assembly[0];
-    const container = await model.getProperties(containerID);
-    if (container) {
-      const attributesRow = await createAttributesRow(container, {
-        groupName: 'Tekla Assembly',
-      });
-      addRowChildren(row, attributesRow);
-    }
-  }
+  // if (assembly && assembly[0]) {
+  //   const containerID = assembly[0];
+  //   const container = await model.getProperties(containerID);
+  //   if (container) {
+  //     const attributesRow = await createAttributesRow(container, {
+  //       groupName: 'Tekla Assembly',
+  //     });
+  //     addRowChildren(row, attributesRow);
+  //   }
+  // }
 };
 
 let processedElements: {
@@ -246,6 +247,9 @@ const computeTableData = async (
 
       const attributesRow = await createAttributesRow(elementAttrs, {
         includeClass: true,
+        indexer: indexer,
+        model: model,
+        expressID: expressID,
       });
 
       if (!elementRow.children) elementRow.children = [];
@@ -254,25 +258,25 @@ const computeTableData = async (
       const elementRelations = modelRelations.get(expressID);
       if (!elementRelations) continue;
 
-      await processDefinedByRelations(
-        components,
-        model,
-        expressID,
-        elementRow,
-        uiState
-      );
-      await processAssociateRelations(
-        components,
-        model,
-        expressID,
-        elementRow
-      );
-      await processAssignmentRelations(
-        components,
-        model,
-        expressID,
-        elementRow
-      );
+      // await processDefinedByRelations(
+      //   components,
+      //   model,
+      //   expressID,
+      //   elementRow,
+      //   uiState
+      // );
+      // await processAssociateRelations(
+      //   components,
+      //   model,
+      //   expressID,
+      //   elementRow
+      // );
+      // await processAssignmentRelations(
+      //   components,
+      //   model,
+      //   expressID,
+      //   elementRow
+      // );
       await processContainerRelations(
         components,
         model,

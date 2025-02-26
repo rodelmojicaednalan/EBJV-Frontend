@@ -16,8 +16,8 @@ import {
 // });
 
 const axiosInstance = axios.create({
-  baseURL: `https://www.api-cadstream.ebjv.e-fab.com.au/api`
-})
+  baseURL: `https://www.api-cadstream.ebjv.e-fab.com.au/api`,
+});
 
 let isRefreshing = false;
 let refreshUser = [];

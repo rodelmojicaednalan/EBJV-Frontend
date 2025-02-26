@@ -1,6 +1,7 @@
 import * as BUI from '@thatopen/ui';
 import * as WEBIFC from 'web-ifc';
 import * as OBC from '@thatopen/components';
+import * as FRAGS from '@thatopen/fragments';
 
 const attrsToIgnore = [
   'OwnerHistory',
@@ -13,6 +14,9 @@ export const createAttributesRow = async (
   _options?: {
     groupName?: string;
     includeClass?: boolean;
+    indexer?: OBC.IfcRelationsIndexer;
+    model?: FRAGS.FragmentsGroup;
+    expressID?: number;
   }
 ) => {
   const defaultOptions = {
@@ -20,22 +24,24 @@ export const createAttributesRow = async (
     includeClass: false,
   };
   const options = { ...defaultOptions, ..._options };
-  const { groupName, includeClass } = options;
+  const { groupName, includeClass, indexer, model, expressID } =
+    options;
 
   const attrsRow: BUI.TableGroupData = { data: { Name: groupName } };
 
-  // console.log('attrs', attrs['Tag'].value);
-  // console.log(attrsRow);
+  // Assembly
+  const assembly = indexer?.getEntityRelations(
+    model,
+    expressID,
+    'Decomposes'
+  );
 
-  if (attrs.type == WEBIFC.IFCELEMENTASSEMBLY) {
-    if (!attrsRow.children) attrsRow.children = [];
-    attrsRow.children.push({
-      data: {
-        Name: 'Assembly/Cast unit Mark',
-        Value: attrs['Tag'].value,
-      },
-    });
-  }
+  // Materials
+  const associateRelations = indexer?.getEntityRelations(
+    model,
+    expressID,
+    'HasAssociations'
+  );
 
   if (includeClass) {
     if (!attrsRow.children) attrsRow.children = [];
@@ -46,6 +52,15 @@ export const createAttributesRow = async (
       },
     });
   }
+
+  // Property Sets
+  const definedByRelations = indexer?.getEntityRelations(
+    model,
+    expressID,
+    'IsDefinedBy'
+  );
+
+  console.log('object', definedByRelations);
 
   for (const attrName in attrs) {
     if (attrsToIgnore.includes(attrName)) continue;
@@ -61,6 +76,79 @@ export const createAttributesRow = async (
     }
   }
 
+  // Assembly Mark
+  if (assembly && assembly[0]) {
+    const containerID = assembly[0];
+    const container = await model.getProperties(containerID);
+    if (container) {
+      if (container.type == WEBIFC.IFCELEMENTASSEMBLY) {
+        if (!attrsRow.children) attrsRow.children = [];
+        attrsRow.children.push({
+          data: {
+            Name: 'Assembly Mark',
+            Value: container['Tag'].value,
+          },
+        });
+      }
+    }
+  }
+
+  // Material
+  if (associateRelations && associateRelations[0]) {
+    const containerID = associateRelations[0];
+    const container = await model.getProperties(containerID);
+
+    if (container) {
+      if (container.type == WEBIFC.IFCMATERIAL) {
+        if (!attrsRow.children) attrsRow.children = [];
+        attrsRow.children.push({
+          data: {
+            Name: 'Material',
+            Value: container['Name'].value,
+          },
+        });
+      }
+    }
+  }
+
+  // Psets
+  if (definedByRelations) {
+    const containerIDs = definedByRelations;
+    let pset = [];
+    for (const containerID of containerIDs) {
+      const container = await model?.getProperties(containerID);
+      if (container['Name'].value == 'Tekla Quantity')
+        pset.push(container);
+    }
+
+    if (pset) {
+      const p = pset[0];
+      if (p.type == WEBIFC.IFCPROPERTYSET) {
+        console.log(p.HasProperties);
+
+        p.HasProperties.forEach(async (property) => {
+          const { value: propID } = property;
+          const propAttrs = await model?.getProperties(propID);
+
+          if (
+            propAttrs['Name'].value == 'Weight' ||
+            propAttrs['Name'].value == 'Length'
+          ) {
+            console.log(propAttrs);
+            attrsRow.children.push({
+              data: {
+                Name: propAttrs['Name'].value,
+                Value: propAttrs['NominalValue'].value,
+              },
+            });
+          }
+        });
+
+        // }
+      }
+    }
+  }
+
   if (attrsRow.data['Name'] == 'Tekla Assembly') {
     attrsRow.children = attrsRow.children?.filter(
       (item) => item.data.Name === 'Assembly/Cast unit Mark'
@@ -69,10 +157,15 @@ export const createAttributesRow = async (
     return attrsRow;
   }
 
-  attrsRow.children = attrsRow.children?.filter(
-    (child) =>
+  attrsRow.children = attrsRow.children?.filter((child) => {
+    if (child.data.Name === 'Tag') {
+      child.data.Name = 'Part Mark';
+    }
+
+    return (
       child.data.Name !== 'Class' && child.data.Name !== 'GlobalId'
-  );
+    );
+  });
 
   return attrsRow;
 };
