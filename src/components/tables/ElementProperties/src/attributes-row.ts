@@ -60,8 +60,6 @@ export const createAttributesRow = async (
     'IsDefinedBy'
   );
 
-  console.log('object', definedByRelations);
-
   for (const attrName in attrs) {
     if (attrsToIgnore.includes(attrName)) continue;
     const attrValue = attrs[attrName];
@@ -124,8 +122,6 @@ export const createAttributesRow = async (
     if (pset) {
       const p = pset[0];
       if (p.type == WEBIFC.IFCPROPERTYSET) {
-        console.log(p.HasProperties);
-
         p.HasProperties.forEach(async (property) => {
           const { value: propID } = property;
           const propAttrs = await model?.getProperties(propID);
@@ -134,7 +130,6 @@ export const createAttributesRow = async (
             propAttrs['Name'].value == 'Weight' ||
             propAttrs['Name'].value == 'Length'
           ) {
-            console.log(propAttrs);
             attrsRow.children.push({
               data: {
                 Name: propAttrs['Name'].value,

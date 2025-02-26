@@ -441,7 +441,7 @@
 }
 
 .top-bar {
-  height: 50px;
+  height: 5vh;
   background-color: #ffffff;
   display: flex;
   align-items: center;
@@ -628,7 +628,7 @@ bim-panel {
 
 bim-grid {
   display: grid;
-  height: 100vh;
+  height: 95vh;
   width: 100%;
 }
 
@@ -652,7 +652,7 @@ bim-grid {
 .options-menu {
   position: fixed;
   min-width: 250px;
-  top: 50px;
+  top: 5vh;
   right: 0px;
   max-height: calc(100vh - 10px);
 }
