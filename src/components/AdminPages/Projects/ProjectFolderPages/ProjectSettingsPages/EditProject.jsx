@@ -80,39 +80,40 @@ function EditProject() {
 
 const [totalFileSize, setTotalFileSize] = useState(0);
 
-  useEffect(() => {
-    // Fetch project details and populate fields
-    const fetchProjectDetails = async () => {
-      try {
-        const response = await axiosInstance.get(`/project/${projectId}`);
-        const { project_name, owner, files, updatedAt, createdAt, 
-          project_file, project_location, project_thumbnail, 
-          start_date, end_date, project_description } = response.data;
-  
-        setProjectName(project_name);
-        setProjectLocation(project_location);
-        setOwnerName(`${owner.first_name} ${owner.last_name}`);
-        setProjectThumbnail(project_thumbnail);
-        setStartDate(start_date)
-        setEndDate(end_date)
-        setProjectDescription(project_description)
-        setExistingFiles(project_file);
-        setCreatedAt(new Intl.DateTimeFormat('en-US', {
-          month: 'short',
-          day: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: 'numeric'
-        }).format(new Date(createdAt)));
-        setUpdatedAt(new Intl.DateTimeFormat('en-US', {
-          month: 'short',
-          day: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: 'numeric'
-        }).format(new Date(updatedAt)),);
+useEffect(() => {
+  // Fetch project details and populate fields
+  const fetchProjectDetails = async () => {
+    try {
+      const response = await axiosInstance.get(`/project/${projectId}`);
+      const { project_name, folderTree, owner, updatedAt, createdAt, 
+        project_file, project_location, project_thumbnail, 
+        start_date, end_date, project_description } = response.data;
 
-        const formattedFiles = files.map((file) => ({
+      setProjectName(project_name);
+      setProjectLocation(project_location);
+      setOwnerName(`${owner.first_name} ${owner.last_name}`);
+      setProjectThumbnail(project_thumbnail);
+      setStartDate(start_date);
+      setEndDate(end_date);
+      setProjectDescription(project_description && project_description !== "null" ? project_description : "No description available");
+      setExistingFiles(project_file);
+      setCreatedAt(new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: 'numeric'
+      }).format(new Date(createdAt)));
+      setUpdatedAt(new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: 'numeric'
+      }).format(new Date(updatedAt)));
+
+      if (folderTree && folderTree.files) {
+        const formattedFiles = folderTree.files.map((file) => ({
           fileName: file.fileName, // Assuming the file object has this key
           fileSize: `${(file.fileSize / (1024 * 1024)).toFixed(2)} MB`, // Convert bytes to MB
           fileOwner: `${owner.first_name} ${owner.last_name}`,
@@ -122,17 +123,19 @@ const [totalFileSize, setTotalFileSize] = useState(0);
             year: 'numeric',
             hour: '2-digit',
             minute: 'numeric'
-          }).format(new Date(updatedAt)),  // Format updatedAt
+          }).format(new Date(file.fileLastModified)), // Format file's last modified time
         }));
 
-        const totalSize = files.reduce((sum, file) => sum + file.fileSize, 0); // Sum file sizes
+        const totalSize = folderTree.files.reduce((sum, file) => sum + file.fileSize, 0); // Sum file sizes
         setTotalFileSize((totalSize / (1024 * 1024)).toFixed(2)); // Convert to MB and set state
-  
-        setExplorerTable(formattedFiles)
-      } catch (error) {
-        console.error("Error fetching project details:", error);
+
+        setExplorerTable(formattedFiles);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching project details:", error);
+    }
+  };
+
 
     const fetchUserGroup = async () => {
       try {
@@ -399,7 +402,14 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                             </div>
                           </div>
 
-                          <div className="module mb-3">
+                        
+
+                          </form>
+                        </div>
+
+
+                        <div className="col-12 col-md-12 col-lg-6">
+                        <div className="module mb-3">
                             <header>
                               <h3>Other Details</h3>
                             </header>
@@ -454,10 +464,13 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                               </div>
                             </div>
                           </div>
-                          </form>
+                          <div className="d-flex mb-5">
+                            <button id="deleteProjectbtn"className="btn btn-danger add-btn" title="Delete" onClick={handleDeleteProject}>
+                              Delete Project
+                            </button>
+                          </div>
                         </div>
-
-                        <div className="col-12 col-md-12 col-lg-6">
+                        {/* <div className="col-12 col-md-12 col-lg-6">
                           <div className="module">
                             <header>
                               <h3>Project Location & CRS</h3>
@@ -561,7 +574,8 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                           <div className="page-submitBar d-flex d-lg-none">
 
                           </div>
-                        </div>
+                        </div> */}
+
                       </div>
                      </div>
                    </div>
