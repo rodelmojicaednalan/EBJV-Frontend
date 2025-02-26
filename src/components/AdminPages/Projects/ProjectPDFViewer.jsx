@@ -27,6 +27,7 @@ function ProjectFolder() {
   const isMobile = windowWidthHook <= 425;
   const isTablet = windowWidthHook <= 768;
   const { projectId, fileName } = useParams();
+  console.log(fileName)
   const navigate = useNavigate();
   const [refreshKey, setRefreshKey] = useState(0); 
   const [pdfBlob, setPdfBlob] = useState(null);
@@ -47,7 +48,8 @@ useEffect(() => {
   setViewerKey(prev => prev + 1); // Change key to force refresh
 }, [fileName]);
 
-  
+const formattedPDFname = fileName.replace(".pdf", "")
+console.log(formattedPDFname)  
 const handleImageUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
@@ -224,7 +226,7 @@ const downloadPDF = () => {
   const url = URL.createObjectURL(pdfBlob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `Modified_${fileName}.pdf`;
+  link.download = `Modified_${formattedPDFname}.pdf`;
   link.click();
 };
 

@@ -1484,7 +1484,7 @@ const deleteSelectedSubfolders = async () => {
                 View PDF
               </button>
             )}
-            {roleCheck.some((role) =>
+            {/* {roleCheck.some((role) =>
               ['Admin', 'Superadmin'].includes(role)
             ) && (
               <button
@@ -1493,7 +1493,7 @@ const deleteSelectedSubfolders = async () => {
               >
                 <IoMdPersonAdd size={20} />
               </button>
-            )}
+            )} */}
 
             <button
               className="btn offcanvas-action-btn"
