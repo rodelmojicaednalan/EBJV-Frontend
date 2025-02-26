@@ -22,6 +22,7 @@
     "@thatopen/ui-obc": "^2.4.1",
     "@types/leaflet": "^1.9.15",
     "axios": "^1.7.7",
+    "axios-retry": "^4.5.0",
     "bootstrap": "^5.3.3",
     "cdbreact": "^1.5.19",
     "date-fns": "^4.1.0",
