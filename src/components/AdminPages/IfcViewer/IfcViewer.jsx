@@ -24,7 +24,7 @@ import { FiArrowLeft, FiEyeOff, FiRotateCcw } from 'react-icons/fi';
 BUI.Manager.init();
 
 function IfcViewer() {
-  const { fileName } = useParams();
+  const { fileName, projectId } = useParams();
   const navigate = useNavigate();
   const containerRef = useRef(null);
   const measurementContainerRef = useRef(null);
@@ -100,7 +100,7 @@ function IfcViewer() {
   };
 
   const handleBack = () => {
-    navigate(`/projects`);
+    navigate(`/project-folder/${projectId}/data/project-explorer`);
   };
 
   const bind = useDoubleTap(() => {
