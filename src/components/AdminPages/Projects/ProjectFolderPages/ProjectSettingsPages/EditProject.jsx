@@ -330,7 +330,7 @@ const [totalFileSize, setTotalFileSize] = useState(0);
                                   <label> Project Thumbnail: </label>
                                   <div className="project-img-settings">
                                   <img 
-                                    src={`https://www.ebjv.api.e-fab.com.au/uploads/project-thumbnails/${projectThumbnail}`}
+                                    src={`https://www.api-cadstream.ebjv.e-fab.com.au/uploads/project-thumbnails/${projectThumbnail}`}
                                     alt="" 
                                     style={{ height: "36px", width: "36px" }} 
                                   />
