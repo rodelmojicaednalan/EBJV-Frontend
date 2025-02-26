@@ -113,10 +113,13 @@ export const createAttributesRow = async (
   if (definedByRelations) {
     const containerIDs = definedByRelations;
     let pset = [];
+    let finish = [];
     for (const containerID of containerIDs) {
       const container = await model?.getProperties(containerID);
       if (container['Name'].value == 'Tekla Quantity')
         pset.push(container);
+      if (container['Name'].value == 'Tekla Common')
+        finish.push(container);
     }
 
     if (pset) {
@@ -138,8 +141,27 @@ export const createAttributesRow = async (
             });
           }
         });
+      }
+    }
 
-        // }
+    if (finish) {
+      const p = finish[0];
+      if (p.type == WEBIFC.IFCPROPERTYSET) {
+        p.HasProperties.forEach(async (property) => {
+          const { value: propID } = property;
+          const propAttrs = await model?.getProperties(propID);
+
+          if (propAttrs['Name'].value == 'Finish') {
+            attrsRow.children.push({
+              data: {
+                Name: propAttrs['Name'].value,
+                Value: propAttrs['NominalValue'].value
+                  ? propAttrs['NominalValue'].value
+                  : 'none',
+              },
+            });
+          }
+        });
       }
     }
   }
