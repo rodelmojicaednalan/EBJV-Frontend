@@ -184,7 +184,12 @@
 .rdt_Pagination {
   background-color: transparent !important;
   border-bottom: none !important;
+  color: #626262;
 }
+.rdt_Pagination > div > select > option, .pagination-controls{
+  color: #626262;
+}
+
 
 .draft-btn {
   display: flex;
@@ -1660,25 +1665,71 @@
   align-items: center;
   padding: .785rem 0;
 }
-.multipdf-sidebar{
+.multipdf-sidebar {
   display: flex;
   flex-direction: column;
-  justify-content: start;
-  /* border: rgba(0, 0, 0, .05);
-  border-radius: 5px;
-  box-shadow: 0 0 .25rem #aeaeb6; */
   padding: 1rem;
+  /* width: 300px;  */
 }
-.pdf-item-wrapper{
-  border: rgba(0, 0, 0, .05);
-  border-radius: 5px;
-  padding: 1rem;
-  box-shadow: 0 0 .25rem #aeaeb6;
-}
-.pdf-item{
-  padding: 5px;
 
+.select-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
 }
+
+.select-controls button {
+  padding: 5px 10px;
+  border: none;
+  background-color: #eb6314;
+  color: white;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.select-controls button:hover {
+  background-color: #eb6314;
+}
+
+.pdf-item-wrapper {
+  border-radius: 5px;
+  padding: 1rem;
+  box-shadow: 0 0 0.25rem #aeaeb6;
+  max-height: 500px; /* Set max height for scrollable list */
+  overflow-y: auto;
+}
+
+.pdf-item {
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  gap: 8px;
+}
+
+.selectedPDF-label {
+  cursor: pointer;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.pagination button {
+  padding: 5px 10px;
+  border: none;
+  background-color: #eb6314;
+  color: white;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.pagination button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
 .multipdf-main-content{
   display: flex;
   flex-direction: column;
@@ -1696,6 +1747,7 @@
 .multipdf-wrapper{
   display: flex;
   justify-content: space-around;
+  flex-direction: row;
 }
 .extractedUrl{
   display: none;

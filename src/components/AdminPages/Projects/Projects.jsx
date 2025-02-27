@@ -254,6 +254,7 @@ function Projects() {
       formData.append("user_id", projectOwner);
       formData.append("project_location", projectLocation);
       if (fragFile) {
+        formData.append("project_file", newProject.file)
         formData.append("project_file", fragFile);
         formData.append("properties", propertiesJSON);
       } else {
@@ -352,14 +353,15 @@ function Projects() {
   const columns = [
     {
       name: 'Project Name',
-      width: 'auto',
+      width: '60%',
       selector: (row) => row.project_name,
       sortable: true,
     },
-    !is320 && { // ✅ Conditionally include the column
-      name: 'Project Owner',
+    { // ✅ Conditionally include the column
+      name: 'Owner',
       selector: (row) => row.project_owner,
       sortable: true,
+      hide: 'sm'
     },
     {
       name: 'Action',

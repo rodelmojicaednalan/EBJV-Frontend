@@ -337,7 +337,7 @@ useEffect(() => {
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
                   >
-                    <FaChevronCircleLeft/>
+                    <FaChevronCircleLeft color="#eb6314"/>
                   </button>
                   <span className="mx-2">
                     Page {currentPage} of {totalPages}
@@ -347,7 +347,7 @@ useEffect(() => {
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
                   >
-                    <FaChevronCircleRight/>
+                    <FaChevronCircleRight color="#eb6314"/>
                   </button>
                 </div>
 

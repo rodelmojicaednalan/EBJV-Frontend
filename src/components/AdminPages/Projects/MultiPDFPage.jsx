@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useRef, useContext, useMemo } from "react";
 import axiosInstance from "../../../../axiosInstance.js";
 import { useNavigate, useParams } from "react-router-dom";
 import { PDFDocument, StandardFonts } from "pdf-lib";
@@ -16,6 +16,7 @@ import FileSaver from "file-saver";
 import { GiDivergence } from "react-icons/gi";
 import { RiFileZipFill } from "react-icons/ri";
 import { BsQrCode } from "react-icons/bs";
+import { MdSelectAll, MdDeselect  } from "react-icons/md";
 import useWindowWidth from './ProjectFolderPages/windowWidthHook.jsx';
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js`;
 
@@ -32,6 +33,8 @@ function MultiPDFEditor() {
     const navigate = useNavigate();
     const [pdfFiles, setPdfFiles] = useState([]);
     const [selectedFiles, setSelectedFiles] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = isMobile ? 50 : 100;
     const [modifiedPdfs, setModifiedPdfs] = useState({});
     const [uploadedImage, setUploadedImage] = useState(null);
     const [qrUrl, setQrUrl] = useState("");
@@ -84,9 +87,9 @@ function MultiPDFEditor() {
         fetchPdfFiles();
     }, [projectId, folderName]);
 
-    const handleSelectionChange = (file) => {
-        setSelectedFiles(prev => prev.includes(file) ? prev.filter(f => f !== file) : [...prev, file]);
-    };
+    // const handleSelectionChange = (file) => {
+    //     setSelectedFiles(prev => prev.includes(file) ? prev.filter(f => f !== file) : [...prev, file]);
+    // };
 
     const handleImageUpload = (event) => {
         const file = event.target.files[0];
@@ -201,6 +204,30 @@ function MultiPDFEditor() {
       });
     };
     
+    // Paginate files
+  const totalPages = Math.ceil(pdfFiles.length / itemsPerPage);
+  const paginatedFiles = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return pdfFiles.slice(start, start + itemsPerPage);
+  }, [currentPage, pdfFiles]);
+
+  // Handle selection
+  const handleSelectionChange = (file) => {
+    setSelectedFiles((prev) =>
+      prev.includes(file) ? prev.filter((f) => f !== file) : [...prev, file]
+    );
+  };
+
+  // Select all files on the current page
+  const handleSelectAll = () => {
+    const allOnPage = paginatedFiles.filter((file) => !selectedFiles.includes(file));
+    setSelectedFiles([...selectedFiles, ...allOnPage]);
+  };
+
+  // Deselect all files on the current page
+  const handleDeselectAll = () => {
+    setSelectedFiles((prev) => prev.filter((file) => !paginatedFiles.includes(file)));
+  };
 
     return (
         <div className="multipdf-container d-flex flex-column pb-2">
@@ -209,19 +236,48 @@ function MultiPDFEditor() {
                   <FaCircleArrowLeft size={28} className="icon-left mr-2 align-items-center"/> Go Back
                 </span>
               </div>  
-          <div className="multipdf-wrapper d-flex flex-row mt-2 ">
-            <div className="multipdf-sidebar">
-                <h5>{projectName} - PDF Files</h5>
-                <div className="pdf-item-wrapper">
-                {pdfFiles.map((file, index) => (
-                  <div key={file} className="pdf-item mb-1">
-                    <input id="selectedPDF" type="checkbox" checked={selectedFiles.includes(file)} onChange={() => handleSelectionChange(file)} /> &nbsp; 
-                    <span className="selectedPDF-label" onClick={() => setActiveIndex(index)}>{file}</span>
-                  </div>
-                ))}
-                </div>
-              
+          <div className="multipdf-wrapper mt-2 ">
+          <div className="multipdf-sidebar">
+            <h5>{folderName ? decodedFolderName : projectName} - PDF Files</h5>
+
+            {/* Select All / Deselect All */}
+            <div className="select-controls">
+              <button  className="d-flex align-items-center" onClick={handleSelectAll}> 
+               Select All
+              </button>
+              <span className="items-info">
+                {`${(currentPage - 1) * itemsPerPage + 1} - ${Math.min(currentPage * itemsPerPage, pdfFiles.length)} of ${pdfFiles.length}`}
+              </span>
+              <button className="d-flex align-items-center" onClick={handleDeselectAll}> 
+              Deselect All
+              </button>
             </div>
+
+            <div className="pdf-item-wrapper">
+              {paginatedFiles.map((file, index) => (
+                <div key={file} className="pdf-item">
+                  <input
+                    type="checkbox"
+                    id="selectedPDF"
+                    checked={selectedFiles.includes(file)}
+                    onChange={() => handleSelectionChange(file)}
+                  />
+                  <span className="selectedPDF-label">{file}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="pagination">
+              <button onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1}>
+              <FaArrowLeft />
+              </button>
+              <span>Page {currentPage} of {totalPages}</span>
+              <button onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>
+              <FaArrowRight />
+              </button>
+            </div>
+          </div>
 
             <div className="multipdf-main-content d-flex">
                 <div className="multipdf-viewer mb-3">
