@@ -156,7 +156,7 @@ function SubFolder() {
         if (!folderNode || !folderNode.files || folderNode.files.length === 0) return [];
   
         return folderNode.files
-        .filter((file) => !file.fileName.endsWith('.json'))
+        .filter((file) => !file.fileName.endsWith('.json')  && !file.fileName.endsWith('.ifc'))
         .map((file) => ({
           projectId: id,
           fileName: file.fileName,
@@ -438,7 +438,10 @@ function SubFolder() {
                         }
 
                         console.log("Appending to FormData...");
+                        formData.append('project_file', file)
+                        console.log("Original IFC File appended to FormData");
                         formData.append("project_file", fragFile);
+                        console.log("Frag File appended to FormData");
                         console.log("✅ FormData after adding fragFile:", [...formData.entries()]);
 
                         if (propertiesFile) {

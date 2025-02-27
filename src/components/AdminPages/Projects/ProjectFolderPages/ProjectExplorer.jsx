@@ -224,7 +224,7 @@ function ProjectExplorer() {
           return [];
 
         return folderNode.files
-        .filter((file) => !file.fileName.endsWith('.json')) // && !file.fileName.endsWith('.ifc'))
+        .filter((file) => !file.fileName.endsWith('.json')  && !file.fileName.endsWith('.ifc'))
           .map((file) => ({
             projectId: id,
             fileName: file.fileName,
@@ -614,7 +614,10 @@ function ProjectExplorer() {
               }
 
               console.log('Appending to FormData...');
-              formData.append('project_file', fragFile);
+              formData.append('project_file', file)
+              console.log("Original IFC File appended to FormData");
+              formData.append("project_file", fragFile);
+              console.log("Frag File appended to FormData");
               console.log('✅ FormData after adding fragFile:', [
                 ...formData.entries(),
               ]);
