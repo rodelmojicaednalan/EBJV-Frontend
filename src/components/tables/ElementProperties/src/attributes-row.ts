@@ -113,16 +113,17 @@ export const createAttributesRow = async (
   if (definedByRelations) {
     const containerIDs = definedByRelations;
     let pset = [];
-    let finish = [];
     for (const containerID of containerIDs) {
       const container = await model?.getProperties(containerID);
-      if (container['Name'].value == 'Tekla Quantity')
+
+      if (
+        container['Name'].value == 'Tekla Quantity' ||
+        container['Name'].value == 'Tekla Common'
+      )
         pset.push(container);
-      if (container['Name'].value == 'Tekla Common')
-        finish.push(container);
     }
 
-    if (pset) {
+    if (pset.length != 0) {
       const p = pset[0];
       if (p.type == WEBIFC.IFCPROPERTYSET) {
         p.HasProperties.forEach(async (property) => {
@@ -131,27 +132,9 @@ export const createAttributesRow = async (
 
           if (
             propAttrs['Name'].value == 'Weight' ||
-            propAttrs['Name'].value == 'Length'
+            propAttrs['Name'].value == 'Length' ||
+            propAttrs['Name'].value == 'Finish'
           ) {
-            attrsRow.children.push({
-              data: {
-                Name: propAttrs['Name'].value,
-                Value: propAttrs['NominalValue'].value,
-              },
-            });
-          }
-        });
-      }
-    }
-
-    if (finish) {
-      const p = finish[0];
-      if (p.type == WEBIFC.IFCPROPERTYSET) {
-        p.HasProperties.forEach(async (property) => {
-          const { value: propID } = property;
-          const propAttrs = await model?.getProperties(propID);
-
-          if (propAttrs['Name'].value == 'Finish') {
             attrsRow.children.push({
               data: {
                 Name: propAttrs['Name'].value,
@@ -164,14 +147,6 @@ export const createAttributesRow = async (
         });
       }
     }
-  }
-
-  if (attrsRow.data['Name'] == 'Tekla Assembly') {
-    attrsRow.children = attrsRow.children?.filter(
-      (item) => item.data.Name === 'Assembly/Cast unit Mark'
-    );
-
-    return attrsRow;
   }
 
   attrsRow.children = attrsRow.children?.filter((child) => {

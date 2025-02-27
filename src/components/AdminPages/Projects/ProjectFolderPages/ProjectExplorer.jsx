@@ -9,7 +9,7 @@ import { CSVLink } from 'react-csv';
 import Select from 'react-select';
 import '../../../../Custom.css';
 import '../ProjectStyles.css';
-import { BiDotsVertical, BiSolidEditAlt} from 'react-icons/bi';
+import { BiDotsVertical, BiSolidEditAlt } from 'react-icons/bi';
 import { LiaTimesSolid } from 'react-icons/lia';
 import { IoMdDownload, IoMdPersonAdd } from 'react-icons/io';
 import { IoGrid } from 'react-icons/io5';
@@ -22,13 +22,13 @@ import {
   FaFile,
   FaChevronCircleLeft,
   FaChevronCircleRight,
-  FaFileCsv 
+  FaFileCsv,
 } from 'react-icons/fa';
 import { MdFolderOff } from 'react-icons/md';
 import { RiAddLargeFill } from 'react-icons/ri';
 import { AiOutlineFileAdd } from 'react-icons/ai';
 import { BsQrCode, BsFillFolderFill } from 'react-icons/bs';
-import { GrMultiple, GrDocumentCsv } from "react-icons/gr";
+import { GrMultiple, GrDocumentCsv } from 'react-icons/gr';
 import ifcIcon from '../../../../assets/images/ifc-icon.png';
 import pdfIcon from '../../../../assets/images/pdf-icon.png';
 import dxfIcon from '../../../../assets/images/dxf-icon.png';
@@ -66,7 +66,8 @@ function ProjectExplorer() {
   const [offcanvasMenuOpen, setOffcanvasMenuOpen] = useState(false);
 
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
-  const [showAddFolderSubMenu, setShowAddFolderSubMenu] = useState(false);
+  const [showAddFolderSubMenu, setShowAddFolderSubMenu] =
+    useState(false);
 
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [availableEmails, setAvailableEmails] = useState([]);
@@ -80,7 +81,6 @@ function ProjectExplorer() {
     setIsGenerateQRCodeModalOpen(true);
   const handleCloseQRCodeModal = () =>
     setIsGenerateQRCodeModalOpen(false);
-
 
   const handleOpenShareModal = () => setIsShareModalOpen(true);
   const handleCloseShareModal = () => setIsShareModalOpen(false);
@@ -210,64 +210,80 @@ function ProjectExplorer() {
   // Fetch project details and populate fields
   const fetchProjectDetails = async () => {
     try {
-      const response = await axiosInstance.get(`/project/${projectId}`);
+      const response = await axiosInstance.get(
+        `/project/${projectId}`
+      );
       const { id, project_name, owner, folderTree } = response.data;
-  
+
       setProjectName(project_name);
       setOwnerName(`${owner.first_name} ${owner.last_name}`);
-  
+
       // ✅ Extract ONLY top-level files, no deep recursion
       const extractTopLevelFiles = (folderNode) => {
-        if (!folderNode.files || folderNode.files.length === 0) return [];
-  
+        if (!folderNode.files || folderNode.files.length === 0)
+          return [];
+
         return folderNode.files
-        .filter((file) => !file.fileName.endsWith('.json'))
-        .map((file) => ({
-          projectId: id,
-          fileName: file.fileName,
-          fileSize: `${(file.fileSize / (1024 * 1024)).toFixed(2)} MB`,
-          fileOwner: file.fileOwner,
-          created: new Intl.DateTimeFormat('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric',
-          }).format(new Date(file.fileCreationTime)),
-          lastAccessed: new Intl.DateTimeFormat('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric',
-          }).format(new Date(file.fileLastAccessed)),
-          lastModified: new Intl.DateTimeFormat('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric',
-          }).format(new Date(file.fileLastModified)),
+          .filter((file) => !file.fileName.endsWith('.json'))
+          .map((file) => ({
+            projectId: id,
+            fileName: file.fileName,
+            fileSize: `${(file.fileSize / (1024 * 1024)).toFixed(
+              2
+            )} MB`,
+            fileOwner: file.fileOwner,
+            created: new Intl.DateTimeFormat('en-US', {
+              month: 'short',
+              day: '2-digit',
+              year: 'numeric',
+            }).format(new Date(file.fileCreationTime)),
+            lastAccessed: new Intl.DateTimeFormat('en-US', {
+              month: 'short',
+              day: '2-digit',
+              year: 'numeric',
+            }).format(new Date(file.fileLastAccessed)),
+            lastModified: new Intl.DateTimeFormat('en-US', {
+              month: 'short',
+              day: '2-digit',
+              year: 'numeric',
+            }).format(new Date(file.fileLastModified)),
+          }));
+      };
+
+      // ✅ Extract ONLY direct subfolders, no recursion
+      const extractDirectSubfolders = (
+        folderNode,
+        parentPath = ''
+      ) => {
+        if (
+          !folderNode.subfolders ||
+          folderNode.subfolders.length === 0
+        )
+          return [];
+
+        return folderNode.subfolders.map((subfolder) => ({
+          folderName: subfolder.folderName,
+          folderPath: parentPath
+            ? `${parentPath}/${subfolder.folderName}`
+            : subfolder.folderName, // ✅ Correct path
         }));
       };
-  
-      // ✅ Extract ONLY direct subfolders, no recursion
-      const extractDirectSubfolders = (folderNode, parentPath = "") => {
-        if (!folderNode.subfolders || folderNode.subfolders.length === 0) return [];
-    
-        return folderNode.subfolders.map((subfolder) => ({
-            folderName: subfolder.folderName,
-            folderPath: parentPath ? `${parentPath}/${subfolder.folderName}` : subfolder.folderName, // ✅ Correct path
-        }));
-    };
-  
+
       const topLevelFiles = extractTopLevelFiles(folderTree);
-      const directSubfolders = extractDirectSubfolders(folderTree, folderTree.folderName);
-  
+      const directSubfolders = extractDirectSubfolders(
+        folderTree,
+        folderTree.folderName
+      );
+
       setExplorerSubfolders(directSubfolders); // Only direct subfolders
       setExplorerTable(topLevelFiles); // Only top-level files
-  
+
       // console.table(topLevelFiles);
       // console.table(directSubfolders);
     } catch (error) {
       console.error('Error fetching project details:', error);
     }
   };
-  
 
   const fetchAvailableUsers = async () => {
     try {
@@ -399,8 +415,8 @@ function ProjectExplorer() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAddFolderModal, setShowAddFolderModal] = useState(false);
   const [selectedSubfolders, setSelectedSubfolders] = useState([]);
-  const [deleteFolderMode, setDeleteFolderMode] =  useState(false);
-  const [newFolder, setNewFolder] = useState("");
+  const [deleteFolderMode, setDeleteFolderMode] = useState(false);
+  const [newFolder, setNewFolder] = useState('');
   const [newFiles, setNewFiles] = useState([]);
   // console.log(newFiles)
 
@@ -409,7 +425,7 @@ function ProjectExplorer() {
   //     const formData = new FormData();
   //     newFiles.forEach((file) => {
   //       formData.append('project_file', file);
-  //     });                                                                                                                                                                                
+  //     });
 
   //     await axiosInstance.post(
   //       `/upload-ifc-files/${projectId}`,
@@ -445,171 +461,232 @@ function ProjectExplorer() {
 
   const handleAddNewFile = async () => {
     try {
-        console.log("Starting file processing...");
-        if (!newFiles.length) {
-            console.warn("No new files to process.");
-            return;
-        }
-
-        Swal.fire({
-            title: "Processing Files...",
-            text: "Please wait.",
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading(),
-        });
-
-        const formData = new FormData();
-        const fragments = components.get(OBC.FragmentsManager);
-        const fragmentIfcLoader = components.get(OBC.IfcLoader);
-
-        console.log("Filtering files...");
-        const pdfFiles = newFiles.filter((file) => file.type === "application/pdf");
-        const ifcFiles = newFiles.filter((file) => file.type !== "application/pdf");
-
-        // Handle PDF Upload Immediately
-        if (pdfFiles.length > 0) {
-          console.log("📄 Found PDF files, uploading directly...");
-      
-          pdfFiles.forEach((file) => {
-              // Extract original filename and remove extra ".pdf" if exists
-              let fileName = file.name.replace(/\.pdf$/i, ""); // Remove trailing .pdf
-              let extension = ".pdf";
-      
-              // Create a new File object with the cleaned-up name
-              const updatedFile = new File([file], `${fileName}${extension}`, { type: file.type });
-      
-              // Append to FormData
-              formData.append("project_file", updatedFile);
-          });
-      
-          await axiosInstance.post(`/upload-pdf-files/${projectId}`, formData, {
-              headers: { "Content-Type": "multipart/form-data" },
-          });
-      
-          console.log("✅ PDF files uploaded successfully.");
+      console.log('Starting file processing...');
+      if (!newFiles.length) {
+        console.warn('No new files to process.');
+        return;
       }
-      
 
-        // Skip IFC processing if no IFC files exist
-        if (ifcFiles.length === 0) {
-            Swal.fire({
-                title: "Success!",
-                text: "PDF files uploaded successfully.",
-                icon: "success",
-                confirmButtonText: "OK",
-            });
+      Swal.fire({
+        title: 'Processing Files...',
+        text: 'Please wait.',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
 
-            setShowAddModal(false);
-            setNewFiles([]);
-            setRefreshKey((prevKey) => prevKey + 1);
-            return;
-        }
+      const formData = new FormData();
+      const fragments = components.get(OBC.FragmentsManager);
+      const fragmentIfcLoader = components.get(OBC.IfcLoader);
 
-        console.log("Setting up IFC loader...");
-        await fragmentIfcLoader.setup();
+      console.log('Filtering files...');
+      const pdfFiles = newFiles.filter(
+        (file) => file.type === 'application/pdf'
+      );
+      const ifcFiles = newFiles.filter(
+        (file) => file.type !== 'application/pdf'
+      );
 
-        for (const file of ifcFiles) {
-            try {
-                console.log(`Processing IFC file: ${file.name}`);
-                const data = await file.arrayBuffer();
-                const buffer = new Uint8Array(data);
-                console.log("File converted to Uint8Array.");
+      // Handle PDF Upload Immediately
+      if (pdfFiles.length > 0) {
+        console.log('📄 Found PDF files, uploading directly...');
 
-                console.log("Adding onFragmentsLoaded listener...");
-                const onLoadHandler = async (model) => {
-                    try {
-                        console.log("🚀 Fragments loaded event triggered!");
+        pdfFiles.forEach((file) => {
+          // Extract original filename and remove extra ".pdf" if exists
+          let fileName = file.name.replace(/\.pdf$/i, ''); // Remove trailing .pdf
+          let extension = '.pdf';
 
-                        const groupsArray = Array.from(fragments.groups.values());
-                        console.log("Fragments Groups Found:", groupsArray.length);
+          // Create a new File object with the cleaned-up name
+          const updatedFile = new File(
+            [file],
+            `${fileName}${extension}`,
+            { type: file.type }
+          );
 
-                        if (groupsArray.length === 0) {
-                            console.warn("⚠️ No fragment groups found!");
-                            return;
-                        }
-
-                        const group = groupsArray[0];
-                        console.log("Extracting fragment data...");
-                        const fragData = fragments.export(group);
-                        console.log("Fragment data extracted, size:", fragData?.length);
-
-                        const fileName = file.name.split('.')[0];
-                        const dateID = Date.now();
-
-                        const fragBlob = new Blob([fragData]);
-                        console.log("Fragment Blob created, size:", fragBlob.size);
-
-                        const fragFile = new File([fragBlob], `${dateID}-${fileName}.frag`);
-                        console.log("Fragment file created:", fragFile.name, "Size:", fragFile.size);
-
-                        const properties = group.getLocalProperties();
-                        console.log("Extracted properties:", properties);
-
-                        let propertiesFile = null;
-                        if (properties) {
-                            const propertiesBlob = new Blob([JSON.stringify(properties)]);
-                            console.log("Properties Blob created, size:", propertiesBlob.size);
-
-                            propertiesFile = new File([propertiesBlob], `${dateID}-${fileName}.json`);
-                            console.log("Properties file created:", propertiesFile.name, "Size:", propertiesFile.size);
-                        }
-
-                        console.log("Appending to FormData...");
-                        formData.append("project_file", fragFile);
-                        console.log("✅ FormData after adding fragFile:", [...formData.entries()]);
-
-                        if (propertiesFile) {
-                            formData.append("properties", propertiesFile);
-                            console.log("✅ FormData after adding propertiesFile:", [...formData.entries()]);
-                        }
-
-                        console.log("✅ Completed processing for file:", file.name);
-                        fragments.onFragmentsLoaded.remove(onLoadHandler);
-                    } catch (error) {
-                        console.error("❌ Error processing IFC fragments:", error);
-                        fragments.onFragmentsLoaded.remove(onLoadHandler);
-                    }
-                };
-
-                fragments.onFragmentsLoaded.add(onLoadHandler, { once: true });
-
-                console.log("🚀 Loading IFC file...");
-                await fragmentIfcLoader.load(buffer);
-                console.log("✅ IFC file loaded successfully.");
-            } catch (error) {
-                console.error("❌ Error loading IFC file:", error);
-            }
-        }
-
-        console.log("🔄 Final FormData entries before sending:", [...formData.entries()]);
-
-        console.log("📤 Sending IFC FormData to server...");
-        await axiosInstance.post(`/upload-ifc-files/${projectId}`, formData, {
-            headers: { "Content-Type": "multipart/form-data" },
+          // Append to FormData
+          formData.append('project_file', updatedFile);
         });
-        console.log("✅ IFC files uploaded successfully.");
 
+        await axiosInstance.post(
+          `/upload-pdf-files/${projectId}`,
+          formData,
+          {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          }
+        );
+
+        console.log('✅ PDF files uploaded successfully.');
+      }
+
+      // Skip IFC processing if no IFC files exist
+      if (ifcFiles.length === 0) {
         Swal.fire({
-            title: "Success!",
-            text: "Files have been added successfully.",
-            icon: "success",
-            confirmButtonText: "OK",
+          title: 'Success!',
+          text: 'PDF files uploaded successfully.',
+          icon: 'success',
+          confirmButtonText: 'OK',
         });
 
         setShowAddModal(false);
         setNewFiles([]);
         setRefreshKey((prevKey) => prevKey + 1);
-    } catch (error) {
-        console.error("❌ Error during file upload:", error);
-        Swal.fire({
-            title: "Error!",
-            text: "Failed to upload files. Try again.",
-            icon: "error",
-            confirmButtonText: "OK",
-        });
-    }
-};
+        return;
+      }
 
+      console.log('Setting up IFC loader...');
+      await fragmentIfcLoader.setup();
+
+      for (const file of ifcFiles) {
+        try {
+          console.log(`Processing IFC file: ${file.name}`);
+          const data = await file.arrayBuffer();
+          const buffer = new Uint8Array(data);
+          console.log('File converted to Uint8Array.');
+
+          console.log('Adding onFragmentsLoaded listener...');
+          const onLoadHandler = async (model) => {
+            try {
+              console.log('🚀 Fragments loaded event triggered!');
+
+              const groupsArray = Array.from(
+                fragments.groups.values()
+              );
+              console.log(
+                'Fragments Groups Found:',
+                groupsArray.length
+              );
+
+              if (groupsArray.length === 0) {
+                console.warn('⚠️ No fragment groups found!');
+                return;
+              }
+
+              const group = groupsArray[0];
+              console.log('Extracting fragment data...');
+              const fragData = fragments.export(group);
+              console.log(
+                'Fragment data extracted, size:',
+                fragData?.length
+              );
+
+              const fileName = file.name.split('.')[0];
+              const dateID = Date.now();
+
+              const fragBlob = new Blob([fragData]);
+              console.log(
+                'Fragment Blob created, size:',
+                fragBlob.size
+              );
+
+              const fragFile = new File(
+                [fragBlob],
+                `${dateID}-${fileName}.frag`
+              );
+              console.log(
+                'Fragment file created:',
+                fragFile.name,
+                'Size:',
+                fragFile.size
+              );
+
+              const properties = group.getLocalProperties();
+              console.log('Extracted properties:', properties);
+
+              let propertiesFile = null;
+              if (properties) {
+                const propertiesBlob = new Blob([
+                  JSON.stringify(properties),
+                ]);
+                console.log(
+                  'Properties Blob created, size:',
+                  propertiesBlob.size
+                );
+
+                propertiesFile = new File(
+                  [propertiesBlob],
+                  `${dateID}-${fileName}.json`
+                );
+                console.log(
+                  'Properties file created:',
+                  propertiesFile.name,
+                  'Size:',
+                  propertiesFile.size
+                );
+              }
+
+              console.log('Appending to FormData...');
+              formData.append('project_file', fragFile);
+              console.log('✅ FormData after adding fragFile:', [
+                ...formData.entries(),
+              ]);
+
+              if (propertiesFile) {
+                formData.append('properties', propertiesFile);
+                console.log(
+                  '✅ FormData after adding propertiesFile:',
+                  [...formData.entries()]
+                );
+              }
+
+              console.log(
+                '✅ Completed processing for file:',
+                file.name
+              );
+              fragments.onFragmentsLoaded.remove(onLoadHandler);
+            } catch (error) {
+              console.error(
+                '❌ Error processing IFC fragments:',
+                error
+              );
+              fragments.onFragmentsLoaded.remove(onLoadHandler);
+            }
+          };
+
+          fragments.onFragmentsLoaded.add(onLoadHandler, {
+            once: true,
+          });
+
+          console.log('🚀 Loading IFC file...');
+          await fragmentIfcLoader.load(buffer);
+          console.log('✅ IFC file loaded successfully.');
+        } catch (error) {
+          console.error('❌ Error loading IFC file:', error);
+        }
+      }
+
+      console.log('🔄 Final FormData entries before sending:', [
+        ...formData.entries(),
+      ]);
+
+      console.log('📤 Sending IFC FormData to server...');
+      await axiosInstance.post(
+        `/upload-ifc-files/${projectId}`,
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }
+      );
+      console.log('✅ IFC files uploaded successfully.');
+
+      Swal.fire({
+        title: 'Success!',
+        text: 'Files have been added successfully.',
+        icon: 'success',
+        confirmButtonText: 'OK',
+      });
+
+      setShowAddModal(false);
+      setNewFiles([]);
+      setRefreshKey((prevKey) => prevKey + 1);
+    } catch (error) {
+      console.error('❌ Error during file upload:', error);
+      Swal.fire({
+        title: 'Error!',
+        text: 'Failed to upload files. Try again.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
+    }
+  };
 
   // const [newFileName, setNewFileName] = useState('')
   // const handleRenameFile = async () => {
@@ -653,75 +730,82 @@ function ProjectExplorer() {
       });
       return;
     }
-  
+
     try {
       await axiosInstance.post(`/create-folder/${projectId}`, {
         folder_name: newFolder.trim(),
       });
-  
-      showToast();  // Show success message
+
+      showToast(); // Show success message
       setShowAddFolderModal(false);
       setNewFolder('');
       setRefreshKey((prevKey) => prevKey + 1); // Refresh UI
     } catch (error) {
       Swal.fire({
         title: 'Error!',
-        text: error.response?.data?.error || 'Failed to create folder',
+        text:
+          error.response?.data?.error || 'Failed to create folder',
         icon: 'error',
         confirmButtonText: 'OK',
       });
     }
   };
-  
 
-const toggleSelectSubfolder = (folderPath) => {
-  setSelectedSubfolders((prevSelected) =>
-    prevSelected.includes(folderPath)
-      ? prevSelected.filter((item) => item !== folderPath) // Deselect
-      : [...prevSelected, folderPath] // Select
-  );
-};
+  const toggleSelectSubfolder = (folderPath) => {
+    setSelectedSubfolders(
+      (prevSelected) =>
+        prevSelected.includes(folderPath)
+          ? prevSelected.filter((item) => item !== folderPath) // Deselect
+          : [...prevSelected, folderPath] // Select
+    );
+  };
 
-const deleteSelectedSubfolders = async () => {
-  if (selectedSubfolders.length === 0) return;
+  const deleteSelectedSubfolders = async () => {
+    if (selectedSubfolders.length === 0) return;
 
-  const confirmed = await Swal.fire({
-    title: "Are you sure?",
-    text: `You are about to delete ${selectedSubfolders.length} folder(s). This action cannot be undone.`,
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Delete",
-    cancelButtonText: "Cancel",
-    customClass: {
-      confirmButton: "btn btn-danger",
-      cancelButton: "btn btn-secondary",
-    },
-  });
+    const confirmed = await Swal.fire({
+      title: 'Are you sure?',
+      text: `You are about to delete ${selectedSubfolders.length} folder(s). This action cannot be undone.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+      customClass: {
+        confirmButton: 'btn btn-danger',
+        cancelButton: 'btn btn-secondary',
+      },
+    });
 
-  if (confirmed.isConfirmed) {
-    try {
-      await axiosInstance.post(`/delete-folders/${projectId}`, { folderPaths: selectedSubfolders });
+    if (confirmed.isConfirmed) {
+      try {
+        await axiosInstance.post(`/delete-folders/${projectId}`, {
+          folderPaths: selectedSubfolders,
+        });
 
-      // Show success message
-      Swal.fire({
-        title: "Deleted!",
-        text: "The selected folders have been deleted.",
-        icon: "success",
-        confirmButtonText: "OK",
-      });
+        // Show success message
+        Swal.fire({
+          title: 'Deleted!',
+          text: 'The selected folders have been deleted.',
+          icon: 'success',
+          confirmButtonText: 'OK',
+        });
 
-      // Clear selection
-      setSelectedSubfolders([]);
-      setDeleteFolderMode(false);
+        // Clear selection
+        setSelectedSubfolders([]);
+        setDeleteFolderMode(false);
 
-      // Refresh folder list
-      setRefreshKey((prevKey) => prevKey + 1);
-    } catch (error) {
-      console.error("Error deleting folders:", error);
-      Swal.fire("Error", "Failed to delete subfolders. Try again.", "error");
+        // Refresh folder list
+        setRefreshKey((prevKey) => prevKey + 1);
+      } catch (error) {
+        console.error('Error deleting folders:', error);
+        Swal.fire(
+          'Error',
+          'Failed to delete subfolders. Try again.',
+          'error'
+        );
+      }
     }
-  }
-};
+  };
 
   const handleDeleteFiles = async () => {
     try {
@@ -965,14 +1049,16 @@ const deleteSelectedSubfolders = async () => {
                 </button>
                 {isAddMenuOpen && (
                   <div className="addFile-dropdown" ref={menuRef}>
-                    <div className="addFile-dd-item" 
-                // onMouseEnter={() => setShowAddFolderSubMenu(true)}
-                // onMouseLeave={() => setShowAddFolderSubMenu(false)}
-                onClick={setShowAddFolderModal}>
-                  <FaChevronLeft className="submenu-indicator"/>
-                  <FaFolderPlus className="addFile-dd-icon" />
-                  <span>Create folder</span>
-                  {/* {showAddFolderSubMenu && (
+                    <div
+                      className="addFile-dd-item"
+                      // onMouseEnter={() => setShowAddFolderSubMenu(true)}
+                      // onMouseLeave={() => setShowAddFolderSubMenu(false)}
+                      onClick={setShowAddFolderModal}
+                    >
+                      <FaChevronLeft className="submenu-indicator" />
+                      <FaFolderPlus className="addFile-dd-icon" />
+                      <span>Create folder</span>
+                      {/* {showAddFolderSubMenu && (
                     <div className="addFolder-subDropdown">
                       <div className="addFolder-subdd-item" onClick={handleOpenPicker}>
                         <FaGoogleDrive className="addFile-dd-icon" />
@@ -985,7 +1071,7 @@ const deleteSelectedSubfolders = async () => {
                       </div>
                     </div>
                   )} */}
-                </div>
+                    </div>
                     <div className="addFile-dd-divider" />
                     <div
                       className="addFile-dd-item"
@@ -1027,32 +1113,32 @@ const deleteSelectedSubfolders = async () => {
                       <FaThList />
                     </button>
                     {roleCheck.some((role) =>
-                            ['Admin', 'Superadmin'].includes(role)
-                          ) && (
-                            <button
-                              className="btn btn-icon"
-                              id="batchEdit-pdf"
-                              title="Edit Multiple PDFs"
-                              onClick={() =>
-                                navigate(
-                                  `/project-folder/multi-pdf-editor/${projectId}`
-                                )
-                              }
-                            >
-                             <GrMultiple/>
-                            </button>
-                          )}
-                          <button className="btn btn-icon" id="csv-export">
-                            <CSVLink
-                              {...handleExportToCSV()}
-                              filename={`${ownerName}'s ${projectName}_IFC-Files.csv`}
-                              className="exportToCSV"
-                              target="_blank"
-                              title="Export as CSV"
-                            >
-                             <GrDocumentCsv />
-                            </CSVLink>
-                          </button>
+                      ['Admin', 'Superadmin'].includes(role)
+                    ) && (
+                      <button
+                        className="btn btn-icon"
+                        id="batchEdit-pdf"
+                        title="Edit Multiple PDFs"
+                        onClick={() =>
+                          navigate(
+                            `/project-folder/multi-pdf-editor/${projectId}`
+                          )
+                        }
+                      >
+                        <GrMultiple />
+                      </button>
+                    )}
+                    <button className="btn btn-icon" id="csv-export">
+                      <CSVLink
+                        {...handleExportToCSV()}
+                        filename={`${ownerName}'s ${projectName}_IFC-Files.csv`}
+                        className="exportToCSV"
+                        target="_blank"
+                        title="Export as CSV"
+                      >
+                        <GrDocumentCsv />
+                      </CSVLink>
+                    </button>
                     {/* <div className="menu-btn-container position-relative">
                       <button
                         className="btn btn-icon menu-btn"
@@ -1097,58 +1183,92 @@ const deleteSelectedSubfolders = async () => {
                 </div>
 
                 <div className="d-flex flex-row deleteButtonGroup">
-                {roleCheck.some((role) =>
-                  ['Admin', 'Superadmin'].includes(role)
-                ) && (
-                  <button
-                    onClick={() => handleDeleteFiles(projectId)}
-                    id="deleteUploadedfilesbtn"
-                    className="btn btn-danger"
-                    disabled={selectedFiles.length === 0} // Disable button when no files are selected
-                  >
-                    Delete Files
-                  </button>
-                )}
-                  
-                <button className="btn mr-2 deleteModeBtn" onClick={() => setDeleteFolderMode(!deleteFolderMode)}>
-                    {deleteFolderMode ? "Cancel" : "Delete Folders"}
-                  </button>
-
-                  {deleteFolderMode && selectedSubfolders.length > 0 && (
-                    <button className="btn deleteFoldersBtn" onClick={deleteSelectedSubfolders}>
-                      Confirm Delete ({selectedSubfolders.length})
+                  {roleCheck.some((role) =>
+                    ['Admin', 'Superadmin'].includes(role)
+                  ) && (
+                    <button
+                      onClick={() => handleDeleteFiles(projectId)}
+                      id="deleteUploadedfilesbtn"
+                      className="btn btn-danger"
+                      disabled={selectedFiles.length === 0} // Disable button when no files are selected
+                    >
+                      Delete Files
                     </button>
                   )}
-                </div>
 
+                  <button
+                    className="btn mr-2 deleteModeBtn"
+                    onClick={() =>
+                      setDeleteFolderMode(!deleteFolderMode)
+                    }
+                  >
+                    {deleteFolderMode ? 'Cancel' : 'Delete Folders'}
+                  </button>
+
+                  {deleteFolderMode &&
+                    selectedSubfolders.length > 0 && (
+                      <button
+                        className="btn deleteFoldersBtn"
+                        onClick={deleteSelectedSubfolders}
+                      >
+                        Confirm Delete ({selectedSubfolders.length})
+                      </button>
+                    )}
+                </div>
 
                 <div className={`project-display ${viewType}`}>
-                <div className="project_subfolders">
-                  <label> Folders: </label>
-                  {explorerSubfolders.length > 0 ? (
-                    <div className="subFolder-card d-flex flex-row ">
-                      {explorerSubfolders.map((subfolder, index) => (
-                        <div
-                          key={index}
-                          className={`subfolder-item ${selectedSubfolders.includes(subfolder.folderPath) ? "selected" : ""}`}
-                          onClick={(e) => {
-                            if (deleteFolderMode) {
-                              toggleSelectSubfolder(subfolder.folderPath);
-                              e.stopPropagation(); // Prevent navigation
-                            } else {
-                              navigate(`/project-folder/${projectId}/data/project-explorer/subfolder/${encodeURIComponent(subfolder.folderPath)}`);
-                            }
-                          }}
-                        >
-                          <BsFillFolderFill className="subfolder-icon" /> <span className="subfolderName"> {subfolder.folderName} </span> 
-                          {deleteFolderMode && <input type="checkbox" checked={selectedSubfolders.includes(subfolder.folderPath)} readOnly />}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div>No Folders Found</div>
-                  )}
-                </div>
+                  <div className="project_subfolders">
+                    <label> Folders: </label>
+                    {explorerSubfolders.length > 0 ? (
+                      <div className="subFolder-card d-flex flex-row ">
+                        {explorerSubfolders.map(
+                          (subfolder, index) => (
+                            <div
+                              key={index}
+                              className={`subfolder-item ${
+                                selectedSubfolders.includes(
+                                  subfolder.folderPath
+                                )
+                                  ? 'selected'
+                                  : ''
+                              }`}
+                              onClick={(e) => {
+                                if (deleteFolderMode) {
+                                  toggleSelectSubfolder(
+                                    subfolder.folderPath
+                                  );
+                                  e.stopPropagation(); // Prevent navigation
+                                } else {
+                                  navigate(
+                                    `/project-folder/${projectId}/data/project-explorer/subfolder/${encodeURIComponent(
+                                      subfolder.folderPath
+                                    )}`
+                                  );
+                                }
+                              }}
+                            >
+                              <BsFillFolderFill className="subfolder-icon" />{' '}
+                              <span className="subfolderName">
+                                {' '}
+                                {subfolder.folderName}{' '}
+                              </span>
+                              {deleteFolderMode && (
+                                <input
+                                  type="checkbox"
+                                  checked={selectedSubfolders.includes(
+                                    subfolder.folderPath
+                                  )}
+                                  readOnly
+                                />
+                              )}
+                            </div>
+                          )
+                        )}
+                      </div>
+                    ) : (
+                      <div>No Folders Found</div>
+                    )}
+                  </div>
 
                   {viewType === 'grid' ? (
                     <div>
@@ -1314,7 +1434,10 @@ const deleteSelectedSubfolders = async () => {
         </Modal.Footer>
       </Modal>
 
-      <Modal show={showAddFolderModal} onHide={() => setShowAddFolderModal(false)}>
+      <Modal
+        show={showAddFolderModal}
+        onHide={() => setShowAddFolderModal(false)}
+      >
         <Modal.Header closeButton>
           <Modal.Title>Create Folder</Modal.Title>
         </Modal.Header>
@@ -1329,7 +1452,7 @@ const deleteSelectedSubfolders = async () => {
                 name="projectFolders"
                 className="form-control"
                 id="projectFolder"
-                placeholder='Folder name'
+                placeholder="Folder name"
                 onChange={(e) => setNewFolder(e.target.value)}
               />
             </div>
@@ -1343,7 +1466,11 @@ const deleteSelectedSubfolders = async () => {
           >
             Close
           </Button>
-          <Button id="saveAdd" variant="primary" onClick={handleAddNewFolder}>
+          <Button
+            id="saveAdd"
+            variant="primary"
+            onClick={handleAddNewFolder}
+          >
             Create
           </Button>
         </Modal.Footer>
@@ -1628,20 +1755,30 @@ const deleteSelectedSubfolders = async () => {
             </Toast.Body>
           </Toast>
         </ToastContainer> */}
-        <ToastContainer
-          className="p-3"
-          position={toastPosition}
-          style={{ zIndex: 1046, position: 'fixed', maxWidth: '300px' }}
+      <ToastContainer
+        className="p-3"
+        position={toastPosition}
+        style={{ zIndex: 1046, position: 'fixed', maxWidth: '300px' }}
+      >
+        <Toast
+          show={showSuccessToast}
+          onClose={showToast}
+          style={{ backgroundColor: '#fec19db8' }}
+          delay={5000}
+          autohide
         >
-        <Toast show={showSuccessToast} onClose={showToast} style={{backgroundColor: "#fec19db8"}} delay={5000} autohide>
-          <Toast.Header className='justify-content-between' style={{backgroundColor: "#ee8a50b8"}}>
-            <small > Folder Created Successfully </small>
+          <Toast.Header
+            className="justify-content-between"
+            style={{ backgroundColor: '#ee8a50b8' }}
+          >
+            <small> Folder Created Successfully </small>
           </Toast.Header>
-          <Toast.Body style={{fontSize: '.785rem'}}>
-            Your folder has been created and is ready to store project files.
+          <Toast.Body style={{ fontSize: '.785rem' }}>
+            Your folder has been created and is ready to store project
+            files.
           </Toast.Body>
         </Toast>
-        </ToastContainer>
+      </ToastContainer>
     </div>
   );
 }
