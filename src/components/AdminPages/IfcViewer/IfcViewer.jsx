@@ -230,8 +230,8 @@ function IfcViewer() {
         });
 
         highlighter.events.select.onClear.add(() => {
-          localStorage.removeItem('SELECTED_PART_MARK');
-          setSelectedPartMark(null);
+          // localStorage.removeItem('SELECTED_PART_MARK');
+          // setSelectedPartMark(null);
           setIsHideContainerOpen(() => false);
           updatePropertiesTable({ fragmentIdMap: {} });
         });
@@ -337,6 +337,15 @@ function IfcViewer() {
         // </bim-panel-section>
 
         const measurementPanel = BUI.Component.create(() => {
+          const viewAssemblyPDF = () => {
+            setTimeout(() => {
+              const selected = localStorage.getItem(
+                'SELECTED_PART_MARK'
+              );
+              console.log('selected', selected);
+            }, '1000');
+          };
+
           return BUI.html`
           <bim-panel active label="Tools" class="options-menu">
               <bim-panel-section collapsed label="Controls">
@@ -375,6 +384,13 @@ function IfcViewer() {
 
               <bim-panel-section collapsed label="Culler">
                
+              </bim-panel-section>
+              <bim-panel-section collapsed label="View Assembly PDF">
+                <bim-button label="View"
+                  @click="${() => {
+                    viewAssemblyPDF();
+                  }}">
+                </bim-button>
               </bim-panel-section>
             </bim-panel>
             `;
