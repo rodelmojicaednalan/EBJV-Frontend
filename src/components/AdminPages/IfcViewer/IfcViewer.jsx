@@ -39,7 +39,6 @@ function IfcViewer() {
   const [hiddenFragmentIds, setHiddenFragmentIds] = useState([]);
   const [selectedPartMark, setSelectedPartMark] = useState(null);
 
-  console.log('selectedPartMark', selectedPartMark);
   const addHiddenFragmentId = (fragmentId) => {
     setHiddenFragmentIds((hiddenFragmentIds) => [
       ...hiddenFragmentIds,
@@ -218,14 +217,21 @@ function IfcViewer() {
         highlighter.zoomToSelection = true;
 
         highlighter.events.select.onHighlight.add((fragmentIdMap) => {
-          const selected = localStorage.getItem('SELECTED_PART_MARK');
-          setSelectedPartMark(selected);
           setSelectedFragmentIdMap(fragmentIdMap);
           setIsHideContainerOpen(() => true);
           updatePropertiesTable({ fragmentIdMap });
+
+          setTimeout(() => {
+            const selected = localStorage.getItem(
+              'SELECTED_PART_MARK'
+            );
+            setSelectedPartMark(selected);
+          }, '1000');
         });
 
         highlighter.events.select.onClear.add(() => {
+          localStorage.removeItem('SELECTED_PART_MARK');
+          setSelectedPartMark(null);
           setIsHideContainerOpen(() => false);
           updatePropertiesTable({ fragmentIdMap: {} });
         });
