@@ -37,7 +37,9 @@ function IfcViewer() {
     useState(null);
   const [hiderInstance, setHiderInstance] = useState(null);
   const [hiddenFragmentIds, setHiddenFragmentIds] = useState([]);
+  const [selectedPartMark, setSelectedPartMark] = useState(null);
 
+  console.log('selectedPartMark', selectedPartMark);
   const addHiddenFragmentId = (fragmentId) => {
     setHiddenFragmentIds((hiddenFragmentIds) => [
       ...hiddenFragmentIds,
@@ -216,6 +218,8 @@ function IfcViewer() {
         highlighter.zoomToSelection = true;
 
         highlighter.events.select.onHighlight.add((fragmentIdMap) => {
+          const selected = localStorage.getItem('SELECTED_PART_MARK');
+          setSelectedPartMark(selected);
           setSelectedFragmentIdMap(fragmentIdMap);
           setIsHideContainerOpen(() => true);
           updatePropertiesTable({ fragmentIdMap });
@@ -328,13 +332,13 @@ function IfcViewer() {
 
         const measurementPanel = BUI.Component.create(() => {
           return BUI.html`
-          <bim-panel active label="Length Measurement" class="options-menu">
+          <bim-panel active label="Tools" class="options-menu">
               <bim-panel-section collapsed label="Controls">
                   <bim-label>Create dimension: Double click</bim-label>  
                   <bim-label>Delete dimension: Delete</bim-label>  
               </bim-panel-section>
               
-              <bim-panel-section collapsed label="Others">
+              <bim-panel-section collapsed label="Length Measurement">
                 <bim-checkbox 
                   checked 
                   label="Dimensions enabled"
@@ -361,6 +365,10 @@ function IfcViewer() {
                   }}">
                 </bim-button>
         
+              </bim-panel-section>
+
+              <bim-panel-section collapsed label="Culler">
+               
               </bim-panel-section>
             </bim-panel>
             `;

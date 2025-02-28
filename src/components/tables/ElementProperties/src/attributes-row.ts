@@ -177,5 +177,11 @@ export const createAttributesRow = async (
     );
   });
 
+  const partMark = attrsRow.children?.filter(
+    (child) => child.data.Name === 'Part Mark'
+  )[0];
+
+  localStorage.setItem('SELECTED_PART_MARK', partMark?.data.Value);
+
   return attrsRow;
 };
