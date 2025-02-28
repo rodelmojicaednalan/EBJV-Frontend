@@ -113,14 +113,14 @@ export const createAttributesRow = async (
   if (definedByRelations) {
     const containerIDs = definedByRelations;
     let pset = [];
+    let finish = [];
     for (const containerID of containerIDs) {
       const container = await model?.getProperties(containerID);
 
-      if (
-        container['Name'].value == 'Tekla Quantity' ||
-        container['Name'].value == 'Tekla Common'
-      )
+      if (container['Name'].value == 'Tekla Quantity')
         pset.push(container);
+      if (container['Name'].value == 'Tekla Common')
+        finish.push(container);
     }
 
     if (pset.length != 0) {
@@ -132,9 +132,27 @@ export const createAttributesRow = async (
 
           if (
             propAttrs['Name'].value == 'Weight' ||
-            propAttrs['Name'].value == 'Length' ||
-            propAttrs['Name'].value == 'Finish'
+            propAttrs['Name'].value == 'Length'
           ) {
+            attrsRow.children.push({
+              data: {
+                Name: propAttrs['Name'].value,
+                Value: propAttrs['NominalValue'].value,
+              },
+            });
+          }
+        });
+      }
+    }
+
+    if (finish.length != 0) {
+      const f = finish[0];
+      if (f.type == WEBIFC.IFCPROPERTYSET) {
+        f.HasProperties.forEach(async (property) => {
+          const { value: propID } = property;
+          const propAttrs = await model?.getProperties(propID);
+
+          if (propAttrs['Name'].value == 'Finish') {
             attrsRow.children.push({
               data: {
                 Name: propAttrs['Name'].value,
