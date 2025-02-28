@@ -361,7 +361,7 @@ function Projects() {
       name: 'Owner',
       selector: (row) => row.project_owner,
       sortable: true,
-      hide: 'sm'
+      hide: 'md'
     },
     {
       name: 'Action',

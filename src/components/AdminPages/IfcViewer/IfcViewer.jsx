@@ -343,6 +343,7 @@ function IfcViewer() {
                 'SELECTED_PART_MARK'
               );
               console.log('selected', selected);
+              navigate(`/project-folder/pdf-from-model/${projectId}`)
             }, '1000');
           };
 

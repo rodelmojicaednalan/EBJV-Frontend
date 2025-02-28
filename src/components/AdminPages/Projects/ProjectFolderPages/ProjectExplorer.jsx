@@ -42,6 +42,7 @@ import ProjectSidebar from '../ProjectFolderSidebar';
 import SidebarOffcanvas from '../MobileSidebar';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import useWindowWidth from './windowWidthHook.jsx';
+import { useLoader } from '../../../Loaders/LoaderContext';
 
 // import useDrivePicker from 'react-google-drive-picker';
 
@@ -53,7 +54,7 @@ import { FragmentsGroup } from '@thatopen/fragments';
 
 function ProjectExplorer() {
   // const [openPicker, data, authResponse] = useDrivePicker();
-
+  const { setLoading } = useLoader();
   const windowWidthHook = useWindowWidth();
   const isMobile = windowWidthHook <= 425;
   const { projectId } = useParams();
@@ -209,6 +210,7 @@ function ProjectExplorer() {
 
   // Fetch project details and populate fields
   const fetchProjectDetails = async () => {
+    setLoading(true);
     try {
       const response = await axiosInstance.get(
         `/project/${projectId}`
@@ -282,6 +284,8 @@ function ProjectExplorer() {
       // console.table(directSubfolders);
     } catch (error) {
       console.error('Error fetching project details:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -1384,6 +1388,8 @@ function ProjectExplorer() {
                       paginationPerPage={20}
                       paginationRowsPerPageOptions={[10, 20, 30, 40]}
                       onRowClicked={handleRowClick}
+                      pointerOnHover
+                      dense
                       responsive
                       noDataComponent={
                         <div className="noData mt-4">

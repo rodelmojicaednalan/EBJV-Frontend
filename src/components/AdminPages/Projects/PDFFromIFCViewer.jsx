@@ -14,9 +14,11 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@2.16.105/
 import './ProjectStyles.css';
 
 import useWindowWidth from '../Projects/ProjectFolderPages/windowWidthHook.jsx'
+import { useLoader } from '../../Loaders/LoaderContext';
 import { FaChevronLeft } from "react-icons/fa6";
 import { AuthContext } from '../../Authentication/authContext';
-function ProjectFolder() {
+function PDFFromIFCViewer() {
+    const { setLoading } = useLoader();
     const { user } = useContext(AuthContext);
     const userRoles = user?.roles?.map((role) => role.role_name) || [];
     const isAdmin = userRoles.includes('Admin') || userRoles.includes('Superadmin');
@@ -26,8 +28,7 @@ function ProjectFolder() {
   const windowWidthHook = useWindowWidth();
   const isMobile = windowWidthHook <= 425;
   const isTablet = windowWidthHook <= 768;
-  const { projectId, fileName } = useParams();
-  console.log(fileName)
+  const { projectId } = useParams();
   const navigate = useNavigate();
   const [refreshKey, setRefreshKey] = useState(0); 
   const [pdfBlob, setPdfBlob] = useState(null);
@@ -37,33 +38,85 @@ function ProjectFolder() {
   const [viewerKey, setViewerKey] = useState(0);
   const [qrUrl, setQrUrl] = useState("");
   const [extractedPDFText, setExtractedPDFText] = useState([]);
+  const [progress, setProgress] = useState(0);
+  const [pdfurl, setpdfurl] = useState(null)
 
   const extractTextFromPDF = async (pdfBlob) => {
-    if (!pdfBlob) return;
-  
+    if (!pdfBlob) return [];
+
     const pdfUrl = URL.createObjectURL(pdfBlob);
     const loadingTask = pdfjsLib.getDocument(pdfUrl);
     
     try {
-      const pdf = await loadingTask.promise;
-      let extractedText = [];
-  
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const textContent = await page.getTextContent();
-        const pageText = textContent.items.map((item) => item.str).join(" ");
-        
-        extractedText.push(pageText);
-      }
-  
-      setExtractedPDFText(extractedText); // Store extracted text in state
-      console.log("Extracted PDF Text:", extractedText);
-    } catch (error) {
-      console.error("Error extracting text from PDF:", error);
-    }
-  };
-  
+        const pdf = await loadingTask.promise;
+        let extractedText = [];
 
+        for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items.map((item) => item.str).join(" ");
+            extractedText.push(pageText);
+        }
+
+        return extractedText;
+    } catch (error) {
+        console.error("Error extracting text from PDF:", error);
+        return [];
+    }
+};
+
+const viewAssemblyPDF = async () => {
+  const selectedAttributes = JSON.parse(localStorage.getItem('SELECTED_ELEMENT_ATTR'));
+  
+  if (!selectedAttributes || selectedAttributes.length === 0) {
+      console.warn("No attributes selected.");
+      return;
+  }
+
+  setLoading(true); // Start loader
+  setProgress(0);   // Reset progress
+
+  try {
+      // Fetch all PDFs in the {Parent}/(Assemblies) folder
+      const response = await axiosInstance.get(`/project/${projectId}/files`);
+      const pdfFiles = response.data.files.currentLevelFiles.map(file => decodeURIComponent(file).split('/').pop());
+
+      let fileIndex = 0;
+      for (const pdf of pdfFiles) {
+          fileIndex++;
+
+          setProgress(Math.round((fileIndex / pdfFiles.length) * 100)); // Update progress
+
+          const pdfUrl = `https://www.api-cadstream.ebjv.e-fab.com.au/api/uploads/${pdf}`;
+          
+          const pdfBlob = await (await fetch(pdfUrl)).blob();
+          const extractedText = await extractTextFromPDF(pdfBlob);
+
+          // Extract attribute values
+          const attributeValues = selectedAttributes.map(attr => attr.data.Value.toLowerCase());
+
+          // Check if any attribute is found in the PDF
+          if (extractedText.some(page => attributeValues.some(attr => page.toLowerCase().includes(attr)))) {
+              console.log(`Match found in ${pdf}`);
+              setPdfPreviewUrl(pdfUrl);
+              console.log(pdfPreviewUrl)
+              setLoading(false); // Stop loader
+              return;
+          }
+      }
+
+      console.warn("No matching PDF found.");
+      setLoading(false);
+  } catch (error) {
+      console.error("Error fetching PDFs:", error);
+      setLoading(false);
+  }
+};
+
+
+useEffect(() => {
+  viewAssemblyPDF();
+}, [projectId]);
 
   useEffect(() => {
     if (user !== undefined) {
@@ -71,12 +124,9 @@ function ProjectFolder() {
     }
   }, [user]);
 
-useEffect(() => {
-  setViewerKey(prev => prev + 1); // Change key to force refresh
-}, [fileName]);
 
-const formattedPDFname = fileName.replace(".pdf", "")
-console.log(formattedPDFname)  
+// const formattedPDFname = fileName.replace(".pdf", "")
+// console.log(formattedPDFname)  
 const handleImageUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
@@ -118,7 +168,7 @@ const handleImageUpload = (event) => {
 
 
 const modifyPDF = async () => {
-  if (!uploadedImage || !fileName || !qrUrl) {
+  if (!uploadedImage || !qrUrl) {
     alert("Please upload an image and provide a URL.");
     return;
   }
@@ -129,8 +179,8 @@ const modifyPDF = async () => {
     // ✅ Generate a shortened link or use "Click Here!"
 
     // Fetch the existing PDF file
-    const fileUrl = await axiosInstance.get(`/uploads/${fileName}`, { responseType: "arraybuffer" });
-    const arrayBuffer = fileUrl.data;
+    // const fileUrl = await axiosInstance.get(`/uploads/${fileName}`, { responseType: "arraybuffer" });
+    const arrayBuffer = pdfPreviewUrl.data;
 
     // Load the PDF into pdf-lib
     const pdfDoc = await PDFDocument.load(arrayBuffer);
@@ -253,28 +303,13 @@ const downloadPDF = () => {
   const url = URL.createObjectURL(pdfBlob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `Modified_${formattedPDFname}.pdf`;
+  link.download = `Modified.pdf`;
   link.click();
 };
 
-const activeFileUrl = pdfPreviewUrl || `https://www.api-cadstream.ebjv.e-fab.com.au/api/uploads/${fileName}`;
-const fetchAndExtractText = async () => {
-  try {
-    // Fetch the PDF as binary data
-    const response = await fetch(activeFileUrl);
-    if (!response.ok) throw new Error("Failed to fetch PDF");
-
-    const pdfBlob = await response.blob(); // Convert to Blob
-    extractTextFromPDF(pdfBlob); // Pass to extraction function
-  } catch (error) {
-    console.error("Error fetching PDF:", error);
-  }
-};
+const activeFileUrl = pdfPreviewUrl || `https://www.ebjv.api.e-fab.com.au/api/uploads/`;
 
 // Call this function when needed
-useEffect(() => {
-  fetchAndExtractText();
-}, [fileName]); // Runs once when fileName changes
 
 
 // const activeFileUrl = pdfPreviewUrl || `http://localhost:3000/api/uploads/${fileName}`;
@@ -282,7 +317,7 @@ useEffect(() => {
   return (
     <div className="container">
       <div className="container-content" id="project-folder-container">
-          <div className="projectFolder-display">
+          <div className="PDFFromIFCViewer-display">
                 <div className="main"> 
                     <div className="container-fluid moduleFluid">
                       <div className="pdf-preview-header">
@@ -357,4 +392,4 @@ useEffect(() => {
   );
 }
 
-export default ProjectFolder;
+export default PDFFromIFCViewer;

@@ -10,17 +10,20 @@ import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import { FaCircleArrowLeft, FaArrowLeft, FaArrowRight  } from "react-icons/fa6";
 import { AuthContext } from "../../Authentication/authContext.jsx";
+import { useLoader } from '../../Loaders/LoaderContext';
 import './ProjectStyles.css';
 import JSZip from "jszip";
 import FileSaver from "file-saver";
 import { GiDivergence } from "react-icons/gi";
 import { RiFileZipFill } from "react-icons/ri";
 import { BsQrCode } from "react-icons/bs";
+import { FaRegFilePdf } from "react-icons/fa";
 import { MdSelectAll, MdDeselect  } from "react-icons/md";
 import useWindowWidth from './ProjectFolderPages/windowWidthHook.jsx';
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js`;
 
 function MultiPDFEditor() {
+  const { setLoading } = useLoader();
     const windowWidthHook = useWindowWidth();
     const isMobile = windowWidthHook <= 425;
     const isTablet = windowWidthHook <= 768;
@@ -45,6 +48,7 @@ function MultiPDFEditor() {
 
     useEffect(() => {
       const fetchPdfFiles = async () => {
+        setLoading(true);
         try {
             let endpoint = folderName
                 ? `/project/${projectId}/files?folder=${encodeURIComponent(decodedFolderName)}`
@@ -65,10 +69,10 @@ function MultiPDFEditor() {
             // console.log("Fetched PDFs:", pdfs);
         } catch (error) {
             console.error("Error fetching PDF files:", error);
+        } finally {
+          setLoading(false);
         }
     };
-    
-    
     
 
         const fetchProjectDetails = async () => {
@@ -237,6 +241,12 @@ function MultiPDFEditor() {
                 </span>
               </div>  
           <div className="multipdf-wrapper mt-2 ">
+            { pdfFiles.length === 0 ? (  
+              <div className="no-pdf-message">
+               <h2>  No PDF files available in this folder. </h2>
+              </div>
+            ) : (
+          <>
           <div className="multipdf-sidebar">
             <h5>{folderName ? decodedFolderName : projectName} - PDF Files</h5>
 
@@ -306,6 +316,8 @@ function MultiPDFEditor() {
               </div>
                 )}
             </div>
+            </>
+            )}
             </div>
         </div>
     );

@@ -22,10 +22,12 @@ import { HiMiniUserGroup } from "react-icons/hi2";
 import ProjectSidebar from '../ProjectFolderSidebar';
 import SidebarOffcanvas from '../MobileSidebar';
 import useWindowWidth from './windowWidthHook.jsx'
+import { useLoader } from '../../../Loaders/LoaderContext';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import { ToastContainer, Toast } from 'react-bootstrap';
 
 function ProjectContributors() {
+  const { setLoading } = useLoader();
   const windowWidthHook = useWindowWidth();
   const isMobile = windowWidthHook <= 425;
   const { projectId } = useParams();
@@ -158,6 +160,7 @@ function ProjectContributors() {
 
     // Fetch project details and populate fields
     const fetchProjectDetails = async () => {
+      setLoading(true);
       try {
         const response = await axiosInstance.get(`/project-contributors/${projectId}`);
         const { project_name, owner, contributors, groups } = response.data;
@@ -200,6 +203,8 @@ function ProjectContributors() {
         //console.log(formattedContributors)
       } catch (error) {
         console.error('Error fetching project details:', error);
+      } finally {
+        setLoading(false);
       }
     };
 

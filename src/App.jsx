@@ -9,6 +9,7 @@ import UsersList from './components/AdminPages/UsersList/UsersLIst';
 import Projects from './components/AdminPages/Projects/Projects';
 import ProjectPDFViewer from './components/AdminPages/Projects/ProjectPDFViewer';
 import MultiPDFEditor from './components/AdminPages/Projects/MultiPDFPage';
+import PDFFromIFCViewer from './components/AdminPages/Projects/PDFFromIFCViewer';
 
 // import ProjectViews from './components/AdminPages/Projects/ProjectFolderPages/ProjectViews';
 // import ProjectTopics from './components/AdminPages/Projects/ProjectFolderPages/ProjectTopics';
@@ -99,6 +100,7 @@ function Layout() {
         {/* <Route path="/project-folder/pdf-viewer/:projectId/:fileName" element={<ProtectedRoute element={<ProjectPDFViewer />} allowedRoles={['Admin', 'Client']} />} /> */}
         <Route path="/project-folder/pdf-viewer/:projectId/:fileName" element={<ProjectPDFViewer/>}/>
         <Route path="/project-folder/multi-pdf-editor/:projectId/:folderName?" element={<MultiPDFEditor/>}/>
+        <Route path="/project-folder/pdf-from-model/:projectId" element={<PDFFromIFCViewer/>}/>
 
         <Route path="/project-folder/:projectId/data/project-explorer" element={<ProtectedRoute element={<ProjectExplorer />} allowedRoles={['Superadmin', 'Admin', 'Client']} />} />
         <Route path="/project-folder/:projectId/data/project-explorer/subfolder/:folderName" element={<ProtectedRoute element={<SubFolders />} allowedRoles={['Superadmin', 'Admin', 'Client']} />} />

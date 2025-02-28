@@ -10,7 +10,9 @@ import { FaCaretDown, FaFileExcel, FaHistory, FaChevronCircleLeft, FaChevronCirc
 
 import SidebarOffcanvas from '../MobileSidebar';
 import useWindowWidth from './windowWidthHook.jsx'
+import { useLoader } from '../../../Loaders/LoaderContext';
 function ProjectActivity() {
+  const { setLoading } = useLoader();
   const windowWidthHook = useWindowWidth();
   const isMobile = windowWidthHook <= 425;
   const { projectId } = useParams();
@@ -42,6 +44,7 @@ function ProjectActivity() {
   useEffect(() => {
     // Fetch project details and populate fields
     const fetchProjectDetails = async () => {
+      setLoading(true);
       try {
         const response = await axiosInstance.get(`/project-activities/${projectId}`);
         const { project_name, owner, project_activities, } = response.data;
@@ -69,6 +72,8 @@ function ProjectActivity() {
         //console.log(project_activities)
       } catch (error) {
         console.error("Error fetching project details:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
