@@ -182,6 +182,10 @@ export const createAttributesRow = async (
   )[0];
 
   localStorage.setItem('SELECTED_PART_MARK', partMark?.data.Value);
+  localStorage.setItem(
+    'SELECTED_ELEMENT_ATTR',
+    JSON.stringify(attrsRow.children)
+  );
 
   return attrsRow;
 };
