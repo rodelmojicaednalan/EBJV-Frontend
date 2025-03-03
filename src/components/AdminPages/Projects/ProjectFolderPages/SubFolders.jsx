@@ -496,42 +496,6 @@ function SubFolder() {
     }
 };
 
-  // const handleAddNewFile = async () => {
-  //   try {
-  //     const formData = new FormData();
-  //     newFiles.forEach((file) => {
-  //       formData.append('project_file', file);
-  //     });
-
-  //     await axiosInstance.post(
-  //       `/upload-ifc-files/${projectId}/${encodeURIComponent(formattedFolderName)}`, // Encode special characters
-  //       formData,
-  //       {
-  //         headers: { 'Content-Type': 'multipart/form-data' },
-  //       }
-  //     );
-      
-
-  //     Swal.fire({
-  //       title: 'Success!',
-  //       text: 'File(s) has been added successfully.',
-  //       icon: 'success',
-  //       confirmButtonText: 'OK',
-  //     });
-
-  //     setShowAddModal(false);
-  //     setNewFiles({ file: null });
-  //     setRefreshKey((prevKey) => prevKey + 1);
-  //   } catch (error) {
-  //     Swal.fire({
-  //       title: 'Error!',
-  //       text: error,
-  //       icon: 'error',
-  //       confirmButtonText: 'OK',
-  //     });
-  //   }
-  // };
-
   const [newFolderName, setNewFolderName] = useState(null)
   const [openFolderRenamer, setOpenFolderRenamer] = useState(false);
 
@@ -625,78 +589,6 @@ function SubFolder() {
     showToast();
   };
 
-  // const handleShare = async () => {
-  //   document.querySelector(".offcanvas").setAttribute("aria-hidden", "true");
-  //   document.querySelector(".offcanvas").setAttribute("inert", "true");
-  //   Swal.fire({
-  //     title: 'Share Data',
-  //     html: `
-  //       <div style="text-align: left;">
-
-  //         <label for="recipients" style="display: block; margin-bottom: 5px;">Choose recipient(s):</label>
-  //         <div id="swal-recipient-select" style= "margin-bottom: 15px; width: 100%;"></div>
-
-  //         <label for="release-note" style="display: block; margin-bottom: 5px;">Note/Message</label>
-  //         <textarea id="release-note" class="swal2-input" placeholder="Write a note..." style="
-  //           margin-bottom: 10px; width: 100%;
-  //           white-space: pre-wrap; word-wrap: break-word;
-  //           background-color: #FFF; color: black;
-  //         "></textarea>
-  //       </div>
-  //     `,
-  //     confirmButtonText: 'Share',
-  //     showCancelButton: true,
-  //     customClass: {
-  //       confirmButton: "btn btn-success rel-btn-success",
-  //       cancelButton: "btn btn-danger rel-btn-danger"
-  //     },
-  //     preConfirm: () => {
-  //       const shareWith = document.getElementById('share-with').value.trim();
-  //       const recipients = document.getElementById('recipients').value.trim();
-  //       const releaseNote = document.getElementById('release-note').value.trim();
-
-  //       if (!shareWith || !recipients) {
-  //         Swal.showValidationMessage('Please fill in all required fields.');
-  //         return null;
-  //       }
-
-  //       const recipientList = recipients.split(',').map((name) => name.trim());
-
-  //       if (recipientList.length === 0) {
-  //         Swal.showValidationMessage('Please enter at least one recipient.');
-  //         return null;
-  //       }
-
-  //       return { shareWith, recipients: recipientList, releaseNote };
-  //     },
-
-  //   }).then(async (result) => {
-  //     if (result.isConfirmed) {
-  //       document.querySelector(".offcanvas").removeAttribute("aria-hidden");
-  //       document.querySelector(".offcanvas").removeAttribute("inert");
-  //       const { shareWith, recipients, releaseNote } = result.value;
-  //       return console.log("success", shareWith, recipients, releaseNote)
-
-  //       // try {
-  //       //   await axiosInstance.post(`/share-data/${projectId}`, {
-  //       //     shareWith,
-  //       //     recipients,
-  //       //     releaseNote,
-  //       //   });
-  //       //   Swal.fire('Success!', 'The new release has been added.', 'success');
-  //       // } catch (error) {
-  //       //   Swal.fire('Error!', 'Failed to add the release. Try again.', 'error');
-  //       //   console.error(error);
-  //       // }
-
-  //     } else if (result.dismiss === Swal.DismissReason.cancel) {
-  //       // If the user cancels, restore focus and remove inert attributes
-  //       document.querySelector(".offcanvas").removeAttribute("aria-hidden");
-  //       document.querySelector(".offcanvas").removeAttribute("inert");
-  //       document.querySelector(".offcanvas button").focus();
-  //     }
-  //   });
-  // };
 
   const menuRef = useRef(null);
   useEffect(() => {
@@ -850,7 +742,7 @@ function SubFolder() {
                     >
                       <FaThList />
                     </button>
-                    {roleCheck.some((role) =>
+                    {formattedFolderName !== "Assemblies" && roleCheck.some((role) =>
                             ['Admin', 'Superadmin'].includes(role)
                           ) && (
                             <button
@@ -1222,22 +1114,12 @@ function SubFolder() {
                 className="btn ml-1 mr-auto"
                 onClick={() =>
                   navigate(
-                    `/project-folder/pdf-viewer/${projectId}/${selectedRow.fileName}`
+                    `/project-folder/pdf-viewer/${projectId}/${formattedFolderName}/${selectedRow.fileName}`
                   )
                 }
                 style={{ fontSize: '12px' }}
               >
                 View PDF
-              </button>
-            )}
-            {roleCheck.some((role) =>
-              ['Admin', 'Superadmin'].includes(role)
-            ) && (
-              <button
-                className="btn offcanvas-action-btn"
-                onClick={handleOpenShareModal}
-              >
-                <IoMdPersonAdd size={20} />
               </button>
             )}
 

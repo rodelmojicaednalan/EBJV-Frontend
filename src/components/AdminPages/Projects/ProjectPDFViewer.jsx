@@ -26,7 +26,7 @@ function ProjectFolder() {
   const windowWidthHook = useWindowWidth();
   const isMobile = windowWidthHook <= 425;
   const isTablet = windowWidthHook <= 768;
-  const { projectId, fileName } = useParams();
+  const { projectId, folderName, fileName } = useParams();
   console.log(fileName)
   const navigate = useNavigate();
   const [refreshKey, setRefreshKey] = useState(0); 
@@ -315,7 +315,7 @@ useEffect(() => {
                           <canvas ref={canvasRef} className="pdf-canvas"></canvas>
                         </div> */}
                         {/* Upload Image */}
-                        {isUserLoaded && user && isAdmin &&(
+                        {folderName !== "Assemblies" && isUserLoaded && user && isAdmin &&(
                           <div className="pdf-preview-btnGroup d-flex mb-5 mt-2 ml-2">
                                                 
                           <div className="d-flex flex-column mr-auto">
