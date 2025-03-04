@@ -41,9 +41,15 @@ function PDFFromIFCViewer() {
       // setLoading(true);
       try {
         const response = await axiosInstance.get(`/project/${projectId}`);
-        const { project_name } = response.data;
+        const { project_name, folderTree } = response.data;
         setProjectName(project_name);
-        viewAssemblyPDF(project_name);
+        const allSubfolders = folderTree.subfolders.map(folder => folder.folderName);
+    
+        // Exclude "Marking Plans"
+        const searchableFolders = allSubfolders.filter(folder => folder !== "Marking Plans");
+    
+        // Call the PDF search function with the filtered folders
+        viewAssemblyPDF(project_name, searchableFolders);
       } catch (error) {
         console.error("Error fetching project details:", error);
       } finally {
@@ -53,130 +59,91 @@ function PDFFromIFCViewer() {
       fetchProjectName();
     }, [projectId]);
 
-  const extractTextFromPDF = async (pdfBlob) => {
-    if (!pdfBlob) return [];
-
-    const pdfUrl = URL.createObjectURL(pdfBlob);
-    const loadingTask = pdfjsLib.getDocument(pdfUrl);
+    const viewAssemblyPDF = async (projectName, searchableFolders) => {
+      if (!projectName || !searchableFolders.length) return;
     
-    try {
-        const pdf = await loadingTask.promise;
-        let extractedText = [];
-
-        for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent();
-            const pageText = textContent.items.map((item) => item.str).join(" ");
-            extractedText.push(pageText);
-        }
-
-        return extractedText;
-    } catch (error) {
-        console.error("Error extracting text from PDF:", error);
-        return [];
-    }
-};
-
-
-const viewAssemblyPDF = async (projectName) => {
-  if (!projectName) return; // Ensure projectName is available
-  const selectedAttributes = JSON.parse(localStorage.getItem('SELECTED_ELEMENT_ATTR'));
-  
-  if (!selectedAttributes || selectedAttributes.length === 0) {
-    console.warn("No attributes selected.");
-    return;
-  }
-
-  // Show SweetAlert2 loader
-  Swal.fire({
-    title: "Searching for Assembly File...",
-    text: "Please wait while we locate the correct document.",
-    allowOutsideClick: false,
-    allowEscapeKey: false,
-    didOpen: () => {
-      Swal.showLoading();
-    },
-  });
-
-  // setLoading(true);
-  setProgress(0);
-
-  try {
-    // Fetch all PDFs in the {Parent}/(Assemblies) folder
-    const response = await axiosInstance.get(`/project/${projectId}/files?folder=${projectName}/Assemblies`);
-    const pdfFiles = response.data.files.currentLevelFiles.map(file => decodeURIComponent(file).split('/').pop());
-
-    // Process PDFs in batches of 10
-    const batchSize = 10;
-    const maxThreads = 4;
-    let foundPdfUrl = null;
-
-    for (let i = 0; i < pdfFiles.length; i += batchSize * maxThreads) {
-      // Process up to maxThreads concurrently
-      const batchPromises = [];
-
-      for (let j = 0; j < maxThreads; j++) {
-        const start = i + j * batchSize;
-        const batch = pdfFiles.slice(start, start + batchSize);
-
-        if (batch.length === 0) break;
-
-        batchPromises.push(
-          (async () => {
-            for (const pdf of batch) {
-              if (foundPdfUrl) return; // Stop processing if a match is found
-
-              const pdfUrl = `https://www.api-cadstream.ebjv.e-fab.com.au/api/uploads/${pdf}`;
-              const pdfBlob = await (await fetch(pdfUrl)).blob();
-              const extractedText = await extractTextFromPDF(pdfBlob);
-
-              const attributeValues = selectedAttributes.map(attr => attr.data.Value.toLowerCase());
-
-              if (extractedText.some(page => attributeValues.some(attr => page.toLowerCase().includes(attr)))) {
-                console.log(`Match found in ${pdf}`);
-                foundPdfUrl = pdfUrl;
-                return;
-              }
-            }
-          })()
-        );
+      const selectedAttributes = JSON.parse(localStorage.getItem('SELECTED_ELEMENT_ATTR'));
+      const assemblyMarkAttr = selectedAttributes?.find(attr => attr.data.Name === "Assembly Mark");
+    
+      if (!assemblyMarkAttr) {
+        console.warn("No Assembly Mark found in selected attributes.");
+        Swal.fire({
+          icon: "warning",
+          title: "No Assembly Mark Found",
+          text: "Please select a different element.",
+          timer: 2500,
+          showConfirmButton: false,
+        });
+        return;
       }
-
-      await Promise.all(batchPromises); // Wait for batch processing to complete
-
-      if (foundPdfUrl) break; // Exit if a match was found
-    }
-
-    if (foundPdfUrl) {
-      setPdfPreviewUrl(foundPdfUrl);
+    
+      const assemblyMark = assemblyMarkAttr.data.Value.toLowerCase();
+    
       Swal.fire({
-        icon: "success",
-        title: "Assembly File Found!",
-        text: "Displaying the matching document.",
-        timer: 2000,
-        showConfirmButton: false,
+        title: "Searching for Assembly File...",
+        text: "Please wait while we locate the correct document.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
       });
-    } else {
-      Swal.fire({
-        icon: "warning",
-        title: "No Matching PDF Found",
-        text: "Try selecting a different element.",
-        timer: 2500,
-        showConfirmButton: false,
-      });
-    }
-
-    // setLoading(false);
-  } catch (error) {
-    console.error("Error fetching PDFs:", error);
-    Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "Failed to fetch PDFs. Please try again.",
-    });
-    // setLoading(false);
-  }
-};
+    
+      setProgress(0);
+    
+      const searchForPdf = async (folderName) => {
+        try {
+          const response = await axiosInstance.get(`/project/${projectId}/files?folder=${projectName}/${folderName}`);
+          const pdfFiles = response.data.files.currentLevelFiles.map(file => decodeURIComponent(file).split('/').pop());
+    
+          return pdfFiles.find(file => file.toLowerCase().includes(assemblyMark));
+        } catch (error) {
+          console.error(`Error fetching PDFs from ${folderName}:`, error);
+          return null;
+        }
+      };
+    
+      try {
+        let matchingPdf = null;
+    
+        for (const folder of searchableFolders) {
+          matchingPdf = await searchForPdf(folder);
+          if (matchingPdf) {
+            console.log(`Found match in ${folder}`);
+            break;
+          }
+        }
+    
+        if (matchingPdf) {
+          const pdfUrl = `https://www.api-cadstream.ebjv.e-fab.com.au/api/uploads/${matchingPdf}`;
+          setPdfPreviewUrl(pdfUrl);
+          Swal.fire({
+            icon: "success",
+            title: "Assembly File Found!",
+            text: "Displaying the matching document.",
+            timer: 2000,
+            showConfirmButton: false,
+          });
+        } else {
+          setPdfPreviewUrl(null);
+          Swal.fire({
+            icon: "warning",
+            title: "No Matching PDF Found",
+            text: "Try selecting a different element.",
+            timer: 2500,
+            showConfirmButton: false,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching PDFs:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to fetch PDFs. Please try again.",
+        });
+      }
+    };
+    
 
 useEffect(() => {
   viewAssemblyPDF();
