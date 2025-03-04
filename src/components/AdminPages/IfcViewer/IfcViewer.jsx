@@ -19,7 +19,13 @@ import Loader from '../../Loaders/Loader';
 import Switch from './Switch';
 import './IfcViewer.css';
 
-import { FiArrowLeft, FiEyeOff, FiRotateCcw } from 'react-icons/fi';
+import {
+  FiArrowLeft,
+  FiEyeOff,
+  FiRotateCcw,
+  FiBox,
+} from 'react-icons/fi';
+import { RiArrowDropRightFill } from 'react-icons/ri';
 
 BUI.Manager.init();
 
@@ -33,11 +39,43 @@ function IfcViewer() {
   const [isMobile, setIsMobile] = useState(false);
   const [isHideContainerOpen, setIsHideContainerOpen] =
     useState(false);
-  const [selectedFragmentIdMap, setSelectedFragmentIdMap] =
-    useState(null);
+  const [selectedFragmentIdMap, setSelectedFragmentIdMap] = useState([
+    null,
+  ]);
   const [hiderInstance, setHiderInstance] = useState(null);
   const [hiddenFragmentIds, setHiddenFragmentIds] = useState([]);
   const [selectedPartMark, setSelectedPartMark] = useState(null);
+  const [alwaysOpen, setAlwaysOpen] = useState(true);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [currentWorld, setCurrentWorld] = useState(null);
+  const [centerW, setCenterW] = useState(null);
+
+  const [buttonConf, setButtonConf] = useState([
+    {
+      name: 'Top',
+      coords: { x: 0, y: 10, z: 0 },
+    },
+    {
+      name: 'Front',
+      coords: { x: 0, y: 0, z: 10 },
+    },
+    {
+      name: 'Left',
+      coords: { x: -10, y: 0, z: 0 },
+    },
+    {
+      name: 'Back',
+      coords: { x: 0, y: 0, z: -10 },
+    },
+    {
+      name: 'Right',
+      coords: { x: 10, y: 0, z: 0 },
+    },
+    {
+      name: 'Bottom',
+      coords: { x: 0, y: -10, z: 0 },
+    },
+  ]);
 
   const addHiddenFragmentId = (fragmentId) => {
     setHiddenFragmentIds((hiddenFragmentIds) => [
@@ -110,6 +148,8 @@ function IfcViewer() {
     }
   });
 
+  useEffect(() => {}, [hiddenFragmentIds]);
+
   useEffect(() => {
     if (fileUrl) {
       const initializeIfcViewer = async () => {
@@ -122,6 +162,7 @@ function IfcViewer() {
 
         const worlds = components.get(OBC.Worlds);
         const world = worlds.create();
+        setCurrentWorld(world);
 
         world.scene = new OBC.SimpleScene(components);
 
@@ -132,8 +173,6 @@ function IfcViewer() {
         world.camera = new OBC.SimpleCamera(components);
 
         components.init();
-
-        world.camera.controls.setLookAt(5, 5, 5, 0, 0, 0);
 
         world.scene.setup();
         world.scene.three.background = new THREE.Color(0xe4e4e4);
@@ -186,6 +225,77 @@ function IfcViewer() {
         const classifier = components.get(OBC.Classifier);
 
         fragmentsManager.onFragmentsLoaded.add(async (model) => {
+          const box = new THREE.Box3().setFromObject(model);
+          const center = box.getCenter(new THREE.Vector3());
+          const size = box.getSize(new THREE.Vector3());
+
+          const distance = Math.max(size.x, size.y, size.z) * 0.7;
+          const cameraPosition = new THREE.Vector3(
+            center.x + distance,
+            center.y + distance,
+            center.z + distance
+          );
+          setButtonConf([
+            {
+              name: 'Top',
+              coords: {
+                x: center.x,
+                y: center.y + distance * 1.3,
+                z: center.z,
+              },
+            },
+            {
+              name: 'Front',
+              coords: {
+                x: center.x,
+                y: center.y,
+                z: center.z + distance * 1.3,
+              },
+            },
+            {
+              name: 'Left',
+              coords: {
+                x: center.x - distance * 1.3,
+                y: center.y,
+                z: center.z,
+              },
+            },
+            {
+              name: 'Back',
+              coords: {
+                x: center.x,
+                y: center.y,
+                z: center.z - distance * 1.3,
+              },
+            },
+            {
+              name: 'Right',
+              coords: {
+                x: center.x + distance * 1.3,
+                y: center.y,
+                z: center.z,
+              },
+            },
+            {
+              name: 'Bottom',
+              coords: {
+                x: center.x,
+                y: center.y - distance * 1.3,
+                z: center.z,
+              },
+            },
+          ]);
+          setCenterW(center);
+          world.camera.controls.setLookAt(
+            cameraPosition.x,
+            cameraPosition.y,
+            cameraPosition.z,
+            center.x,
+            center.y,
+            center.z,
+            true
+          );
+
           await classifier.byPredefinedType(model);
 
           const classifications = [
@@ -232,6 +342,7 @@ function IfcViewer() {
         highlighter.events.select.onClear.add(() => {
           // localStorage.removeItem('SELECTED_PART_MARK');
           // setSelectedPartMark(null);
+          setIsDropdownOpen(false);
           setIsHideContainerOpen(() => false);
           updatePropertiesTable({ fragmentIdMap: {} });
         });
@@ -343,7 +454,7 @@ function IfcViewer() {
                 'SELECTED_PART_MARK'
               );
               console.log('selected', selected);
-              navigate(`/project-folder/pdf-from-model/${projectId}`)
+              navigate(`/project-folder/pdf-from-model/${projectId}`);
             }, '1000');
           };
 
@@ -352,10 +463,10 @@ function IfcViewer() {
               <bim-panel-section collapsed label="Controls">
                   <bim-label>Create dimension: Double click</bim-label>  
                   <bim-label>Delete dimension: Delete</bim-label>  
-              </bim-panel-section>
-              
-              <bim-panel-section collapsed label="Length Measurement">
-                <bim-checkbox 
+                  </bim-panel-section>
+                  
+                  <bim-panel-section collapsed label="Length Measurement">
+                  <bim-checkbox 
                   checked 
                   label="Dimensions enabled"
                   @change="${(event) => {
@@ -366,25 +477,34 @@ function IfcViewer() {
                    @change="${(event) => {
                      dimensionsInstance.visible = event.target.value;
                    }}">  
-                </bim-checkbox>  
-                
-                <bim-color-input 
-                  label="Dimensions Color" color="#202932" 
-                   @input="${(event) => {
-                     dimensionsInstance.color.set(event.target.color);
-                   }}">
-                </bim-color-input>
-                
-                <bim-button label="Delete all"
-                  @click="${() => {
-                    dimensionsInstance.deleteAll();
-                  }}">
-                </bim-button>
-        
-              </bim-panel-section>
-
+                    </bim-checkbox>  
+                    
+                    <bim-color-input 
+                    label="Dimensions Color" color="#202932" 
+                    @input="${(event) => {
+                      dimensionsInstance.color.set(
+                        event.target.color
+                      );
+                    }}">
+                    </bim-color-input>
+                    
+                    <bim-button label="Delete all"
+                    @click="${() => {
+                      dimensionsInstance.deleteAll();
+                    }}">
+                  </bim-button>
+                  
+                  </bim-panel-section>
+                  
               <bim-panel-section collapsed label="Culler">
-               
+                  <bim-label>Lower value: More detailed model</bim-label>  
+                  <bim-label>Higher value: More simplified model</bim-label>  
+               <bim-number-input 
+                  slider step="10" label="Culler Threshold" value="10" min="0" max="500"
+                  @change="${({ target }) => {
+                    culler.config.threshold = target.value;
+                  }}">
+                </bim-number-input>
               </bim-panel-section>
               <bim-panel-section collapsed label="View Assembly PDF">
                 <bim-button label="View"
@@ -452,9 +572,10 @@ function IfcViewer() {
         {/* <StickyHeader /> */}
         {isLoading && <Loader />}
       </div>
-      {isHideContainerOpen && (
-        <div className="tools-container">
-          <div className="hide-container">
+
+      <div className="tools-container">
+        <div className="hide-container">
+          {isHideContainerOpen && (
             <button
               className="hide-button"
               onClick={() => {
@@ -464,16 +585,44 @@ function IfcViewer() {
             >
               <FiEyeOff />
             </button>
+          )}
+          {hiddenFragmentIds.length > 0 && (
             <button
               className="reset-button"
               onClick={restoreHiddenFragments}
             >
               <FiRotateCcw />
             </button>
-          </div>
-          {/* <button className="opacity-button">opacity</button> */}
+          )}
+          <button
+            className="view-button"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          >
+            <FiBox />
+            <RiArrowDropRightFill />
+          </button>
+          {isDropdownOpen &&
+            buttonConf.map((button, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  currentWorld.camera.controls.setLookAt(
+                    button.coords.x,
+                    button.coords.y,
+                    button.coords.z,
+                    centerW.x,
+                    centerW.y,
+                    centerW.z,
+                    true
+                  );
+                  setIsDropdownOpen(!isDropdownOpen);
+                }}
+              >
+                {button.name}
+              </button>
+            ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }
