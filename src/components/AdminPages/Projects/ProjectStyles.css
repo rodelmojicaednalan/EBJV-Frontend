@@ -423,6 +423,28 @@
   color: #212A31;
   margin: 0;
 }
+.page-title > nav > ol {
+  margin-bottom: 0;
+}
+.search-div{
+  max-width: 300px;
+  width: 300px;
+}
+
+.search-div > input {
+  width: 100%;
+  padding: .2rem;
+  border: 1px solid rgba(30, 30, 30 , .1);
+  box-shadow: none;
+  border-bottom: 2px solid rgba(30, 30, 30, .5);
+  background-color: transparent;
+  border-radius: 5px;
+  color: rgba(30, 30, 30 ,.7);
+  transition: .2s ease-in-out;
+}
+.search-div > input:focus{
+  border-color: #eb6314;
+}
 
 .button-group {
   display: flex;
@@ -1914,6 +1936,11 @@ input[type=checkbox]#selectedPDF:checked:after {
     font-size: 1.2rem;
   }
 
+  .search-div{
+    width: 250px;
+  }
+
+
   #addbtn {
     display: none;
   }
@@ -2147,6 +2174,9 @@ input[type=checkbox]#selectedPDF:checked:after {
   .panel-right {
     width: calc(100%);
   }
+  .search-div{
+    width: 150px;
+  }
 
   .container-content {
     flex-direction: column;
@@ -2256,6 +2286,9 @@ input[type=checkbox]#selectedPDF:checked:after {
 }
 
 @media (max-width: 425px) {
+  .search-div{
+    width: 100px;
+  }
   .multipdf-controls > input {
     max-width: 200px;
 }

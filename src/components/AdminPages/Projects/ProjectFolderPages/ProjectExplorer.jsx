@@ -1302,7 +1302,6 @@ function ProjectExplorer() {
                       <div>No Folders Found</div>
                     )}
                   </div>
-
                   {viewType === 'grid' ? (
                     <div>
                       <div className="grid-view">

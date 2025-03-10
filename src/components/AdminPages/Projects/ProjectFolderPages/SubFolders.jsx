@@ -66,6 +66,9 @@ function SubFolder() {
   const extractedRootFolder = decodedFolderName.split('/')[0];
   // console.log(extractedRootFolder);
   const [projectName, setProjectName] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredData, setFilteredData] = useState([]);
+  const [selectedprojectId, setSelectedprojectId] = useState(null);
   const [ownerName, setOwnerName] = useState('');
   const [currentFolder, setCurrentFolder] = useState(null);
 
@@ -195,6 +198,7 @@ function SubFolder() {
   
       setExplorerSubfolders(subfoldersInTargetFolder);
       setExplorerTable(filesInTargetFolder);
+      setFilteredData(filesInTargetFolder);
   
       // console.log(`Fetching files from folder: ${formattedFolderName}`);
       // console.table(filesInTargetFolder);
@@ -249,6 +253,16 @@ function SubFolder() {
     fetchAvailableUsers();
     fetchProjectDetails();
   }, [projectId, refreshKey, formattedFolderName]);
+
+    useEffect(() => {
+      const results = explorerTable.filter(
+        (file) =>
+          file.fileName
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
+      );
+      setFilteredData(results);
+    }, [searchTerm, explorerTable, selectedprojectId]);
 
   // Define columns for the table
   const explorerColumn = [
@@ -718,6 +732,15 @@ function SubFolder() {
                     </Breadcrumb.Item>
                 </Breadcrumb>
                   </div>
+                  <div className="search-div">
+                    <input
+                      // id="search-bar"
+                      type="text"
+                      placeholder="Enter a file name..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
                   <div
                     className="button-group d-flex"
                     id="explorer-buttons"
@@ -905,8 +928,8 @@ function SubFolder() {
                       className="dataTables_wrapperz mt-3"
                       id="explorer-table"
                       columns={noDeleteColumn}
-                      data={explorerTable}
-                      pagination={explorerTable.length >= 10}
+                      data={filteredData}
+                      pagination={filteredData.length >= 10}
                       paginationPerPage={20}
                       paginationRowsPerPageOptions={[10, 20, 30, 40]}
                       onRowClicked={handleRowClick}
