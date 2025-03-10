@@ -16,7 +16,9 @@ import { useLoader } from '../../Loaders/LoaderContext';
 import { AuthContext } from '../../Authentication/authContext';
 import useWindowWidth from './ProjectFolderPages/windowWidthHook.jsx';
 import { TbCubePlus } from 'react-icons/tb';
+import { BsFolderSymlink, BsFolderMinus  } from "react-icons/bs";
 import { FaSearch } from 'react-icons/fa'
+
 
 
 import * as WEBIFC from 'web-ifc';
@@ -367,7 +369,7 @@ function Projects() {
       name: 'Action',
       selector: (row) => (
         <div>
-          <img
+          {/* <img
             className="project-folder-icon"
             src={view_icon}
             title="Open Project Folder"
@@ -376,8 +378,14 @@ function Projects() {
             height="25"
             onClick={() => handleViewProjectFolder(row.id)}
             style={{ cursor: 'pointer' }}
+          /> */}
+          <BsFolderSymlink
+            color="rgba(30, 30, 30, .7)"
+            size={24}
+            title='Open Project Folder' 
+            onClick={() => handleViewProjectFolder(row.id)}
+            style={{ cursor: 'pointer' }}
           />
- 
           {/* {row.project_file && row.project_file.length > 0 && (
             <img
               className="ifc-viewer-icon ml-3"
@@ -405,15 +413,23 @@ function Projects() {
           {roleCheck.some((role) =>
             ['Admin', 'Superadmin'].includes(role)
           ) && (
-            <img
-              className="delete-project-icon ml-3"
-              src={delete_icon}
-              title="Delete project"
+            // <img
+            //   className="delete-project-icon ml-3"
+            //   src={delete_icon}
+            //   title="Delete project"
+            //   style={{ cursor: 'pointer' }}
+            //   onClick={() => handleDeleteprojectClick(row.id)}
+            //   alt="delete"
+            //   width="25"
+            //   height="25"
+            // />
+            <BsFolderMinus
+              color='rgba(225,12,0, .7)'
+              className="ml-3"
+              title='Delete Project Folder'
               style={{ cursor: 'pointer' }}
               onClick={() => handleDeleteprojectClick(row.id)}
-              alt="delete"
-              width="25"
-              height="25"
+              size={22}
             />
 
           )}

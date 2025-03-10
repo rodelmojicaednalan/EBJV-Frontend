@@ -68,7 +68,8 @@ function Layout() {
   
     // Check if the route matches project-folder or ifc-viewer
     // const isProjectFolder = /^\/project-folder\/[a-zA-Z0-9]+/.test(location.pathname);
-    const isIfcViewer = /^\/ifc-viewer\/[a-zA-Z0-9]+\/[a-zA-Z0-9._-]+$/.test(location.pathname);
+    // const isIfcViewer = /^\/ifc-viewer\/[a-zA-Z0-9]+\/[a-zA-Z0-9._-]+$/.test(location.pathname);
+    const isIfcViewer = /^\/ifc-viewer\/\d+\/[\w%.-]+$/.test(location.pathname);
     const isResetPassword = /^\/reset-password\/[a-zA-Z0-9]+$/.test(location.pathname);
     // const isPDFViewer = /^\/project-folder\/pdf-viewer\/[^/]+\/[^/]+$/.test(location.pathname);
 
@@ -100,7 +101,7 @@ function Layout() {
         {/* <Route path="/project-folder/pdf-viewer/:projectId/:fileName" element={<ProtectedRoute element={<ProjectPDFViewer />} allowedRoles={['Admin', 'Client']} />} /> */}
         <Route path="/project-folder/pdf-viewer/:projectId/:folderName?/:fileName/" element={<ProjectPDFViewer/>}/>
         <Route path="/project-folder/multi-pdf-editor/:projectId/:folderName?" element={<MultiPDFEditor/>}/>
-        <Route path="/project-folder/pdf-from-model/:projectId" element={<PDFFromIFCViewer/>}/>
+        <Route path="/project-folder/pdf-from-model/:projectId"  element={<ProtectedRoute element={<PDFFromIFCViewer />} allowedRoles={['Superadmin' ,'Admin', 'Client']} />} />
 
         <Route path="/project-folder/:projectId/data/project-explorer" element={<ProtectedRoute element={<ProjectExplorer />} allowedRoles={['Superadmin', 'Admin', 'Client']} />} />
         <Route path="/project-folder/:projectId/data/project-explorer/subfolder/:folderName" element={<ProtectedRoute element={<SubFolders />} allowedRoles={['Superadmin', 'Admin', 'Client']} />} />

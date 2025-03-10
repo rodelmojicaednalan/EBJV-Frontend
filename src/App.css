@@ -488,6 +488,7 @@ input[type="date"] {
   color: #eb6314;
   /* margin-left: 85px; */
   cursor: pointer;
+  transition: .2s ease-in-out;
 }
 
 

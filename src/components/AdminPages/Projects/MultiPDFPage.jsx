@@ -179,7 +179,8 @@ function MultiPDFEditor() {
                   wordBreaks: [' ', '-', '/', '.'],
                   opacity: 0,
                 });
-            
+          
+
                 // Save modified PDF
                 const pdfBytes = await pdfDoc.save();
                 updatedPdfs[fileName] = URL.createObjectURL(new Blob([pdfBytes], { type: "application/pdf" }));
@@ -233,10 +234,19 @@ function MultiPDFEditor() {
     setSelectedFiles((prev) => prev.filter((file) => !paginatedFiles.includes(file)));
   };
 
+  const navigateBack = () => {
+    if (folderName){
+      navigate(`/project-folder/${projectId}/data/project-explorer/subfolder/${encodeURIComponent(decodedFolderName)}`);
+    } else {
+      // Otherwise, go to the project explorer
+      navigate(`/project-folder/${projectId}/data/project-explorer`);
+    }
+  };
+
     return (
         <div className="multipdf-container d-flex flex-column pb-2">
              <div className="pdf-preview-header d-flex flex-row ml-2 ">
-                <span className="back-btn ml-3" onClick={() => navigate(-1)}>
+                <span className="back-btn ml-3" onClick={navigateBack}>
                   <FaCircleArrowLeft size={28} className="icon-left mr-2 align-items-center"/> Go Back
                 </span>
               </div>  
@@ -299,6 +309,7 @@ function MultiPDFEditor() {
                 {selectedFiles.length > 0 && (
                   // <Viewer key={selectedFiles[activeIndex]} fileUrl={modifiedPdfs[selectedFiles[activeIndex]] || `http://localhost:3000/api/uploads/ifc-files/${selectedFiles[activeIndex]}`} plugins={[defaultLayoutPluginInstance]} />
                   <Viewer key={selectedFiles[activeIndex]} fileUrl={modifiedPdfs[selectedFiles[activeIndex]] || `https://www.api-cadstream.ebjv.e-fab.com.au/api/uploads/${selectedFiles[activeIndex]}`} plugins={[defaultLayoutPluginInstance]} />
+                  // <Viewer key={selectedFiles[activeIndex]} fileUrl={modifiedPdfs[selectedFiles[activeIndex]] || `https://www.ebjv.api.e-fab.com.au/api/uploads/${selectedFiles[activeIndex]}`} plugins={[defaultLayoutPluginInstance]} />
                 )}
                 </div>
                 {isAdmin && (

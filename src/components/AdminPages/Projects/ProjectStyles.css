@@ -1603,6 +1603,7 @@
   font-weight: 500;
   margin: .875rem 0;
   cursor: pointer;
+  transition: .2s ease-in-out;
 }
 .pdf-name:hover{
   color: #eb6314;

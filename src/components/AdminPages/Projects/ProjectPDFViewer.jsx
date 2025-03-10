@@ -278,6 +278,17 @@ useEffect(() => {
 
 
 // const activeFileUrl = pdfPreviewUrl || `http://localhost:3000/api/uploads/${fileName}`;
+// const activeFileUrl = pdfPreviewUrl || `https://www.ebjv.api.e-fab.com.au/api/uploads/${fileName}`;
+
+
+const navigateBack = () => {
+  if (folderName){
+    navigate(`/project-folder/${projectId}/data/project-explorer/subfolder/${encodeURIComponent(folderName)}`);
+  } else {
+    // Otherwise, go to the project explorer
+    navigate(`/project-folder/${projectId}/data/project-explorer`);
+  }
+};
 
   return (
     <div className="container">
@@ -287,7 +298,7 @@ useEffect(() => {
                     <div className="container-fluid moduleFluid">
                       <div className="pdf-preview-header">
                         <span className="d-flex flex-row align-items-center pdf-name"
-                              onClick={() => navigate(-1)}>    
+                              onClick={navigateBack}>    
                           <FaChevronLeft className="mr-2"/> Go Back 
                         </span>
                       </div>

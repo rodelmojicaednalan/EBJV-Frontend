@@ -13,6 +13,9 @@ import check from "../../../assets/images/check.png";
 import { useLoader } from "../../Loaders/LoaderContext";
 import useWindowWidth from "../Projects/ProjectFolderPages/windowWidthHook.jsx";
 import { MdManageAccounts } from "react-icons/md";
+import { FaCircleInfo } from "react-icons/fa6";
+import { RiEditCircleFill } from "react-icons/ri";
+import { TiDelete } from "react-icons/ti";
 
 function UserRoleManagement() {
   const navigate = useNavigate();
@@ -131,36 +134,30 @@ function UserRoleManagement() {
       name: "Action",
       selector: (row) => (
         <div>
-          <img
-            src={view_icon}
+          <FaCircleInfo
+            color="rgba(30, 30, 30, .5)"
             title="View Role Details"
-            alt="view"
-            width="25"
-            height="25"
-            onClick={() => handleViewRoleDetails(row.id)}
+            size={20} // Sets width & height
             style={{ cursor: "pointer" }}
+            onClick={() => handleViewRoleDetails(row.id)}
           />
-          <img
-            className="ml-3"
-            src={edit_icon}
+          <RiEditCircleFill
+            color="rgba(30, 30, 30, .7)"
+            className="ml-2"
             title="Edit Role"
             onClick={() => navigate(`/edit-user-role/${row.id}`)}
-            alt="edit"
-            width="25"
-            height="25"
+            size={22}
             style={{ cursor: "pointer" }}
           />
           {row.role_name !== "Admin" && row.role_name !== "Client" && row.role_name !== "Superadmin" && (
-            <img
-              className="ml-3"
-              src={delete_icon}
-              title="Delete Role"
-              alt="delete"
-              width="25"
-              height="25"
-              onClick={() => handleDeleteUserClick(row.id)}
-              style={{ cursor: "pointer" }}
-            />
+          <TiDelete
+                  color='rgba(225,12,0, .7)'
+            onClick={() => handleDeleteUserClick(row.id)}
+            style={{ cursor: "pointer" }}
+            size={28}
+            title="Delete User"
+            className="ml-1"
+          />
           )}
         </div>
       ),

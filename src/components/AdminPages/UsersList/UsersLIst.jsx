@@ -16,6 +16,9 @@ import "./UserList.css";
 import useWindowWidth from "../Projects/ProjectFolderPages/windowWidthHook.jsx";
 
 import { IoPersonAdd } from "react-icons/io5";
+import { FaCircleInfo } from "react-icons/fa6";
+import { RiEditCircleFill } from "react-icons/ri";
+import { TiDelete } from "react-icons/ti";
 
 function UsersList() {
   const navigate = useNavigate();
@@ -250,45 +253,37 @@ function UsersList() {
       // width: "15%",
       selector: (row) => (
         <div>
-          <img
-            src={view_icon}
-            title="View User Details"
-            alt="view"
-            width="20"
-            height="20"
-            onClick={() =>
-              handleViewClick({
-                name: `${row.first_name} ${row.last_name}`,
-                email: row.email,
-                username: row.username,
-                branch:
-                  row.branches?.map((r) => r.branch_name).join(", ") || "N/A",
-                role: row.roles?.map((r) => r.role_name).join(", ") || "N/A",
-                profileImage: userIcon,
-              })
-            }
-            style={{ cursor: "pointer" }}
-          />
-          <img
-            className="ml-2"
-            src={edit_icon}
-            title="Edit User Details"
+         <FaCircleInfo
+          color="rgba(30, 30, 30, .5)"
+          title="View User Details"
+          size={20} // Sets width & height
+          style={{ cursor: "pointer" }}
+          onClick={() =>
+            handleViewClick({
+              name: `${row.first_name} ${row.last_name}`,
+              email: row.email,
+              username: row.username,
+              role: row.roles?.map((r) => r.role_name).join(", ") || "N/A",
+              profileImage: userIcon,
+            })
+          }
+        />
+        <RiEditCircleFill
+            color="rgba(30, 30, 30, .7)"
+            size={22}
             onClick={() => handleEditUserClick(row.id)}
-            alt="edit"
-            width="20"
-            height="20"
+            title="Edit User Details"
+            className="ml-2"
             style={{ cursor: "pointer" }}
-          />
+        />
           {loggedInUser && row.id !== loggedInUser.id && (
-            <img
-              className="ml-2"
-              src={delete_icon}
-              title="Delete User"
-              alt="delete"
-              width="20"
-              height="20"
-              onClick={() => handleDeleteUserClick(row.id)}
-              style={{ cursor: "pointer" }}
+            <TiDelete
+                color='rgba(225,12,0, .7)'
+            onClick={() => handleDeleteUserClick(row.id)}
+            style={{ cursor: "pointer" }}
+            size={28}
+            title="Delete User"
+            className="ml-1"
             />
           )}
         </div>
