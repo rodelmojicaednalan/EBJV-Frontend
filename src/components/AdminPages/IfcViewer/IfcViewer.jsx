@@ -225,6 +225,7 @@ function IfcViewer() {
         const classifier = components.get(OBC.Classifier);
 
         fragmentsManager.onFragmentsLoaded.add(async (model) => {
+          // localStorage.setItem('MODEL', JSON.stringify(model));
           const box = new THREE.Box3().setFromObject(model);
           const center = box.getCenter(new THREE.Vector3());
           const size = box.getSize(new THREE.Vector3());
@@ -418,6 +419,14 @@ function IfcViewer() {
               : 'Expand';
           };
 
+          const expandAssembly = (e) => {
+            const button = e.target;
+            relationsTree.expanded = !relationsTree.expanded;
+            button.label = relationsTree.expanded
+              ? 'Collapse'
+              : 'Expand';
+          };
+
           const onSearch = (e) => {
             const input = e.target;
             relationsTree.queryString = input.value;
@@ -425,27 +434,30 @@ function IfcViewer() {
 
           return BUI.html`
           <bim-panel class="asd hidden" label="Classifications Tree" class="options-menu">
-          <bim-panel-section label="Classifications">
-          ${classificationsTree}
-          </bim-panel-section>
-          <bim-panel-section label="Element Data">
-          <div style="display: flex; gap: 8px;">
-          <bim-button @click=${expandTable} label=${
+              <bim-panel-section label="Classifications">
+              ${classificationsTree}
+              </bim-panel-section>
+              <bim-panel-section label="Element Data">
+                <div style="display: flex; gap: 8px;">
+                  <bim-button @click=${expandTable} label=${
             propertiesTable.expanded ? 'Collapse' : 'Expand'
           }></bim-button> 
-          </div> 
-          <bim-text-input @input=${onTextInput} placeholder="Search Property" debounce="250"></bim-text-input>
-          ${propertiesTable}
-          </bim-panel-section>
-           
+                </div> 
+                ${propertiesTable}
+              </bim-panel-section>
+             
+              <bim-panel-section label="Assembly">
+               <div style="display: flex; gap: 8px;">
+                  <bim-button @click=${expandAssembly} label=${
+            relationsTree.expanded ? 'Collapse' : 'Expand'
+          }></bim-button> 
+                </div> 
+              <bim-text-input @input=${onSearch} placeholder="Search..." debounce="200"></bim-text-input>
+              ${relationsTree}
+              </bim-panel-section>
           </bim-panel> 
           `;
         });
-
-        //     <bim-panel-section label="Assembly">
-        //   <bim-text-input @input=${onSearch} placeholder="Search..." debounce="200"></bim-text-input>
-        //   ${relationsTree}
-        // </bim-panel-section>
 
         const measurementPanel = BUI.Component.create(() => {
           const viewAssemblyPDF = () => {
@@ -496,11 +508,11 @@ function IfcViewer() {
                   
                   </bim-panel-section>
                   
-              <bim-panel-section collapsed label="Culler">
+              <bim-panel-section collapsed label="View Clip">
                   <bim-label>Lower value: More detailed model</bim-label>  
                   <bim-label>Higher value: More simplified model</bim-label>  
                <bim-number-input 
-                  slider step="10" label="Culler Threshold" value="10" min="0" max="500"
+                  slider step="10" label="Clip Threshold" value="10" min="0" max="500"
                   @change="${({ target }) => {
                     culler.config.threshold = target.value;
                   }}">

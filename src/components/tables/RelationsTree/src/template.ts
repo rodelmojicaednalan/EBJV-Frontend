@@ -1,9 +1,11 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-import * as FRAGS from "@thatopen/fragments";
-import * as OBC from "@thatopen/components";
-import * as OBF from "@thatopen/components-front";
-import * as BUI from "@thatopen/ui";
-import * as WEBIFC from "web-ifc";
+import * as FRAGS from '@thatopen/fragments';
+import * as OBC from '@thatopen/components';
+import * as OBF from '@thatopen/components-front';
+import * as BUI from '@thatopen/ui';
+import * as WEBIFC from 'web-ifc';
+import { createAttributesRow } from '../../ElementProperties/src/attributes-row';
+import { collectActions } from 'pdfjs-dist/build/pdf.worker';
 
 export interface RelationsTreeUIState {
   components: OBC.Components;
@@ -14,11 +16,21 @@ export interface RelationsTreeUIState {
   expressID?: number;
 }
 
+const WEBIFC_ENTITIESE_TO_IGNORE = [
+  WEBIFC.IFCPROJECT,
+  WEBIFC.IFCSITE,
+  WEBIFC.IFCBUILDING,
+  WEBIFC.IFCBUILDINGSTOREY,
+  WEBIFC.IFCELEMENTASSEMBLY,
+];
+
+// console.log(WEBIFC_ENTITIESE_TO_IGNORE);
+
 const getDecompositionTree = async (
   components: OBC.Components,
   model: FRAGS.FragmentsGroup,
   expressID: number,
-  inverseAttributes: OBC.InverseAttribute[],
+  inverseAttributes: OBC.InverseAttribute[]
 ) => {
   const rows: BUI.TableGroupData[] = [];
   const indexer = components.get(OBC.IfcRelationsIndexer);
@@ -36,7 +48,11 @@ const getDecompositionTree = async (
   };
 
   for (const attrName of inverseAttributes) {
-    const relations = indexer.getEntityRelations(model, expressID, attrName);
+    const relations = indexer.getEntityRelations(
+      model,
+      expressID,
+      attrName
+    );
     if (!relations) continue;
     if (!entityRow.children) entityRow.children = [];
     entityRow.data.relations = JSON.stringify(relations);
@@ -46,11 +62,54 @@ const getDecompositionTree = async (
         components,
         model,
         id,
-        inverseAttributes,
+        inverseAttributes
       );
       for (const row of decompositionRow) {
+        const entityNumericValue = WEBIFC[row?.data.Entity];
+
+        // console.log('inner assemblyRelations: ', assemblyRelations);
         if (row.data.relations) {
+          // console.log('inner row: ', row.data);
           entityRow.children.push(row);
+          // console.log(entityRow.children);
+          if (
+            !WEBIFC_ENTITIESE_TO_IGNORE.includes(
+              entityNumericValue
+            ) &&
+            row.children?.length == 0
+          ) {
+            const assemblyRelations = indexer.getEntityRelations(
+              model,
+              row?.data?.expressID,
+              'Decomposes'
+            );
+
+            if (assemblyRelations && assemblyRelations[0]) {
+              const containerID = assemblyRelations[0];
+              const container = await model.getProperties(
+                containerID
+              );
+
+              // console.log('container: ', container);
+              if (container) {
+                if (container.type == WEBIFC.IFCELEMENTASSEMBLY) {
+                  if (row.children == null) row.children = [];
+                  row.children.push({
+                    data: {
+                      Name: 'Assembly Mark',
+                      Value: container['Tag'].value,
+                    },
+                  });
+                }
+              }
+            }
+
+            // console.log('assemblyRelations: ', [
+            //   assemblyRelations,
+            //   row.data.Entity,
+            // ]);
+          }
+          // console.log('row: ', row);
         } else {
           const data = model.data.get(id);
           if (!data) {
@@ -69,7 +128,9 @@ const getDecompositionTree = async (
 
     for (const entity in entityGroups) {
       const children = entityGroups[entity];
-      const relations = children.map((child: any) => child.data.expressID);
+      const relations = children.map(
+        (child: any) => child.data.expressID
+      );
       const row: BUI.TableGroupData = {
         data: {
           Entity: entity,
@@ -91,51 +152,66 @@ const computeRowData = async (
   components: OBC.Components,
   models: Iterable<FRAGS.FragmentsGroup>,
   inverseAttributes: OBC.InverseAttribute[],
-  expressID?: number,
+  expressID?: number
 ) => {
   const indexer = components.get(OBC.IfcRelationsIndexer);
   const rows: BUI.TableGroupData[] = [];
   for (const model of models) {
     let modelData: BUI.TableGroupData;
+    // const elementAttrs = await model.getProperties(expressID);
+
+    // const attributesRow = await createAttributesRow(elementAttrs, {
+    //   indexer: indexer,
+    //   model: model,
+    //   expressID: expressID,
+    // });
+
+    // createAttributesRow();
+
     if (expressID) {
       modelData = {
         data: {
-          Entity: model.name !== "" ? model.name : model.uuid,
+          Entity: model.name !== '' ? model.name : model.uuid,
         },
         children: await getDecompositionTree(
           components,
           model,
           expressID,
-          inverseAttributes,
+          inverseAttributes
         ),
       };
     } else {
       const modelRelations = indexer.relationMaps[model.uuid];
       const projectAttrs = await model.getAllPropertiesOfType(
-        WEBIFC.IFCPROJECT,
+        WEBIFC.IFCPROJECT
       );
       if (!(modelRelations && projectAttrs)) continue;
       const { expressID } = Object.values(projectAttrs)[0];
+
       modelData = {
         data: {
-          Entity: model.name !== "" ? model.name : model.uuid,
+          Entity: model.name !== '' ? model.name : model.uuid,
         },
         children: await getDecompositionTree(
           components,
           model,
           expressID,
-          inverseAttributes,
+          inverseAttributes
         ),
       };
     }
     rows.push(modelData);
   }
+  // console.log(rows);
   return rows;
 };
 
 let table: BUI.Table;
 
-const getRowFragmentIdMap = (components: OBC.Components, rowData: any) => {
+const getRowFragmentIdMap = (
+  components: OBC.Components,
+  rowData: any
+) => {
   const fragments = components.get(OBC.FragmentsManager);
   const { modelID, expressID, relations } = rowData as {
     modelID: string;
@@ -147,51 +223,56 @@ const getRowFragmentIdMap = (components: OBC.Components, rowData: any) => {
   if (!model) return null;
   const fragmentIDMap = model.getFragmentMap([
     expressID,
-    ...JSON.parse(relations ?? "[]"),
+    ...JSON.parse(relations ?? '[]'),
   ]);
   return fragmentIDMap;
 };
 
-export const relationsTreeTemplate = (state: RelationsTreeUIState) => {
+export const relationsTreeTemplate = (
+  state: RelationsTreeUIState
+) => {
   const { components, models, expressID } = state;
 
-  const selectHighlighterName = state.selectHighlighterName ?? "select";
-  const hoverHighlighterName = state.hoverHighlighterName ?? "hover";
+  const selectHighlighterName =
+    state.selectHighlighterName ?? 'select';
+  const hoverHighlighterName = state.hoverHighlighterName ?? 'hover';
 
   if (!table) {
-    table = document.createElement("bim-table");
-    table.hiddenColumns = ["modelID", "expressID", "relations"];
-    table.columns = ["Entity", "Name"];
+    table = document.createElement('bim-table');
+    table.hiddenColumns = ['modelID', 'expressID', 'relations'];
+    table.columns = ['Entity', 'Name'];
     table.headersHidden = true;
 
-    table.addEventListener("cellcreated", ({ detail }) => {
+    table.addEventListener('cellcreated', ({ detail }) => {
       const { cell } = detail;
-      if (cell.column === "Entity" && !("Name" in cell.rowData)) {
-        cell.style.gridColumn = "1 / -1";
+
+      if (cell.column === 'Entity' && !('Name' in cell.rowData)) {
+        cell.style.gridColumn = '1 / -1';
       }
     });
   }
 
-  table.addEventListener("rowcreated", (e) => {
+  table.addEventListener('rowcreated', (e) => {
     e.stopImmediatePropagation();
     const { row } = e.detail;
     const highlighter = components.get(OBF.Highlighter);
     const fragmentIDMap = getRowFragmentIdMap(components, row.data);
-    if (!(fragmentIDMap && Object.keys(fragmentIDMap).length !== 0)) return;
+    if (!(fragmentIDMap && Object.keys(fragmentIDMap).length !== 0))
+      return;
     row.onmouseover = () => {
       if (!hoverHighlighterName) return;
-      row.style.backgroundColor = "var(--bim-ui_bg-contrast-20)";
+      row.style.backgroundColor = 'var(--bim-ui_bg-contrast-20)';
       highlighter.highlightByID(
         hoverHighlighterName,
         fragmentIDMap,
         true,
         false,
-        highlighter.selection[selectHighlighterName] ?? {},
+        highlighter.selection[selectHighlighterName] ?? {}
       );
     };
 
     row.onmouseout = () => {
-      row.style.backgroundColor = "";
+      row.style.backgroundColor = '';
       highlighter.clear(hoverHighlighterName);
     };
 
@@ -201,19 +282,26 @@ export const relationsTreeTemplate = (state: RelationsTreeUIState) => {
         selectHighlighterName,
         fragmentIDMap,
         true,
-        true,
+        true
       );
     };
   });
 
-  const inverseAttributes: OBC.InverseAttribute[] = state.inverseAttributes ?? [
-    "IsDecomposedBy",
-    "ContainsElements",
-  ];
+  const inverseAttributes: OBC.InverseAttribute[] =
+    state.inverseAttributes ?? [
+      'IsDecomposedBy',
+      'ContainsElements',
+      // 'Decomposes',
+    ];
 
-  computeRowData(components, models, inverseAttributes, expressID).then(
-    (data) => (table.data = data),
-  );
+  computeRowData(
+    components,
+    models,
+    inverseAttributes,
+    expressID
+  ).then((data) => {
+    table.data = data;
+  });
 
   return BUI.html`${table}`;
 };
