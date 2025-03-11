@@ -69,9 +69,14 @@ const getDecompositionTree = async (
 
         // console.log('inner assemblyRelations: ', assemblyRelations);
         if (row.data.relations) {
-          // console.log('inner row: ', row.data);
+          if (row.data.Name !== 'Undefined') {
+            row.children = row.children?.filter(
+              (child) => child.data.Name === row.data.Name
+            );
+          }
+
           entityRow.children.push(row);
-          // console.log(entityRow.children);
+
           if (
             !WEBIFC_ENTITIESE_TO_IGNORE.includes(
               entityNumericValue
@@ -103,13 +108,7 @@ const getDecompositionTree = async (
                 }
               }
             }
-
-            // console.log('assemblyRelations: ', [
-            //   assemblyRelations,
-            //   row.data.Entity,
-            // ]);
           }
-          // console.log('row: ', row);
         } else {
           const data = model.data.get(id);
           if (!data) {

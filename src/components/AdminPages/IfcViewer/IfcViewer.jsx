@@ -148,6 +148,19 @@ function IfcViewer() {
     }
   });
 
+  useEffect(() => {
+    const hasReloaded = sessionStorage.getItem('hasReloaded');
+
+    if (!hasReloaded) {
+      sessionStorage.setItem('hasReloaded', 'true');
+      window.location.reload();
+    }
+
+    return () => {
+      sessionStorage.removeItem('hasReloaded');
+    };
+  }, []);
+
   useEffect(() => {}, [hiddenFragmentIds]);
 
   useEffect(() => {
@@ -319,6 +332,8 @@ function IfcViewer() {
         });
 
         relationsTree.preserveStructureOnFilter = true;
+        relationsTree.indentationInText = false;
+        relationsTree.expanded = false;
 
         propertiesTable.preserveStructureOnFilter = true;
         propertiesTable.indentationInText = false;
