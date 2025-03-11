@@ -462,6 +462,7 @@ function IfcViewer() {
         const measurementPanel = BUI.Component.create(() => {
           const viewAssemblyPDF = () => {
             setTimeout(() => {
+              localStorage.setItem("fileName", fileName);
               const selected = localStorage.getItem(
                 'SELECTED_PART_MARK'
               );

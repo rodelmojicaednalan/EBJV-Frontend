@@ -193,13 +193,8 @@ function Layout() {
             {/* <Route path="/project-folder/pdf-viewer/:projectId/:fileName" element={<ProtectedRoute element={<ProjectPDFViewer />} allowedRoles={['Admin', 'Client']} />} /> */}
             <Route
               path="/project-folder/pdf-viewer/:projectId/:folderName?/:fileName/"
-              element={
-                <ProtectedRoute
-                  element={<ProjectPDFViewer />}
-                  allowedRoles={['Superadmin', 'Admin', 'Client']}
+              element={<ProjectPDFViewer />}
                 />
-              }
-            />
             <Route
               path="/project-folder/multi-pdf-editor/:projectId/:folderName?"
               element={<MultiPDFEditor />}

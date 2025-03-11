@@ -150,14 +150,14 @@ useEffect(() => {
 }, [projectId]);
 
 const matchingPDF  = pdfPreviewUrl || 'https://www.api-cadstream.ebjv.e-fab.com.au/uploads/blank.pdf';
-
+const fileName = localStorage.getItem("fileName")
   return (
     <div className="container">
           <div className="PDFFromIFCViewer-display">
                 <div className="pdfFromModel-wrapper"> 
                       <div className="pdf-preview-header pt-0 pb-0">
                         <span className="d-flex flex-row align-items-center pdf-name"
-                              onClick={() => navigate(`/project-folder/${projectId}/data/project-explorer`)}>    
+                              onClick={() => navigate(`/ifc-viewer/${projectId}/${fileName}`)}>    
                           <FaChevronLeft className="mr-2"/> Go Back 
                         </span>
                       </div>
