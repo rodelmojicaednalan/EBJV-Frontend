@@ -334,6 +334,7 @@ function IfcViewer() {
         relationsTree.preserveStructureOnFilter = true;
         relationsTree.indentationInText = false;
         relationsTree.expanded = false;
+        relationsTree.hidden = true;
 
         propertiesTable.preserveStructureOnFilter = true;
         propertiesTable.indentationInText = false;
@@ -444,7 +445,10 @@ function IfcViewer() {
 
           const onSearch = (e) => {
             const input = e.target;
-            relationsTree.queryString = input.value;
+            const query = input.value.trim();
+            relationsTree.queryString = query;
+
+            relationsTree.hidden = !query;
           };
 
           return BUI.html`
