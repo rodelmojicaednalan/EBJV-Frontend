@@ -201,8 +201,33 @@ const computeRowData = async (
     }
     rows.push(modelData);
   }
-  // console.log(rows);
-  return rows;
+
+  const formatTree = (nodes) => {
+    let result = [];
+
+    nodes.forEach((node) => {
+      if (!node.children || node.children.length === 0) return;
+
+      const assemblyMarkChildren = node.children.filter(
+        (child) => child.data && child.data.Name === 'Assembly Mark'
+      );
+
+      if (assemblyMarkChildren.length > 0) {
+        result.push({
+          ...node,
+          children: assemblyMarkChildren,
+        });
+      }
+
+      result = result.concat(formatTree(node.children));
+    });
+
+    return result;
+  };
+
+  const formattedTree = formatTree(rows);
+
+  return formattedTree;
 };
 
 let table: BUI.Table;
@@ -251,6 +276,8 @@ export const relationsTreeTemplate = (
     });
   }
 
+  let selectedRow = null;
+
   table.addEventListener('rowcreated', (e) => {
     e.stopImmediatePropagation();
     const { row } = e.detail;
@@ -258,8 +285,11 @@ export const relationsTreeTemplate = (
     const fragmentIDMap = getRowFragmentIdMap(components, row.data);
     if (!(fragmentIDMap && Object.keys(fragmentIDMap).length !== 0))
       return;
+
+    let isSelected = false;
+
     row.onmouseover = () => {
-      if (!hoverHighlighterName) return;
+      if (!hoverHighlighterName || isSelected) return;
       row.style.backgroundColor = 'var(--bim-ui_bg-contrast-20)';
       highlighter.highlightByID(
         hoverHighlighterName,
@@ -271,18 +301,36 @@ export const relationsTreeTemplate = (
     };
 
     row.onmouseout = () => {
+      if (isSelected) return;
       row.style.backgroundColor = '';
       highlighter.clear(hoverHighlighterName);
     };
 
     row.onclick = () => {
       if (!selectHighlighterName) return;
-      highlighter.highlightByID(
-        selectHighlighterName,
-        fragmentIDMap,
-        true,
-        true
-      );
+
+      if (selectedRow && selectedRow !== row) {
+        selectedRow.style.backgroundColor = '';
+        highlighter.clear(selectHighlighterName);
+        selectedRow.isSelected = false;
+      }
+
+      isSelected = !isSelected;
+
+      if (isSelected) {
+        row.style.backgroundColor = 'var(--bim-ui_bg-contrast-20)';
+        highlighter.highlightByID(
+          selectHighlighterName,
+          fragmentIDMap,
+          true,
+          true
+        );
+        selectedRow = row;
+      } else {
+        row.style.backgroundColor = '';
+        highlighter.clear(selectHighlighterName);
+        selectedRow = null;
+      }
     };
   });
 
