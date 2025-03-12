@@ -1863,6 +1863,25 @@ input[type=checkbox]#selectedPDF:checked:after {
   /* overflow: hidden; */
 }
 /* end */
+
+/* custom swal styles */
+.custom-swal-popup {
+  padding: 20px !important;  /* Adjust padding */
+  width: 400px !important;   /* Adjust width */
+  max-width: 90%;            /* Prevent too large popups */
+}
+
+.custom-swal-title {
+  margin-bottom: 10px !important; /* Adjust title margin */
+  font-size: 20px !important;     /* Adjust font size */
+}
+
+.custom-swal-text {
+  font-size: 16px !important;  /* Adjust text size */
+  margin-bottom: 5px !important;
+}
+
+/*  */
 /* Media Queries for Responsiveness */
 @media (max-width: 1024px) {
   #projectList-container{

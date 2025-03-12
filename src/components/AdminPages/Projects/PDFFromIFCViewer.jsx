@@ -121,8 +121,14 @@ function PDFFromIFCViewer() {
             icon: "success",
             title: "Assembly File Found!",
             text: "Displaying the matching document.",
-            timer: 2000,
+            // timer: 2000,
             showConfirmButton: false,
+            customClass: {
+              popup: "custom-swal-popup",
+              title: "custom-swal-title",
+              htmlContainer: "custom-swal-text",
+            }
+            // position: 'bottom-end'
           });
         } else {
           setPdfPreviewUrl(null);
