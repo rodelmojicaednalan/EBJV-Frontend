@@ -119,14 +119,15 @@ function PDFFromIFCViewer() {
           setPdfPreviewUrl(pdfUrl);
           Swal.fire({
             icon: "success",
-            title: "Assembly File Found!",
-            text: "Displaying the matching document.",
-            // timer: 2000,
+            // title: "Assembly File Found!",
+            // text: "Displaying the matching document.",
+            timer: 1500,
             showConfirmButton: false,
             customClass: {
               popup: "custom-swal-popup",
-              title: "custom-swal-title",
-              htmlContainer: "custom-swal-text",
+              icon: "custom-swal-icon"
+              // title: "custom-swal-title",
+              // htmlContainer: "custom-swal-text",
             }
             // position: 'bottom-end'
           });
