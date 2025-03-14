@@ -178,12 +178,17 @@ function IfcViewer() {
         setCurrentWorld(world);
 
         world.scene = new OBC.SimpleScene(components);
-
         world.renderer = new OBCF.PostproductionRenderer(
           components,
           viewport
         );
         world.camera = new OBC.SimpleCamera(components);
+        // const contro = world.camera.controls;
+        // contro.mouseButtons.wheel;
+        // world.camera.controls.setLookAt(5, 5, 5, 0, 0, 0);
+        // contro.infinityDolly = false;
+        // contro.minDistance = 0.001;
+        // contro.maxDistance = 300;
 
         components.init();
 
@@ -466,6 +471,7 @@ function IfcViewer() {
               </bim-panel-section>
              
               <bim-panel-section label="Search Assembly">
+              <bim-label>Click a result to highlight the corresponding element.</bim-label>  
                <div style="display: flex; gap: 8px;">
                   <bim-button @click=${expandAssembly} label=${
             relationsTree.expanded ? 'Collapse' : 'Expand'
@@ -529,8 +535,8 @@ function IfcViewer() {
                   </bim-panel-section>
                   
               <bim-panel-section collapsed label="View Clip">
-                  <bim-label>Lower value: More detailed model</bim-label>  
-                  <bim-label>Higher value: More simplified model</bim-label>  
+                  <bim-label>Lower value: Detailed model</bim-label>  
+                  <bim-label>Higher value: Simplified model</bim-label>  
                <bim-number-input 
                   slider step="10" label="Clip Threshold" value="10" min="0" max="500"
                   @change="${({ target }) => {
