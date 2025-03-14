@@ -59,6 +59,10 @@ body {
   background-color: #FBFBF9;
 }
 
+body.swal2-shown.swal2-height-auto{
+  height: 100vh !important;
+}
+
 #root,
 .App {
   display: flex;
@@ -130,6 +134,7 @@ button:hover {
   display: flex;
   align-items: center;
   flex-direction: column;
+  /* height: auto; */
 }
 
 #search-bar {

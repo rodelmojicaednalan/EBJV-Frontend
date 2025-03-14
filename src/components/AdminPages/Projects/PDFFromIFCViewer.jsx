@@ -73,21 +73,24 @@ function PDFFromIFCViewer() {
           text: "Please select a different element.",
           timer: 2500,
           showConfirmButton: false,
+          customClass: {
+            container: 'swal-container-fullheight'
+          }
         });
         return;
       }
     
       const assemblyMark = assemblyMarkAttr.data.Value.toLowerCase();
     
-      Swal.fire({
-        title: "Searching for Assembly File...",
-        text: "Please wait while we locate the correct document.",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
+      // Swal.fire({
+      //   title: "Searching for Assembly File...",
+      //   text: "Please wait while we locate the correct document.",
+      //   allowOutsideClick: false,
+      //   allowEscapeKey: false,
+      //   didOpen: () => {
+      //     Swal.showLoading();
+      //   },
+      // });
     
       setProgress(0);
     
@@ -125,7 +128,8 @@ function PDFFromIFCViewer() {
             showConfirmButton: false,
             customClass: {
               popup: "custom-swal-popup",
-              icon: "custom-swal-icon"
+              icon: "custom-swal-icon",
+              container: 'swal-container-fullheight'
               // title: "custom-swal-title",
               // htmlContainer: "custom-swal-text",
             }
@@ -139,6 +143,9 @@ function PDFFromIFCViewer() {
             text: "Try selecting a different element.",
             timer: 2500,
             showConfirmButton: false,
+            customClass: {
+              container: 'swal-container-fullheight'
+            }
           });
         }
       } catch (error) {
@@ -147,6 +154,9 @@ function PDFFromIFCViewer() {
           icon: "error",
           title: "Error",
           text: "Failed to fetch PDFs. Please try again.",
+          customClass: {
+            container: 'swal-container-fullheight'
+          }
         });
       }
     };

@@ -1865,6 +1865,9 @@ input[type=checkbox]#selectedPDF:checked:after {
 /* end */
 
 /* custom swal styles */
+.swal-container-fullheight{
+  height: 100vh;
+}
 .custom-swal-popup {
   padding: 20px !important;  /* Adjust padding */
   width: 200px !important;   /* Adjust width */
