@@ -9,7 +9,7 @@ import { CSVLink } from 'react-csv';
 import Select from 'react-select';
 import '../../../../Custom.css';
 import '../ProjectStyles.css';
-import { BiDotsVertical, BiSolidEditAlt} from 'react-icons/bi';
+import { BiDotsVertical, BiSolidEditAlt } from 'react-icons/bi';
 import { LiaTimesSolid } from 'react-icons/lia';
 import { IoMdDownload, IoMdPersonAdd } from 'react-icons/io';
 import { IoGrid } from 'react-icons/io5';
@@ -22,13 +22,13 @@ import {
   FaFile,
   FaChevronCircleLeft,
   FaChevronCircleRight,
-  FaFileCsv 
+  FaFileCsv,
 } from 'react-icons/fa';
 import { MdFolderOff } from 'react-icons/md';
-import { RiAddLargeFill, RiEdit2Fill  } from 'react-icons/ri';
+import { RiAddLargeFill, RiEdit2Fill } from 'react-icons/ri';
 import { AiOutlineFileAdd } from 'react-icons/ai';
 import { BsQrCode, BsFillFolderFill } from 'react-icons/bs';
-import { GrMultiple, GrDocumentCsv } from "react-icons/gr";
+import { GrMultiple, GrDocumentCsv } from 'react-icons/gr';
 import ifcIcon from '../../../../assets/images/ifc-icon.png';
 import pdfIcon from '../../../../assets/images/pdf-icon.png';
 import dxfIcon from '../../../../assets/images/dxf-icon.png';
@@ -37,7 +37,7 @@ import {
   Button,
   ToastContainer,
   Toast,
-  Breadcrumb
+  Breadcrumb,
 } from 'react-bootstrap';
 import ProjectSidebar from '../ProjectFolderSidebar';
 import SidebarOffcanvas from '../MobileSidebar';
@@ -92,7 +92,6 @@ function SubFolder() {
   const handleCloseQRCodeModal = () =>
     setIsGenerateQRCodeModalOpen(false);
 
-
   const handleOpenShareModal = () => setIsShareModalOpen(true);
   const handleCloseShareModal = () => setIsShareModalOpen(false);
 
@@ -108,9 +107,72 @@ function SubFolder() {
 
   const [explorerSubfolders, setExplorerSubfolders] = useState([]);
   const [explorerTable, setExplorerTable] = useState([]);
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const navigate = useNavigate();
+  const [selectedFiles, setSelectedFiles] = useState(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  console.table(selectedFiles);
+  const [currentDataTablePage, setCurrentDataTablePage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
 
+  const handleSelectAll = () => {
+    const startIndex = (currentDataTablePage - 1) * rowsPerPage;
+    const endIndex = Math.min(
+      startIndex + rowsPerPage,
+      filteredData.length
+    );
+    const currentPageFiles = filteredData
+      .slice(startIndex, endIndex)
+      .map((file) => file.fileName);
+
+    setSelectedFiles((prevSelected) => {
+      const newSelected = new Set(prevSelected);
+
+      // Check if all current page items are selected
+      const allCurrentPageSelected = currentPageFiles.every(
+        (fileName) => newSelected.has(fileName)
+      );
+
+      if (allCurrentPageSelected) {
+        // If all current page items are selected, unselect them
+        currentPageFiles.forEach((fileName) =>
+          newSelected.delete(fileName)
+        );
+      } else {
+        // Select all current page items
+        currentPageFiles.forEach((fileName) =>
+          newSelected.add(fileName)
+        );
+      }
+
+      return newSelected;
+    });
+
+    setSelectAll(!selectAll);
+  };
+
+  // Update selectAll state when page changes or rows per page changes
+  useEffect(() => {
+    const startIndex = (currentDataTablePage - 1) * rowsPerPage;
+    const endIndex = Math.min(
+      startIndex + rowsPerPage,
+      filteredData.length
+    );
+    const currentPageFiles = filteredData
+      .slice(startIndex, endIndex)
+      .map((file) => file.fileName);
+
+    // Check if all current page items are selected
+    const allCurrentPageSelected = currentPageFiles.every(
+      (fileName) => selectedFiles.has(fileName)
+    );
+    setSelectAll(allCurrentPageSelected);
+  }, [
+    currentDataTablePage,
+    rowsPerPage,
+    filteredData,
+    selectedFiles,
+  ]);
+
+  const navigate = useNavigate();
 
   const [showCanvas, setShowCanvas] = useState(false);
   const handleCloseCanvas = () => setShowCanvas(false);
@@ -127,79 +189,110 @@ function SubFolder() {
   // Fetch project details and populate fields
   const fetchProjectDetails = async () => {
     try {
-      const response = await axiosInstance.get(`/project/${projectId}`);
+      const response = await axiosInstance.get(
+        `/project/${projectId}`
+      );
       const { id, project_name, owner, folderTree } = response.data;
-  
+
       setProjectName(project_name);
       setOwnerName(`${owner.first_name} ${owner.last_name}`);
-  
+
       // 🔍 Function to find a folder by name in the tree
       const findFolderInTree = (folderNode, targetName) => {
         if (!folderNode) return null;
-  
+
         // If this is the target folder, return it
         if (folderNode.folderName === targetName) return folderNode;
-  
+
         // Recursively search in subfolders
-        if (folderNode.subfolders && folderNode.subfolders.length > 0) {
+        if (
+          folderNode.subfolders &&
+          folderNode.subfolders.length > 0
+        ) {
           for (let subfolder of folderNode.subfolders) {
             const found = findFolderInTree(subfolder, targetName);
             if (found) return found;
           }
         }
-  
+
         return null;
       };
-  
+
       // 🔍 Locate the specific folder
-      const targetFolder = findFolderInTree(folderTree, formattedFolderName);
-  
+      const targetFolder = findFolderInTree(
+        folderTree,
+        formattedFolderName
+      );
+
       // ✅ Extract files from the found folder
       const extractFiles = (folderNode) => {
-        if (!folderNode || !folderNode.files || folderNode.files.length === 0) return [];
-  
+        if (
+          !folderNode ||
+          !folderNode.files ||
+          folderNode.files.length === 0
+        )
+          return [];
+
         return folderNode.files
-        .filter((file) => !file.fileName.endsWith('.json')  && !file.fileName.endsWith('.ifc'))
-        .map((file) => ({
-          projectId: id,
-          fileName: file.fileName,
-          fileSize: `${(file.fileSize / (1024 * 1024)).toFixed(2)} MB`,
-          fileOwner: file.fileOwner,
-          created: new Intl.DateTimeFormat('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric',
-          }).format(new Date(file.fileCreationTime)),
-          lastAccessed: new Intl.DateTimeFormat('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric',
-          }).format(new Date(file.fileLastAccessed)),
-          lastModified: new Intl.DateTimeFormat('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric',
-          }).format(new Date(file.fileLastModified)),
+          .filter(
+            (file) =>
+              !file.fileName.endsWith('.json') &&
+              !file.fileName.endsWith('.ifc')
+          )
+          .map((file) => ({
+            projectId: id,
+            fileName: file.fileName,
+            fileSize: `${(file.fileSize / (1024 * 1024)).toFixed(
+              2
+            )} MB`,
+            fileOwner: file.fileOwner,
+            created: new Intl.DateTimeFormat('en-US', {
+              month: 'short',
+              day: '2-digit',
+              year: 'numeric',
+            }).format(new Date(file.fileCreationTime)),
+            lastAccessed: new Intl.DateTimeFormat('en-US', {
+              month: 'short',
+              day: '2-digit',
+              year: 'numeric',
+            }).format(new Date(file.fileLastAccessed)),
+            lastModified: new Intl.DateTimeFormat('en-US', {
+              month: 'short',
+              day: '2-digit',
+              year: 'numeric',
+            }).format(new Date(file.fileLastModified)),
+          }));
+      };
+
+      // ✅ Extract subfolders of the found folder (if needed)
+      const extractDirectSubfolders = (
+        folderNode,
+        parentPath = ''
+      ) => {
+        if (
+          !folderNode.subfolders ||
+          folderNode.subfolders.length === 0
+        )
+          return [];
+
+        return folderNode.subfolders.map((subfolder) => ({
+          folderName: subfolder.folderName,
+          folderPath: parentPath
+            ? `${parentPath}/${subfolder.folderName}`
+            : subfolder.folderName, // ✅ Correct path
         }));
       };
-  
-      // ✅ Extract subfolders of the found folder (if needed)
-      const extractDirectSubfolders = (folderNode, parentPath = "") => {
-        if (!folderNode.subfolders || folderNode.subfolders.length === 0) return [];
-    
-        return folderNode.subfolders.map((subfolder) => ({
-            folderName: subfolder.folderName,
-            folderPath: parentPath ? `${parentPath}/${subfolder.folderName}` : subfolder.folderName, // ✅ Correct path
-        }));
-    };
-  
+
       const filesInTargetFolder = extractFiles(targetFolder);
-      const subfoldersInTargetFolder = extractDirectSubfolders(folderTree, folderTree.folderName);
-  
+      const subfoldersInTargetFolder = extractDirectSubfolders(
+        folderTree,
+        folderTree.folderName
+      );
+
       setExplorerSubfolders(subfoldersInTargetFolder);
       setExplorerTable(filesInTargetFolder);
       setFilteredData(filesInTargetFolder);
-  
+
       // console.log(`Fetching files from folder: ${formattedFolderName}`);
       // console.table(filesInTargetFolder);
       // console.table(subfoldersInTargetFolder);
@@ -207,8 +300,6 @@ function SubFolder() {
       console.error('Error fetching project details:', error);
     }
   };
-  
-
 
   const fetchAvailableUsers = async () => {
     try {
@@ -254,33 +345,64 @@ function SubFolder() {
     fetchProjectDetails();
   }, [projectId, refreshKey, formattedFolderName]);
 
-    useEffect(() => {
-      const results = explorerTable.filter(
-        (file) =>
-          file.fileName
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase())
-      );
-      setFilteredData(results);
-    }, [searchTerm, explorerTable, selectedprojectId]);
+  useEffect(() => {
+    const results = explorerTable.filter((file) =>
+      file.fileName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredData(results);
+  }, [searchTerm, explorerTable, selectedprojectId]);
 
   // Define columns for the table
   const explorerColumn = [
+    // {
+    //   name: ' ',
+    //   cell: (row, index) => (
+    //     <label className="del-checkbox">
+    //       <input
+    //         type="checkbox"
+    //         onChange={(e) => {
+    //           const checked = e.target.checked;
+    //           setSelectedFiles((prev) =>
+    //             checked
+    //               ? [...prev, index]
+    //               : prev.filter((i) => i !== index)
+    //           );
+    //         }}
+    //         checked={selectedFiles.includes(index)}
+    //       />
+    //       <div className="del-checkmark" />
+    //     </label>
+    //   ),
+    //   ignoreRowClick: true,
+    //   allowOverflow: true,
+    //   button: true,
+    // },
     {
-      name: ' ',
-      cell: (row, index) => (
+      name: (
+        <label className="del-checkbox">
+          <input
+            type="checkbox"
+            onChange={handleSelectAll}
+            checked={selectAll}
+          />
+          <div className="del-checkmark" />
+        </label>
+      ),
+      cell: (row) => (
         <label className="del-checkbox">
           <input
             type="checkbox"
             onChange={(e) => {
               const checked = e.target.checked;
-              setSelectedFiles((prev) =>
+              setSelectedFiles((prev) => {
+                const newSet = new Set(prev);
                 checked
-                  ? [...prev, index]
-                  : prev.filter((i) => i !== index)
-              );
+                  ? newSet.add(row.fileName)
+                  : newSet.delete(row.fileName);
+                return newSet;
+              });
             }}
-            checked={selectedFiles.includes(index)}
+            checked={selectedFiles.has(row.fileName)}
           />
           <div className="del-checkmark" />
         </label>
@@ -353,173 +475,237 @@ function SubFolder() {
 
   const handleAddNewFile = async () => {
     try {
-        console.log("Starting file processing...");
-        if (!newFiles.length) {
-            console.warn("No new files to process.");
-            return;
-        }
+      console.log('Starting file processing...');
+      if (!newFiles.length) {
+        console.warn('No new files to process.');
+        return;
+      }
 
-        Swal.fire({
-            title: "Processing Files...",
-            text: "Please wait.",
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading(),
+      Swal.fire({
+        title: 'Processing Files...',
+        text: 'Please wait.',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
+
+      const formData = new FormData();
+      const fragments = components.get(OBC.FragmentsManager);
+      const fragmentIfcLoader = components.get(OBC.IfcLoader);
+
+      console.log('Filtering files...');
+      const pdfFiles = newFiles.filter(
+        (file) => file.type === 'application/pdf'
+      );
+      const ifcFiles = newFiles.filter(
+        (file) => file.type !== 'application/pdf'
+      );
+
+      // Handle PDF Upload Immediately
+      if (pdfFiles.length > 0) {
+        console.log('📄 Found PDF files, uploading directly...');
+        pdfFiles.forEach((file) => {
+          formData.append('project_file', file);
         });
 
-        const formData = new FormData();
-        const fragments = components.get(OBC.FragmentsManager);
-        const fragmentIfcLoader = components.get(OBC.IfcLoader);
+        await axiosInstance.post(
+          `/upload-pdf-files/${projectId}/${encodeURIComponent(
+            formattedFolderName
+          )}`,
+          formData,
+          {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          }
+        );
+        console.log('✅ PDF files uploaded successfully.');
+      }
 
-        console.log("Filtering files...");
-        const pdfFiles = newFiles.filter((file) => file.type === "application/pdf");
-        const ifcFiles = newFiles.filter((file) => file.type !== "application/pdf");
-
-        // Handle PDF Upload Immediately
-        if (pdfFiles.length > 0) {
-            console.log("📄 Found PDF files, uploading directly...");
-            pdfFiles.forEach((file) => {
-                formData.append("project_file", file);
-            });
-
-            await axiosInstance.post(`/upload-pdf-files/${projectId}/${encodeURIComponent(formattedFolderName)}`, formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
-            console.log("✅ PDF files uploaded successfully.");
-        }
-
-        // Skip IFC processing if no IFC files exist
-        if (ifcFiles.length === 0) {
-            Swal.fire({
-                title: "Success!",
-                text: "PDF files uploaded successfully.",
-                icon: "success",
-                confirmButtonText: "OK",
-            });
-
-            setShowAddModal(false);
-            setNewFiles([]);
-            setRefreshKey((prevKey) => prevKey + 1);
-            return;
-        }
-
-        console.log("Setting up IFC loader...");
-        await fragmentIfcLoader.setup();
-
-        for (const file of ifcFiles) {
-            try {
-                console.log(`Processing IFC file: ${file.name}`);
-                const data = await file.arrayBuffer();
-                const buffer = new Uint8Array(data);
-                console.log("File converted to Uint8Array.");
-
-                console.log("Adding onFragmentsLoaded listener...");
-                const onLoadHandler = async (model) => {
-                    try {
-                        console.log("🚀 Fragments loaded event triggered!");
-
-                        const groupsArray = Array.from(fragments.groups.values());
-                        console.log("Fragments Groups Found:", groupsArray.length);
-
-                        if (groupsArray.length === 0) {
-                            console.warn("⚠️ No fragment groups found!");
-                            return;
-                        }
-
-                        const group = groupsArray[0];
-                        console.log("Extracting fragment data...");
-                        const fragData = fragments.export(group);
-                        console.log("Fragment data extracted, size:", fragData?.length);
-
-                        const fileName = file.name.split('.')[0];
-                        const dateID = Date.now();
-
-                        const fragBlob = new Blob([fragData]);
-                        console.log("Fragment Blob created, size:", fragBlob.size);
-
-                        const fragFile = new File([fragBlob], `${dateID}-${fileName}.frag`);
-                        console.log("Fragment file created:", fragFile.name, "Size:", fragFile.size);
-
-                        const properties = group.getLocalProperties();
-                        console.log("Extracted properties:", properties);
-
-                        let propertiesFile = null;
-                        if (properties) {
-                            const propertiesBlob = new Blob([JSON.stringify(properties)]);
-                            console.log("Properties Blob created, size:", propertiesBlob.size);
-
-                            propertiesFile = new File([propertiesBlob], `${dateID}-${fileName}.json`);
-                            console.log("Properties file created:", propertiesFile.name, "Size:", propertiesFile.size);
-                        }
-
-                        console.log("Appending to FormData...");
-                        formData.append('project_file', file)
-                        console.log("Original IFC File appended to FormData");
-                        formData.append("project_file", fragFile);
-                        console.log("Frag File appended to FormData");
-                        console.log("✅ FormData after adding fragFile:", [...formData.entries()]);
-
-                        if (propertiesFile) {
-                            formData.append("properties", propertiesFile);
-                            console.log("✅ FormData after adding propertiesFile:", [...formData.entries()]);
-                        }
-
-                        console.log("✅ Completed processing for file:", file.name);
-                        fragments.onFragmentsLoaded.remove(onLoadHandler);
-                    } catch (error) {
-                        console.error("❌ Error processing IFC fragments:", error);
-                        fragments.onFragmentsLoaded.remove(onLoadHandler);
-                    }
-                };
-
-                fragments.onFragmentsLoaded.add(onLoadHandler, { once: true });
-
-                console.log("🚀 Loading IFC file...");
-                await fragmentIfcLoader.load(buffer);
-                console.log("✅ IFC file loaded successfully.");
-            } catch (error) {
-                console.error("❌ Error loading IFC file:", error);
-            }
-        }
-
-        console.log("🔄 Final FormData entries before sending:", [...formData.entries()]);
-
-        console.log("📤 Sending IFC FormData to server...");
-        await axiosInstance.post(`/upload-ifc-files/${projectId}/${encodeURIComponent(formattedFolderName)}`, formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-        });
-        console.log("✅ IFC files uploaded successfully.");
-
+      // Skip IFC processing if no IFC files exist
+      if (ifcFiles.length === 0) {
         Swal.fire({
-            title: "Success!",
-            text: "Files have been added successfully.",
-            icon: "success",
-            confirmButtonText: "OK",
+          title: 'Success!',
+          text: 'PDF files uploaded successfully.',
+          icon: 'success',
+          confirmButtonText: 'OK',
         });
 
         setShowAddModal(false);
         setNewFiles([]);
         setRefreshKey((prevKey) => prevKey + 1);
+        return;
+      }
+
+      console.log('Setting up IFC loader...');
+      await fragmentIfcLoader.setup();
+
+      for (const file of ifcFiles) {
+        try {
+          console.log(`Processing IFC file: ${file.name}`);
+          const data = await file.arrayBuffer();
+          const buffer = new Uint8Array(data);
+          console.log('File converted to Uint8Array.');
+
+          console.log('Adding onFragmentsLoaded listener...');
+          const onLoadHandler = async (model) => {
+            try {
+              console.log('🚀 Fragments loaded event triggered!');
+
+              const groupsArray = Array.from(
+                fragments.groups.values()
+              );
+              console.log(
+                'Fragments Groups Found:',
+                groupsArray.length
+              );
+
+              if (groupsArray.length === 0) {
+                console.warn('⚠️ No fragment groups found!');
+                return;
+              }
+
+              const group = groupsArray[0];
+              console.log('Extracting fragment data...');
+              const fragData = fragments.export(group);
+              console.log(
+                'Fragment data extracted, size:',
+                fragData?.length
+              );
+
+              const fileName = file.name.split('.')[0];
+              const dateID = Date.now();
+
+              const fragBlob = new Blob([fragData]);
+              console.log(
+                'Fragment Blob created, size:',
+                fragBlob.size
+              );
+
+              const fragFile = new File(
+                [fragBlob],
+                `${dateID}-${fileName}.frag`
+              );
+              console.log(
+                'Fragment file created:',
+                fragFile.name,
+                'Size:',
+                fragFile.size
+              );
+
+              const properties = group.getLocalProperties();
+              console.log('Extracted properties:', properties);
+
+              let propertiesFile = null;
+              if (properties) {
+                const propertiesBlob = new Blob([
+                  JSON.stringify(properties),
+                ]);
+                console.log(
+                  'Properties Blob created, size:',
+                  propertiesBlob.size
+                );
+
+                propertiesFile = new File(
+                  [propertiesBlob],
+                  `${dateID}-${fileName}.json`
+                );
+                console.log(
+                  'Properties file created:',
+                  propertiesFile.name,
+                  'Size:',
+                  propertiesFile.size
+                );
+              }
+
+              console.log('Appending to FormData...');
+              formData.append('project_file', file);
+              console.log('Original IFC File appended to FormData');
+              formData.append('project_file', fragFile);
+              console.log('Frag File appended to FormData');
+              console.log('✅ FormData after adding fragFile:', [
+                ...formData.entries(),
+              ]);
+
+              if (propertiesFile) {
+                formData.append('properties', propertiesFile);
+                console.log(
+                  '✅ FormData after adding propertiesFile:',
+                  [...formData.entries()]
+                );
+              }
+
+              console.log(
+                '✅ Completed processing for file:',
+                file.name
+              );
+              fragments.onFragmentsLoaded.remove(onLoadHandler);
+            } catch (error) {
+              console.error(
+                '❌ Error processing IFC fragments:',
+                error
+              );
+              fragments.onFragmentsLoaded.remove(onLoadHandler);
+            }
+          };
+
+          fragments.onFragmentsLoaded.add(onLoadHandler, {
+            once: true,
+          });
+
+          console.log('🚀 Loading IFC file...');
+          await fragmentIfcLoader.load(buffer);
+          console.log('✅ IFC file loaded successfully.');
+        } catch (error) {
+          console.error('❌ Error loading IFC file:', error);
+        }
+      }
+
+      console.log('🔄 Final FormData entries before sending:', [
+        ...formData.entries(),
+      ]);
+
+      console.log('📤 Sending IFC FormData to server...');
+      await axiosInstance.post(
+        `/upload-ifc-files/${projectId}/${encodeURIComponent(
+          formattedFolderName
+        )}`,
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }
+      );
+      console.log('✅ IFC files uploaded successfully.');
+
+      Swal.fire({
+        title: 'Success!',
+        text: 'Files have been added successfully.',
+        icon: 'success',
+        confirmButtonText: 'OK',
+      });
+
+      setShowAddModal(false);
+      setNewFiles([]);
+      setRefreshKey((prevKey) => prevKey + 1);
     } catch (error) {
-        console.error("❌ Error during file upload:", error);
-        Swal.fire({
-            title: "Error!",
-            text: "Failed to upload files. Try again.",
-            icon: "error",
-            confirmButtonText: "OK",
-        });
+      console.error('❌ Error during file upload:', error);
+      Swal.fire({
+        title: 'Error!',
+        text: 'Failed to upload files. Try again.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
     }
-};
+  };
 
-  const [newFolderName, setNewFolderName] = useState(null)
+  const [newFolderName, setNewFolderName] = useState(null);
   const [openFolderRenamer, setOpenFolderRenamer] = useState(false);
-
 
   const handleRenameFolder = async () => {
     try {
       await axiosInstance.post(
-        `/rename-folder/${projectId}/${encodeURIComponent(decodedFolderName)}/${encodeURIComponent(newFolderName)}`
+        `/rename-folder/${projectId}/${encodeURIComponent(
+          decodedFolderName
+        )}/${encodeURIComponent(newFolderName)}`
       );
-  
+
       Swal.fire({
         title: 'Success!',
         text: 'Folder has been renamed successfully.',
@@ -527,21 +713,24 @@ function SubFolder() {
         confirmButtonText: 'OK',
       }).then(() => {
         // Navigate only after the user clicks "OK"
-        navigate(`/project-folder/${projectId}/data/project-explorer`);
+        navigate(
+          `/project-folder/${projectId}/data/project-explorer`
+        );
       });
-  
+
       setOpenFolderRenamer(false);
       setRefreshKey((prevKey) => prevKey + 1);
     } catch (error) {
       Swal.fire({
         title: 'Error!',
-        text: error.response?.data?.error || 'Failed to rename folder.',
+        text:
+          error.response?.data?.error || 'Failed to rename folder.',
         icon: 'error',
         confirmButtonText: 'OK',
       });
     }
   };
-  
+
   const handleDeleteFiles = async () => {
     try {
       const result = await Swal.fire({
@@ -562,23 +751,32 @@ function SubFolder() {
       });
 
       if (result.isConfirmed) {
-        const filesToDelete = selectedFiles.map(
-          (index) => explorerTable[index]
+        const filesToDelete = explorerTable.filter((file) =>
+          selectedFiles.has(file.fileName)
         );
+
         for (const file of filesToDelete) {
           await axiosInstance.delete(
             `/delete-file/${projectId}/${file.fileName}`
           );
         }
+
         setExplorerTable((prev) =>
-          prev.filter((_, index) => !selectedFiles.includes(index))
+          prev.filter((file) => !selectedFiles.has(file.fileName))
         );
-        setSelectedFiles([]); // Clear selected files
+        setSelectedFiles(new Set());
         Swal.fire({
-          title: 'Deleted!',
-          text: 'Selected files have been deleted.',
+          // title: 'Deleted!',
+          // text: 'Selected files have been deleted.',
           icon: 'success',
-          confirmButtonText: 'OK',
+          // timerProgressBar: true,
+          timer: 1500,
+          showConfirmButton: false,
+          customClass: {
+            popup: 'custom-swal-popup',
+            title: 'custom-swal-title',
+            htmlContainer: 'custom-swal-text',
+          },
         });
         setRefreshKey((prevKey) => prevKey + 1);
       }
@@ -602,7 +800,6 @@ function SubFolder() {
     handleCloseShareModal();
     showToast();
   };
-
 
   const menuRef = useRef(null);
   useEffect(() => {
@@ -725,12 +922,30 @@ function SubFolder() {
               <div className="project-content">
                 <div className="table-header d-flex justify-content-between align-items-center">
                   <div className="page-title">
-                  <Breadcrumb>
-                    <Breadcrumb.Item className="d-flex flex-row align-items-center" onClick={() => navigate(`/project-folder/${projectId}/data/project-explorer`)}> <FaChevronLeft/> {projectName}</Breadcrumb.Item>
-                    <Breadcrumb.Item active className="d-flex align-items-center">
-                    {formattedFolderName} <RiEdit2Fill className="ml-2" size={18} onClick={() => setOpenFolderRenamer(true)} /> 
-                    </Breadcrumb.Item>
-                </Breadcrumb>
+                    <Breadcrumb>
+                      <Breadcrumb.Item
+                        className="d-flex flex-row align-items-center"
+                        onClick={() =>
+                          navigate(
+                            `/project-folder/${projectId}/data/project-explorer`
+                          )
+                        }
+                      >
+                        {' '}
+                        <FaChevronLeft /> {projectName}
+                      </Breadcrumb.Item>
+                      <Breadcrumb.Item
+                        active
+                        className="d-flex align-items-center"
+                      >
+                        {formattedFolderName}{' '}
+                        <RiEdit2Fill
+                          className="ml-2"
+                          size={18}
+                          onClick={() => setOpenFolderRenamer(true)}
+                        />
+                      </Breadcrumb.Item>
+                    </Breadcrumb>
                   </div>
                   <div className="search-div">
                     <input
@@ -765,33 +980,36 @@ function SubFolder() {
                     >
                       <FaThList />
                     </button>
-                    {formattedFolderName !== "Assemblies" && roleCheck.some((role) =>
-                            ['Admin', 'Superadmin'].includes(role)
-                          ) && (
-                            <button
-                              className="btn btn-icon"
-                              id="batchEdit-pdf"
-                              title="Edit Multiple PDFs"
-                              onClick={() =>
-                                navigate(
-                                  `/project-folder/multi-pdf-editor/${projectId}/${encodeURIComponent(decodedFolderName)}`
-                                )
-                              }
-                            >
-                             <GrMultiple/>
-                            </button>
-                          )}
-                          <button className="btn btn-icon" id="csv-export">
-                            <CSVLink
-                              {...handleExportToCSV()}
-                              filename={`${ownerName}'s ${projectName}_IFC-Files.csv`}
-                              className="exportToCSV"
-                              target="_blank"
-                              title="Export as CSV"
-                            >
-                             <GrDocumentCsv />
-                            </CSVLink>
-                          </button>
+                    {formattedFolderName !== 'Assemblies' &&
+                      roleCheck.some((role) =>
+                        ['Admin', 'Superadmin'].includes(role)
+                      ) && (
+                        <button
+                          className="btn btn-icon"
+                          id="batchEdit-pdf"
+                          title="Edit Multiple PDFs"
+                          onClick={() =>
+                            navigate(
+                              `/project-folder/multi-pdf-editor/${projectId}/${encodeURIComponent(
+                                decodedFolderName
+                              )}`
+                            )
+                          }
+                        >
+                          <GrMultiple />
+                        </button>
+                      )}
+                    <button className="btn btn-icon" id="csv-export">
+                      <CSVLink
+                        {...handleExportToCSV()}
+                        filename={`${ownerName}'s ${projectName}_IFC-Files.csv`}
+                        className="exportToCSV"
+                        target="_blank"
+                        title="Export as CSV"
+                      >
+                        <GrDocumentCsv />
+                      </CSVLink>
+                    </button>
                     {/* <div className="menu-btn-container position-relative">
                       <button
                         className="btn btn-icon menu-btn"
@@ -930,8 +1148,15 @@ function SubFolder() {
                       columns={noDeleteColumn}
                       data={filteredData}
                       pagination={filteredData.length >= 10}
-                      paginationPerPage={20}
+                      paginationPerPage={rowsPerPage}
                       paginationRowsPerPageOptions={[10, 20, 30, 40]}
+                      onChangePage={(page) =>
+                        setCurrentDataTablePage(page)
+                      }
+                      onChangeRowsPerPage={(currentRowsPerPage) => {
+                        setRowsPerPage(currentRowsPerPage);
+                        setCurrentDataTablePage(1); // Reset to first page when changing rows per page
+                      }}
                       onRowClicked={handleRowClick}
                       responsive
                       noDataComponent={
@@ -1206,7 +1431,7 @@ function SubFolder() {
       >
         <Modal.Header closeButton>
           <Modal.Title> Share QR Code </Modal.Title>
-        </Modal.Header >
+        </Modal.Header>
         <Modal.Body>
           <QrCodeGenerator
             fileName={selectedRow?.fileName || ''}
@@ -1232,19 +1457,18 @@ function SubFolder() {
         show={openFolderRenamer}
         onHide={() => setOpenFolderRenamer(false)}
         centered
-
       >
         <Modal.Header>
           <Modal.Title> Rename Folder </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-        <input
-                type="text"
-                className="form-control"
-                id="folderName"
-                placeholder='Enter new folder name...'
-                onChange={(e) => setNewFolderName(e.target.value)}
-              />
+          <input
+            type="text"
+            className="form-control"
+            id="folderName"
+            placeholder="Enter new folder name..."
+            onChange={(e) => setNewFolderName(e.target.value)}
+          />
         </Modal.Body>
         <Modal.Footer>
           <Button
@@ -1264,20 +1488,30 @@ function SubFolder() {
         </Modal.Footer>
       </Modal>
 
-        <ToastContainer
-          className="p-3"
-          position={toastPosition}
-          style={{ zIndex: 1046, position: 'fixed', maxWidth: '300px' }}
+      <ToastContainer
+        className="p-3"
+        position={toastPosition}
+        style={{ zIndex: 1046, position: 'fixed', maxWidth: '300px' }}
+      >
+        <Toast
+          show={showSuccessToast}
+          onClose={showToast}
+          style={{ backgroundColor: '#fec19db8' }}
+          delay={5000}
+          autohide
         >
-        <Toast show={showSuccessToast} onClose={showToast} style={{backgroundColor: "#fec19db8"}} delay={5000} autohide>
-          <Toast.Header className='justify-content-between' style={{backgroundColor: "#ee8a50b8"}}>
-            <small > Folder Created Successfully </small>
+          <Toast.Header
+            className="justify-content-between"
+            style={{ backgroundColor: '#ee8a50b8' }}
+          >
+            <small> Folder Created Successfully </small>
           </Toast.Header>
-          <Toast.Body style={{fontSize: '.785rem'}}>
-            Your folder has been created and is ready to store project files.
+          <Toast.Body style={{ fontSize: '.785rem' }}>
+            Your folder has been created and is ready to store project
+            files.
           </Toast.Body>
         </Toast>
-        </ToastContainer>
+      </ToastContainer>
     </div>
   );
 }

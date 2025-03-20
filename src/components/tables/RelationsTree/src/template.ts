@@ -143,7 +143,6 @@ const getDecompositionTree = async (
   }
 
   rows.push(entityRow);
-
   return rows;
 };
 

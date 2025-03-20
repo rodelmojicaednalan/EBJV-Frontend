@@ -50,6 +50,76 @@ function IfcViewer() {
   const [currentWorld, setCurrentWorld] = useState(null);
   const [centerW, setCenterW] = useState(null);
 
+  const [lastOpacity, setLastOpacity] = useState(1);
+  const [originalMaterials, setOriginalMaterials] = useState(
+    new Map()
+  );
+  const [isTransparent, setIsTransparent] = useState(false);
+
+  const fragmentsManagerRef = useRef(null);
+  const worldRef = useRef(null);
+  const hiderRef = useRef(null);
+
+  const setOpacity = (opacityValue) => {
+    const opacity = opacityValue / 100;
+
+    if (!worldRef.current || !fragmentsManagerRef.current) {
+      console.log('Required references not available yet');
+      return;
+    }
+
+    const models = Array.from(
+      fragmentsManagerRef.current.groups.values()
+    );
+
+    models.forEach((model) => {
+      model.traverse((object) => {
+        if (object.isMesh && object.material) {
+          if (opacity < 1 && !isTransparent) {
+            const id = object.uuid;
+            if (Array.isArray(object.material)) {
+              originalMaterials.set(
+                id,
+                object.material.map((mat) => ({
+                  transparent: mat.transparent,
+                  opacity: mat.opacity,
+                }))
+              );
+            } else {
+              originalMaterials.set(id, {
+                transparent: object.material.transparent,
+                opacity: object.material.opacity,
+              });
+            }
+          }
+
+          if (Array.isArray(object.material)) {
+            object.material.forEach((mat) => {
+              mat.transparent = opacity < 1;
+              mat.opacity = opacity;
+              mat.needsUpdate = true;
+            });
+          } else {
+            object.material.transparent = opacity < 1;
+            object.material.opacity = opacity;
+            object.material.needsUpdate = true;
+          }
+        }
+      });
+    });
+
+    // Force render update
+    // if (worldRef.current && worldRef.current.renderer) {
+    //   worldRef.current.renderer.render(
+    //     worldRef.current.scene.three,
+    //     worldRef.current.camera.three
+    //   );
+    // }
+
+    setIsTransparent(opacity < 1);
+    setLastOpacity(opacity);
+  };
+
   const [buttonConf, setButtonConf] = useState([
     {
       name: 'Top',
@@ -176,6 +246,7 @@ function IfcViewer() {
         const worlds = components.get(OBC.Worlds);
         const world = worlds.create();
         setCurrentWorld(world);
+        worldRef.current = world;
 
         world.scene = new OBC.SimpleScene(components);
         world.renderer = new OBCF.PostproductionRenderer(
@@ -189,7 +260,7 @@ function IfcViewer() {
         // contro.infinityDolly = false;
         // contro.minDistance = 0.001;
         // contro.maxDistance = 300;
-
+        world.renderer.needsUpdate = true;
         components.init();
 
         world.scene.setup();
@@ -228,6 +299,7 @@ function IfcViewer() {
         };
 
         const fragmentsManager = components.get(OBC.FragmentsManager);
+        fragmentsManagerRef.current = fragmentsManager; // Store for opacity function
         let uuid = '';
 
         const [classificationsTree, updateClassificationsTree] =
@@ -238,6 +310,7 @@ function IfcViewer() {
 
         //HIDER
         const hider = components.get(OBC.Hider);
+        hiderRef.current = hider; // Store for opacity function
         setHiderInstance(hider);
 
         const classifier = components.get(OBC.Classifier);
@@ -425,6 +498,7 @@ function IfcViewer() {
         };
 
         loadIfc();
+
         const panel = BUI.Component.create(() => {
           const onTextInput = (e) => {
             const input = e.target;
@@ -544,6 +618,14 @@ function IfcViewer() {
                   }}">
                 </bim-number-input>
               </bim-panel-section>
+              <bim-panel-section collapsed label="Model Opacity">
+                <bim-number-input
+                    slider step="1" label="Value" value="100" min="0" max="100"
+                    @change="${({ target }) => {
+                      setOpacity(parseFloat(target.value));
+                    }}">
+                </bim-number-input>
+              </bim-panel-section>
               <bim-panel-section collapsed label="View Assembly PDF">
                 <bim-button label="View"
                   @click="${() => {
@@ -599,6 +681,45 @@ function IfcViewer() {
       initializeIfcViewer();
     }
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (
+        isTransparent &&
+        originalMaterials.size > 0 &&
+        worldRef.current &&
+        fragmentsManagerRef.current
+      ) {
+        const models = Array.from(
+          fragmentsManagerRef.current.groups.values()
+        );
+        models.forEach((model) => {
+          model.traverse((object) => {
+            if (object.isMesh && object.material) {
+              const id = object.uuid;
+              const originalMaterial = originalMaterials.get(id);
+
+              if (originalMaterial) {
+                if (Array.isArray(object.material)) {
+                  object.material.forEach((mat, index) => {
+                    if (originalMaterial[index]) {
+                      mat.transparent =
+                        originalMaterial[index].transparent;
+                      mat.opacity = originalMaterial[index].opacity;
+                    }
+                  });
+                } else if (originalMaterial) {
+                  object.material.transparent =
+                    originalMaterial.transparent;
+                  object.material.opacity = originalMaterial.opacity;
+                }
+              }
+            }
+          });
+        });
+      }
+    };
+  }, [isTransparent, originalMaterials]);
 
   return (
     <div className={`w-100`} ref={measurementContainerRef}>
