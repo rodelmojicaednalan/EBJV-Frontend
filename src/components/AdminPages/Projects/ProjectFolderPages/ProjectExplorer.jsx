@@ -226,7 +226,11 @@ function ProjectExplorer() {
           return [];
 
         return folderNode.files
-        .filter((file) => !file.fileName.endsWith('.json')  && !file.fileName.endsWith('.ifc'))
+          .filter(
+            (file) =>
+              !file.fileName.endsWith('.json') &&
+              !file.fileName.endsWith('.ifc')
+          )
           .map((file) => ({
             projectId: id,
             fileName: file.fileName,
@@ -618,10 +622,10 @@ function ProjectExplorer() {
               }
 
               console.log('Appending to FormData...');
-              formData.append('project_file', file)
-              console.log("Original IFC File appended to FormData");
-              formData.append("project_file", fragFile);
-              console.log("Frag File appended to FormData");
+              formData.append('project_file', file);
+              console.log('Original IFC File appended to FormData');
+              formData.append('project_file', fragFile);
+              console.log('Frag File appended to FormData');
               console.log('✅ FormData after adding fragFile:', [
                 ...formData.entries(),
               ]);
@@ -970,64 +974,91 @@ function ProjectExplorer() {
 
   const downloadFile = async (fileName) => {
     Swal.fire({
-        title: 'Fetching file...',
-        text: 'Please wait.',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        },
+      title: 'Fetching file...',
+      text: 'Please wait.',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
     });
 
     try {
-        let downloadTarget = fileName; // Default: download requested file
+      let downloadTarget = fileName; // Default: download requested file
 
-        // ✅ If the file is a .frag, find the corresponding .ifc instead
-        if (fileName.endsWith('.frag')) {
-            const response = await axiosInstance.get(`/project/${projectId}`);
-            const folderTree = response.data.folderTree;
-
-            // Extract the original IFC file name by removing the timestamp
-            const expectedIfcName = fileName.replace(/^\d+-/, '').replace('.frag', '.ifc');
-
-            console.log(`🔍 Looking for corresponding IFC file: ${expectedIfcName}`);
-
-            // Function to search for the IFC file in the folderTree
-            const findMatchingIfcFile = (folderNode, expectedName) => {
-                if (!folderNode.files || folderNode.files.length === 0) return null;
-                return folderNode.files.find(file => file.fileName === expectedName) ? expectedName : null;
-            };
-
-            const foundIfcFile = findMatchingIfcFile(folderTree, expectedIfcName);
-
-            if (foundIfcFile) {
-                console.log(`🎯 Found matching IFC file: ${foundIfcFile}`);
-                downloadTarget = foundIfcFile; // Switch download to IFC file
-            } else {
-                console.warn(`⚠️ No matching IFC file found for: ${fileName}`);
-                Swal.fire('Error!', `No IFC file found for ${fileName}.`, 'error');
-                return;
-            }
-        }
-
-        // ✅ Download the determined file
-        console.log(`📥 Downloading: ${downloadTarget}`);
+      // ✅ If the file is a .frag, find the corresponding .ifc instead
+      if (fileName.endsWith('.frag')) {
         const response = await axiosInstance.get(
-            `/download-file/${projectId}/${downloadTarget}`,
-            { responseType: 'blob' }
+          `/project/${projectId}`
         );
-        const blob = new Blob([response.data]);
-        saveAs(blob, downloadTarget);
-        console.log(`✅ Successfully downloaded: ${downloadTarget}`);
+        const folderTree = response.data.folderTree;
 
-        Swal.fire('Success!', `${downloadTarget} has been downloaded.`, 'success');
+        // Extract the original IFC file name by removing the timestamp
+        const expectedIfcName = fileName
+          .replace(/^\d+-/, '')
+          .replace('.frag', '.ifc');
+
+        console.log(
+          `🔍 Looking for corresponding IFC file: ${expectedIfcName}`
+        );
+
+        // Function to search for the IFC file in the folderTree
+        const findMatchingIfcFile = (folderNode, expectedName) => {
+          if (!folderNode.files || folderNode.files.length === 0)
+            return null;
+          return folderNode.files.find(
+            (file) => file.fileName === expectedName
+          )
+            ? expectedName
+            : null;
+        };
+
+        const foundIfcFile = findMatchingIfcFile(
+          folderTree,
+          expectedIfcName
+        );
+
+        if (foundIfcFile) {
+          console.log(`🎯 Found matching IFC file: ${foundIfcFile}`);
+          downloadTarget = foundIfcFile; // Switch download to IFC file
+        } else {
+          console.warn(
+            `⚠️ No matching IFC file found for: ${fileName}`
+          );
+          Swal.fire(
+            'Error!',
+            `No IFC file found for ${fileName}.`,
+            'error'
+          );
+          return;
+        }
+      }
+
+      // ✅ Download the determined file
+      console.log(`📥 Downloading: ${downloadTarget}`);
+      const response = await axiosInstance.get(
+        `/download-file/${projectId}/${downloadTarget}`,
+        { responseType: 'blob' }
+      );
+      const blob = new Blob([response.data]);
+      saveAs(blob, downloadTarget);
+      console.log(`✅ Successfully downloaded: ${downloadTarget}`);
+
+      Swal.fire(
+        'Success!',
+        `${downloadTarget} has been downloaded.`,
+        'success'
+      );
     } catch (error) {
-        Swal.fire('Error!', `Failed to download ${fileName}. Try again.`, 'error');
-        console.error(error);
+      Swal.fire(
+        'Error!',
+        `Failed to download ${fileName}. Try again.`,
+        'error'
+      );
+      console.error(error);
     } finally {
-        Swal.close();
+      Swal.close();
     }
-};
-
+  };
 
   // console.log(selectedRow?.projectId || '')
 
@@ -1360,7 +1391,7 @@ function ProjectExplorer() {
                             setCurrentPage(currentPage - 1)
                           }
                         >
-                          <FaChevronCircleLeft color="#eb6314"/>
+                          <FaChevronCircleLeft color="#eb6314" />
                         </button>
                         <span className="mx-2">
                           {' '}
@@ -1373,7 +1404,7 @@ function ProjectExplorer() {
                             setCurrentPage(currentPage + 1)
                           }
                         >
-                          <FaChevronCircleRight color="#eb6314"/>
+                          <FaChevronCircleRight color="#eb6314" />
                         </button>
                       </div>
                     </div>

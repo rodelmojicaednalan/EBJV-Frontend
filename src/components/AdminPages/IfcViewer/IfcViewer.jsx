@@ -24,6 +24,7 @@ import {
   FiEyeOff,
   FiRotateCcw,
   FiBox,
+  FiGrid,
 } from 'react-icons/fi';
 import { RiArrowDropRightFill } from 'react-icons/ri';
 
@@ -49,6 +50,10 @@ function IfcViewer() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [currentWorld, setCurrentWorld] = useState(null);
   const [centerW, setCenterW] = useState(null);
+  const [ifcGrids, setIfcGrids] = useState([]);
+  const [showIfcGrid, setShowIfcGrid] = useState(false);
+  const [modelProperties, setModelProperties] = useState([]);
+  const modelPropertiesRef = useRef(null);
 
   const [lastOpacity, setLastOpacity] = useState(1);
   const [originalMaterials, setOriginalMaterials] = useState(
@@ -59,6 +64,308 @@ function IfcViewer() {
   const fragmentsManagerRef = useRef(null);
   const worldRef = useRef(null);
   const hiderRef = useRef(null);
+  const ifcGridRef = useRef(null);
+  const indexerRef = useRef(null);
+  const componentsRef = useRef(null);
+
+  const createIfcGrid = async (model) => {
+    if (!worldRef.current || !model || !componentsRef.current) return;
+
+    if (ifcGridRef.current) {
+      worldRef.current.scene.three.remove(ifcGridRef.current);
+      ifcGridRef.current = null;
+    }
+
+    const gridGroup = new THREE.Group();
+    gridGroup.name = 'IFC_GRID';
+
+    let ifcGridEntities = [];
+    if (modelProperties) {
+      ifcGridEntities = modelProperties.filter(
+        (item) => item.type === 3009204131
+      );
+    }
+    if (ifcGridEntities.length > 0) {
+      for (const grid of ifcGridEntities) {
+        if (grid.UAxes && grid.VAxes) {
+          for (let i = 0; i < grid.UAxes.length; i++) {
+            const axisRef = grid.UAxes[i];
+            const axis = modelProperties.find(
+              (item) => item.expressID === axisRef.value
+            );
+
+            if (axis && axis.AxisCurve) {
+              const curveId = axis.AxisCurve.value;
+              const polyline = modelProperties.find(
+                (item) => item.expressID === curveId
+              );
+              if (polyline && polyline.Points) {
+                const points = [];
+                for (const pointRef of polyline.Points) {
+                  const point = modelProperties.find(
+                    (item) => item.expressID === pointRef.value
+                  );
+
+                  if (point && point.Coordinates) {
+                    points.push(
+                      new THREE.Vector3(
+                        point.Coordinates[0] / 1000,
+                        0,
+                        point.Coordinates[1] / 1000
+                      )
+                    );
+                  }
+                }
+
+                if (points.length >= 2) {
+                  const line = createGridLine(
+                    points[0],
+                    points[points.length - 1],
+                    0xff0000
+                  );
+                  gridGroup.add(line);
+
+                  const label = createTextLabel(
+                    axis.AxisTag?.value ||
+                      String.fromCharCode(90 - i),
+                    new THREE.Vector3(points[0].x, 0, points[0].z - 1)
+                  );
+                  gridGroup.add(label);
+                }
+              } else {
+                const box = new THREE.Box3().setFromObject(model);
+                const size = box.getSize(new THREE.Vector3());
+                const center = box.getCenter(new THREE.Vector3());
+
+                const totalUAxes = grid.UAxes.length;
+                const offset =
+                  size.x * (i / (totalUAxes - 1 || 1) - 0.5);
+
+                const start = new THREE.Vector3(
+                  center.x + offset,
+                  0,
+                  center.z - size.z / 2
+                );
+
+                const end = new THREE.Vector3(
+                  center.x + offset,
+                  0,
+                  center.z + size.z / 2
+                );
+
+                const line = createGridLine(start, end, 0xff0000);
+                gridGroup.add(line);
+
+                const label = createTextLabel(
+                  axis.AxisTag?.value || String.fromCharCode(90 - i),
+                  new THREE.Vector3(start.x, 0, start.z - 1)
+                );
+                gridGroup.add(label);
+              }
+            }
+          }
+
+          for (let i = 0; i < grid.VAxes.length; i++) {
+            const axisRef = grid.VAxes[i];
+            const axis = modelProperties.find(
+              (item) => item.expressID === axisRef.value
+            );
+
+            if (axis && axis.AxisCurve) {
+              const curveId = axis.AxisCurve.value;
+
+              const polyline = modelProperties.find(
+                (item) => item.expressID === curveId
+              );
+              if (polyline && polyline.Points) {
+                const points = [];
+                for (const pointRef of polyline.Points) {
+                  const point = modelProperties.find(
+                    (item) => item.expressID === pointRef.value
+                  );
+
+                  if (point && point.Coordinates) {
+                    points.push(
+                      new THREE.Vector3(
+                        point.Coordinates[0] / 1000,
+                        0,
+                        point.Coordinates[1] / 1000
+                      )
+                    );
+                  }
+                }
+
+                if (points.length >= 2) {
+                  const line = createGridLine(
+                    points[0],
+                    points[points.length - 1],
+                    0x0000ff
+                  );
+                  gridGroup.add(line);
+
+                  const label = createTextLabel(
+                    axis.AxisTag?.value || `V${i + 1}`,
+                    new THREE.Vector3(points[0].x - 1, 0, points[0].z)
+                  );
+                  gridGroup.add(label);
+                }
+              } else {
+                const box = new THREE.Box3().setFromObject(model);
+                const size = box.getSize(new THREE.Vector3());
+                const center = box.getCenter(new THREE.Vector3());
+
+                const totalVAxes = grid.VAxes.length;
+                const offset =
+                  size.z * (i / (totalVAxes - 1 || 1) - 0.5);
+
+                const start = new THREE.Vector3(
+                  center.x - size.x / 2,
+                  0,
+                  center.z + offset
+                );
+
+                const end = new THREE.Vector3(
+                  center.x + size.x / 2,
+                  0,
+                  center.z + offset
+                );
+
+                const line = createGridLine(start, end, 0x0000ff);
+                gridGroup.add(line);
+                const label = createTextLabel(
+                  axis.AxisTag?.value || `V${i + 1}`,
+                  new THREE.Vector3(start.x - 1, 0, start.z)
+                );
+                gridGroup.add(label);
+              }
+            }
+          }
+        }
+      }
+    } else {
+      const box = new THREE.Box3().setFromObject(model);
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+
+      const gridSize = Math.max(size.x, size.z);
+      const numLines = 5;
+
+      for (let i = 0; i < numLines; i++) {
+        const offset = gridSize * (i / (numLines - 1) - 0.5);
+
+        const uStart = new THREE.Vector3(
+          center.x + offset,
+          0,
+          center.z - gridSize / 2
+        );
+        const uEnd = new THREE.Vector3(
+          center.x + offset,
+          0,
+          center.z + gridSize / 2
+        );
+        const uLine = createGridLine(uStart, uEnd, 0xff0000);
+        gridGroup.add(uLine);
+
+        const uLabel = createTextLabel(
+          String.fromCharCode(90 - i),
+          new THREE.Vector3(uStart.x, 0, uStart.z - 1)
+        );
+        gridGroup.add(uLabel);
+
+        const vStart = new THREE.Vector3(
+          center.x - gridSize / 2,
+          0,
+          center.z + offset
+        );
+        const vEnd = new THREE.Vector3(
+          center.x + gridSize / 2,
+          0,
+          center.z + offset
+        );
+        const vLine = createGridLine(vStart, vEnd, 0x0000ff);
+        gridGroup.add(vLine);
+
+        const vLabel = createTextLabel(
+          `V${i + 1}`,
+          new THREE.Vector3(vStart.x - 1, 0, vStart.z)
+        );
+        gridGroup.add(vLabel);
+      }
+    }
+
+    worldRef.current.scene.three.add(gridGroup);
+    ifcGridRef.current = gridGroup;
+    setIfcGrids(ifcGridEntities);
+
+    // if (ifcGridRef.current) {
+    //   ifcGridRef.current.visible = true;
+    //   setShowIfcGrid(true);
+    // }
+
+    if (ifcGridRef.current) {
+      ifcGridRef.current.visible = false;
+      setShowIfcGrid(false);
+    }
+
+    return gridGroup;
+  };
+
+  const createGridLine = (start, end, color = 0x000000) => {
+    const material = new THREE.LineBasicMaterial({
+      color: color,
+      linewidth: 2,
+      opacity: 0.8,
+      transparent: true,
+    });
+
+    const geometry = new THREE.BufferGeometry().setFromPoints([
+      start,
+      end,
+    ]);
+    const line = new THREE.Line(geometry, material);
+    line.renderOrder = 999;
+    return line;
+  };
+
+  const createTextLabel = (text, position) => {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.width = 128;
+    canvas.height = 64;
+
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    context.font = '48px Arial';
+    context.fillStyle = '#000000';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText(text, canvas.width / 2, canvas.height / 2);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const material = new THREE.SpriteMaterial({
+      map: texture,
+      transparent: true,
+      opacity: 0.9,
+    });
+
+    const sprite = new THREE.Sprite(material);
+    sprite.position.copy(position);
+    sprite.scale.set(2, 1, 1);
+
+    return sprite;
+  };
+
+  useEffect(() => {
+    if (modelProperties && fragmentsManagerRef.current) {
+      const models = Array.from(
+        fragmentsManagerRef.current.groups.values()
+      );
+      if (models) {
+        createIfcGrid(models[0]);
+      }
+    }
+  }, [modelProperties]);
 
   const setOpacity = (opacityValue) => {
     const opacity = opacityValue / 100;
@@ -107,14 +414,6 @@ function IfcViewer() {
         }
       });
     });
-
-    // Force render update
-    // if (worldRef.current && worldRef.current.renderer) {
-    //   worldRef.current.renderer.render(
-    //     worldRef.current.scene.three,
-    //     worldRef.current.camera.three
-    //   );
-    // }
 
     setIsTransparent(opacity < 1);
     setLastOpacity(opacity);
@@ -239,6 +538,7 @@ function IfcViewer() {
         if (!containerRef.current) return;
 
         const components = new OBC.Components();
+        componentsRef.current = components;
 
         const viewport = document.createElement('bim-viewport');
         viewport.name = 'viewer';
@@ -254,12 +554,6 @@ function IfcViewer() {
           viewport
         );
         world.camera = new OBC.SimpleCamera(components);
-        // const contro = world.camera.controls;
-        // contro.mouseButtons.wheel;
-        // world.camera.controls.setLookAt(5, 5, 5, 0, 0, 0);
-        // contro.infinityDolly = false;
-        // contro.minDistance = 0.001;
-        // contro.maxDistance = 300;
         world.renderer.needsUpdate = true;
         components.init();
 
@@ -274,6 +568,7 @@ function IfcViewer() {
         const culler = cullers.create(world);
 
         const indexer = components.get(OBC.IfcRelationsIndexer);
+        indexerRef.current = indexer;
 
         culler.config.threshold = 10;
 
@@ -300,7 +595,6 @@ function IfcViewer() {
 
         const fragmentsManager = components.get(OBC.FragmentsManager);
         fragmentsManagerRef.current = fragmentsManager; // Store for opacity function
-        let uuid = '';
 
         const [classificationsTree, updateClassificationsTree] =
           CUIT.tables.classificationTree({
@@ -316,7 +610,11 @@ function IfcViewer() {
         const classifier = components.get(OBC.Classifier);
 
         fragmentsManager.onFragmentsLoaded.add(async (model) => {
-          // localStorage.setItem('MODEL', JSON.stringify(model));
+          // Create IFC grid after model is loaded
+          // setTimeout(() => {
+          //   createIfcGrid(model, modelPropertiesRef.current);
+          // }, 1000);
+
           const box = new THREE.Box3().setFromObject(model);
           const center = box.getCenter(new THREE.Vector3());
           const size = box.getSize(new THREE.Vector3());
@@ -435,8 +733,6 @@ function IfcViewer() {
         });
 
         highlighter.events.select.onClear.add(() => {
-          // localStorage.removeItem('SELECTED_PART_MARK');
-          // setSelectedPartMark(null);
           setIsDropdownOpen(false);
           setIsHideContainerOpen(() => false);
           updatePropertiesTable({ fragmentIdMap: {} });
@@ -466,11 +762,12 @@ function IfcViewer() {
 
             const model = await fragmentsManager.load(buffer);
             model._properties = await json_object;
+            modelPropertiesRef.current = model._properties;
+            setModelProperties(Object.values(model._properties));
 
             model.name = `${fileUrl}`;
             world.scene.three.add(model);
             world.meshes.add(model);
-            uuid = model.uuid;
 
             await indexer.process(model);
 
@@ -500,12 +797,6 @@ function IfcViewer() {
         loadIfc();
 
         const panel = BUI.Component.create(() => {
-          const onTextInput = (e) => {
-            const input = e.target;
-            propertiesTable.queryString =
-              input.value !== '' ? input.value : null;
-          };
-
           const expandTable = (e) => {
             const button = e.target;
             propertiesTable.expanded = !propertiesTable.expanded;
@@ -626,6 +917,7 @@ function IfcViewer() {
                     }}">
                 </bim-number-input>
               </bim-panel-section>
+           
               <bim-panel-section collapsed label="View Assembly PDF">
                 <bim-button label="View"
                   @click="${() => {
@@ -636,6 +928,19 @@ function IfcViewer() {
             </bim-panel>
             `;
         });
+
+        // IFC GRID
+        //   <bim-panel-section collapsed label="IFC Grid">
+        //   <bim-checkbox
+        //     label="Show IFC Grid"
+        //     @change="${(event) => {
+        //       if (ifcGridRef.current) {
+        //         ifcGridRef.current.visible = event.target.value;
+        //         setShowIfcGrid(event.target.value);
+        //       }
+        //     }}">
+        //   </bim-checkbox>
+        // </bim-panel-section>
 
         const app = document.createElement('bim-grid');
         app.layouts = {

@@ -9,17 +9,20 @@ import delete_icon from '../../../assets/images/delete-log.png';
 import check from '../../../assets/images/check.png';
 import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
-import { Modal, Button, Toast, ToastContainer } from 'react-bootstrap';
+import {
+  Modal,
+  Button,
+  Toast,
+  ToastContainer,
+} from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import axiosInstance from '../../../../axiosInstance.js';
 import { useLoader } from '../../Loaders/LoaderContext';
 import { AuthContext } from '../../Authentication/authContext';
 import useWindowWidth from './ProjectFolderPages/windowWidthHook.jsx';
 import { TbCubePlus } from 'react-icons/tb';
-import { BsFolderSymlink, BsFolderMinus  } from "react-icons/bs";
-import { FaSearch } from 'react-icons/fa'
-
-
+import { BsFolderSymlink, BsFolderMinus } from 'react-icons/bs';
+import { FaSearch } from 'react-icons/fa';
 
 import * as WEBIFC from 'web-ifc';
 import * as BUI from '@thatopen/ui';
@@ -42,12 +45,12 @@ function Projects() {
 
   const [refreshKey, setRefreshKey] = useState(0);
 
-
-   const [toastPosition, setToastPosition] = useState('bottom-end')
-    const [showSuccessToast, setShowSuccessToast] = useState(false);
-    const [showErrorToast, setShowErrorToast] = useState(false);
-    const openSuccessToast = () => setShowSuccessToast(!showSuccessToast);
-    const openErrorToast = () => setShowErrorToast(!showErrorToast);
+  const [toastPosition, setToastPosition] = useState('bottom-end');
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const openSuccessToast = () =>
+    setShowSuccessToast(!showSuccessToast);
+  const openErrorToast = () => setShowErrorToast(!showErrorToast);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [newProject, setNewProject] = useState({
@@ -66,88 +69,102 @@ function Projects() {
 
   useEffect(() => {
     if (!newProject.file) return;
-  
+
     Swal.fire({
-      title: "Converting IFC File...",
-      text: "Please wait.",
+      title: 'Converting IFC File...',
+      text: 'Please wait.',
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
       },
     });
-  
+
     const initFragments = async () => {
       try {
         const fragments = components.get(OBC.FragmentsManager);
         const fragmentIfcLoader = components.get(OBC.IfcLoader);
-  
+
         // ✅ Ensure the WASM module is loaded first
         await fragmentIfcLoader.setup();
-  
+
         fragments.onFragmentsLoaded.add(async (model) => {
           try {
             const group = Array.from(fragments.groups.values())[0];
             const data = fragments.export(group);
             const file_name = newProject.file.name.split('.')[0];
             const dateID = Date.now();
-  
-            setFragFile(new File([new Blob([data])], `${dateID}-${file_name}.frag`));
-  
+
+            setFragFile(
+              new File(
+                [new Blob([data])],
+                `${dateID}-${file_name}.frag`
+              )
+            );
+            console.log(group);
             const properties = group.getLocalProperties();
             if (properties) {
               setPropertiesJSON(
-                new File([JSON.stringify(properties)], `${dateID}-${file_name}.json`)
+                new File(
+                  [JSON.stringify(properties)],
+                  `${dateID}-${file_name}.json`
+                )
               );
             }
-  
+
             // ✅ Close Swal Loader on Success
             Swal.fire({
-              title: "IFC File Converted Successfully!", // Only header
-              icon: "success", // Success icon
-              confirmButtonText: "Continue", // Custom button text
+              title: 'IFC File Converted Successfully!', // Only header
+              icon: 'success', // Success icon
+              confirmButtonText: 'Continue', // Custom button text
               customClass: {
-                confirmButton: "btn btn-primary", // Apply custom CSS class
+                confirmButton: 'btn btn-primary', // Apply custom CSS class
               },
             });
-  
           } catch (error) {
-            console.error("Error processing IFC:", error);
-  
+            console.error('Error processing IFC:', error);
+
             // Show error message if conversion fails
-            Swal.fire("Error!", "Failed to convert IFC file. Try again.", "error");
+            Swal.fire(
+              'Error!',
+              'Failed to convert IFC file. Try again.',
+              'error'
+            );
           }
         });
       } catch (error) {
-        console.error("Error initializing Fragments:", error);
-        Swal.fire("Error!", "Failed to initialize IFC Loader.", "error");
+        console.error('Error initializing Fragments:', error);
+        Swal.fire(
+          'Error!',
+          'Failed to initialize IFC Loader.',
+          'error'
+        );
       }
     };
-  
+
     initFragments();
   }, [components, newProject.file]);
-  
+
   const loadIfc = async (file) => {
     if (!file) return;
     try {
       const data = await file.arrayBuffer();
       const buffer = new Uint8Array(data);
       const fragmentIfcLoader = components.get(OBC.IfcLoader);
-      
+
       // ✅ Ensure the IFC Loader is properly initialized
       await fragmentIfcLoader.setup();
-      
+
       await fragmentIfcLoader.load(buffer);
     } catch (error) {
-      console.error("Error loading IFC:", error);
+      console.error('Error loading IFC:', error);
     }
   };
-  
+
   useEffect(() => {
     if (newProject.file) {
       loadIfc(newProject.file);
     }
   }, [newProject.file]);
-  
 
   useEffect(() => {
     if (user && user.id) {
@@ -239,64 +256,63 @@ function Projects() {
     try {
       // Show Swal Loader while uploading
       Swal.fire({
-        title: "Uploading Project...",
-        text: "Please wait.",
+        title: 'Uploading Project...',
+        text: 'Please wait.',
         allowOutsideClick: false,
         didOpen: () => {
           Swal.showLoading();
         },
       });
-  
+
       if (!fragFile) {
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
-  
+
       const formData = new FormData();
-      formData.append("project_name", newProject.projectName);
-      formData.append("user_id", projectOwner);
-      formData.append("project_location", projectLocation);
+      formData.append('project_name', newProject.projectName);
+      formData.append('user_id', projectOwner);
+      formData.append('project_location', projectLocation);
       if (fragFile) {
-        formData.append("project_file", newProject.file)
-        formData.append("project_file", fragFile);
-        formData.append("properties", propertiesJSON);
+        formData.append('project_file', newProject.file);
+        formData.append('project_file', fragFile);
+        formData.append('properties', propertiesJSON);
       } else {
-        console.warn("No frag file available");
+        console.warn('No frag file available');
       }
-  
-      await axiosInstance.post("/create-project", formData);
-  
+
+      await axiosInstance.post('/create-project', formData);
+
       // ✅ Close Swal loader & show success message
       Swal.fire({
-        title: "Project Uploaded Successfully!",
-        icon: "success",
-        confirmButtonText: "OK",
+        title: 'Project Uploaded Successfully!',
+        icon: 'success',
+        confirmButtonText: 'OK',
         customClass: {
-          confirmButton: "btn btn-primary",
+          confirmButton: 'btn btn-primary',
         },
       });
-  
+
       setShowAddModal(false);
       openSuccessToast();
-      setNewProject({ title: "", location: "", file: null });
+      setNewProject({ title: '', location: '', file: null });
       setRefreshKey((prevKey) => prevKey + 1);
     } catch (error) {
-      console.error("Upload failed:", error);
-  
+      console.error('Upload failed:', error);
+
       // ❌ Close Swal loader & show error message
       Swal.fire({
-        title: "Upload Failed!",
-        text: "Something went wrong. Please try again.",
-        icon: "error",
-        confirmButtonText: "Retry",
+        title: 'Upload Failed!',
+        text: 'Something went wrong. Please try again.',
+        icon: 'error',
+        confirmButtonText: 'Retry',
         customClass: {
-          confirmButton: "btn btn-danger",
+          confirmButton: 'btn btn-danger',
         },
       });
-  
+
       openErrorToast();
     }
   };
-  
 
   //handle deleting of project
   const handleDeleteprojectClick = async (projectId) => {
@@ -359,11 +375,12 @@ function Projects() {
       selector: (row) => row.project_name,
       sortable: true,
     },
-    { // ✅ Conditionally include the column
+    {
+      // ✅ Conditionally include the column
       name: 'Owner',
       selector: (row) => row.project_owner,
       sortable: true,
-      hide: 'md'
+      hide: 'md',
     },
     {
       name: 'Action',
@@ -382,7 +399,7 @@ function Projects() {
           <BsFolderSymlink
             color="rgba(30, 30, 30, .7)"
             size={24}
-            title='Open Project Folder' 
+            title="Open Project Folder"
             onClick={() => handleViewProjectFolder(row.id)}
             style={{ cursor: 'pointer' }}
           />
@@ -424,16 +441,14 @@ function Projects() {
             //   height="25"
             // />
             <BsFolderMinus
-              color='rgba(225,12,0, .7)'
+              color="rgba(225,12,0, .7)"
               className="ml-3"
-              title='Delete Project Folder'
+              title="Delete Project Folder"
               style={{ cursor: 'pointer' }}
               onClick={() => handleDeleteprojectClick(row.id)}
               size={22}
             />
-
           )}
-       
         </div>
       ),
       sortable: false,
@@ -498,7 +513,6 @@ function Projects() {
         onHide={() => setShowAddModal(false)}
         centered
         backdrop="static"
-
       >
         <Modal.Header closeButton>
           <Modal.Title>Add New Project</Modal.Title>
@@ -592,26 +606,39 @@ function Projects() {
       </Modal>
 
       <ToastContainer className="p-3" position={toastPosition}>
-                <Toast className="success-toast-container" show={showSuccessToast} onClose={openSuccessToast} delay={5000} autohide>
-                  <Toast.Header className='success-toast-header justify-content-between'>
-                 <span> Project Added Successfully! </span>   
-                  </Toast.Header>
-                  <Toast.Body className="success-toast-body">
-                    Enter the project folder to start exploring
-                  </Toast.Body>
-                </Toast>
-              </ToastContainer>
-      
-              <ToastContainer className="p-3" position={toastPosition}>
-                <Toast className="error-toast-container" show={showErrorToast} onClose={openErrorToast} delay={5000} autohide>
-                  <Toast.Header className='error-toast-header justify-content-between'>
-                  <span> Project Creation Failed </span>
-                  </Toast.Header>
-                  <Toast.Body className="error-toast-body">
-                    Please review the error details, check your configurations, and try again.
-                  </Toast.Body>
-                </Toast>
-              </ToastContainer>
+        <Toast
+          className="success-toast-container"
+          show={showSuccessToast}
+          onClose={openSuccessToast}
+          delay={5000}
+          autohide
+        >
+          <Toast.Header className="success-toast-header justify-content-between">
+            <span> Project Added Successfully! </span>
+          </Toast.Header>
+          <Toast.Body className="success-toast-body">
+            Enter the project folder to start exploring
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
+
+      <ToastContainer className="p-3" position={toastPosition}>
+        <Toast
+          className="error-toast-container"
+          show={showErrorToast}
+          onClose={openErrorToast}
+          delay={5000}
+          autohide
+        >
+          <Toast.Header className="error-toast-header justify-content-between">
+            <span> Project Creation Failed </span>
+          </Toast.Header>
+          <Toast.Body className="error-toast-body">
+            Please review the error details, check your
+            configurations, and try again.
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
     </div>
   );
 }
