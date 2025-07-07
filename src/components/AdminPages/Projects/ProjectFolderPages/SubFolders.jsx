@@ -1105,7 +1105,7 @@ function SubFolder() {
                   </button>
                 )}
                 <button
-                  className="btn btn-secondary ml-2"
+                  className="btn ml-1 bulkDownloadBtn"
                   onClick={handleBulkDownload}
                   disabled={selectedFiles.size === 0}
                 >

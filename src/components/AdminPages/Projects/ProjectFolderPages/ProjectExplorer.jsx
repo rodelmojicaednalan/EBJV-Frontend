@@ -1303,7 +1303,7 @@ function ProjectExplorer() {
                   )}
 
                   <button
-                    className="btn btn-secondary ml-2"
+                    className="btn ml-1 bulkDownloadBtn"
                     onClick={handleBulkDownload}
                     disabled={selectedFiles.length === 0}
                   >

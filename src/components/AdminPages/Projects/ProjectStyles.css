@@ -1492,6 +1492,10 @@
   color: #212A31;
 }
 
+.bulkDownloadBtn{
+  font-size: 14px;
+}
+ 
 .deleteModeBtn, .deleteFoldersBtn{
   font-size: 14px;
   color: #212A31;
