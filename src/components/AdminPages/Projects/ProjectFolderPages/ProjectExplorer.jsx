@@ -43,6 +43,7 @@ import SidebarOffcanvas from '../MobileSidebar';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import useWindowWidth from './windowWidthHook.jsx';
 import { useLoader } from '../../../Loaders/LoaderContext';
+import JSZip from 'jszip';
 
 // import useDrivePicker from 'react-google-drive-picker';
 
@@ -868,6 +869,47 @@ function ProjectExplorer() {
     }
   };
 
+  // Bulk download handler (zip all selected files)
+  const handleBulkDownload = async () => {
+    if (!selectedFiles.length) return;
+    const zip = new JSZip();
+    const fileFetches = selectedFiles.map(async (idx) => {
+      const file = explorerTable[idx];
+      if (!file || !file.fileName) return;
+      try {
+        // If .frag, try to get the .ifc as in downloadFile
+        let downloadTarget = file.fileName;
+        if (file.fileName.endsWith('.frag')) {
+          const response = await axiosInstance.get(`/project/${projectId}`);
+          const folderTree = response.data.folderTree;
+          const expectedIfcName = file.fileName.replace(/^[0-9]+-/, '').replace('.frag', '.ifc');
+          const findMatchingIfcFile = (folderNode, expectedName) => {
+            if (!folderNode.files || folderNode.files.length === 0) return null;
+            return folderNode.files.find((f) => f.fileName === expectedName) ? expectedName : null;
+          };
+          const foundIfcFile = findMatchingIfcFile(folderTree, expectedIfcName);
+          if (foundIfcFile) downloadTarget = foundIfcFile;
+        }
+        const res = await axiosInstance.get(`/download-file/${projectId}/${downloadTarget}`, { responseType: 'blob' });
+        zip.file(downloadTarget, res.data);
+      } catch (error) {
+        // Optionally: handle error for this file
+        console.error("Failed to zip. Please try again", error);
+      }
+    });
+    Swal.fire({
+      title: 'Preparing zip...',
+      text: 'Please wait while files are being fetched.',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+    await Promise.all(fileFetches);
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const today = new Date().toISOString().split('T')[0];
+    saveAs(zipBlob, `${projectName}_files_${today}.zip`);
+    Swal.close();
+  };
+
   const handleShare = () => {
     if (recipients.length === 0) {
       alert('Please select at least one recipient.');
@@ -1259,6 +1301,14 @@ function ProjectExplorer() {
                       Delete Files
                     </button>
                   )}
+
+                  <button
+                    className="btn btn-secondary ml-2"
+                    onClick={handleBulkDownload}
+                    disabled={selectedFiles.length === 0}
+                  >
+                    Download Selected
+                  </button>
 
                   <button
                     className="btn mr-2 deleteModeBtn"

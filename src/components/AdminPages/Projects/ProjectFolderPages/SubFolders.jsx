@@ -43,6 +43,7 @@ import ProjectSidebar from '../ProjectFolderSidebar';
 import SidebarOffcanvas from '../MobileSidebar';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import useWindowWidth from './windowWidthHook.jsx';
+import JSZip from 'jszip';
 
 // import useDrivePicker from 'react-google-drive-picker';
 
@@ -790,6 +791,45 @@ function SubFolder() {
     }
   };
 
+  // Bulk download handler (zip all selected files)
+  const handleBulkDownload = async () => {
+    if (!selectedFiles.size) return;
+    const zip = new JSZip();
+    const fileFetches = Array.from(selectedFiles).map(async (fileName) => {
+      try {
+        // If .frag, try to get the .ifc as in downloadFile
+        let downloadTarget = fileName;
+        if (fileName.endsWith('.frag')) {
+          const response = await axiosInstance.get(`/project/${projectId}`);
+          const folderTree = response.data.folderTree;
+          const expectedIfcName = fileName.replace(/^[0-9]+-/, '').replace('.frag', '.ifc');
+          const findMatchingIfcFile = (folderNode, expectedName) => {
+            if (!folderNode.files || folderNode.files.length === 0) return null;
+            return folderNode.files.find((f) => f.fileName === expectedName) ? expectedName : null;
+          };
+          const foundIfcFile = findMatchingIfcFile(folderTree, expectedIfcName);
+          if (foundIfcFile) downloadTarget = foundIfcFile;
+        }
+        const res = await axiosInstance.get(`/download-file/${projectId}/${downloadTarget}`, { responseType: 'blob' });
+        zip.file(downloadTarget, res.data);
+      } catch (error) {
+        // Optionally: handle error for this file
+         console.error("Failed to zip. Please try again", error);
+      }
+    });
+    Swal.fire({
+      title: 'Preparing zip...',
+      text: 'Please wait while files are being fetched.',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+    await Promise.all(fileFetches);
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const today = new Date().toISOString().split('T')[0];
+    saveAs(zipBlob, `${projectName}_files_${today}.zip`);
+    Swal.close();
+  };
+
   const handleShare = () => {
     if (recipients.length === 0) {
       alert('Please select at least one recipient.');
@@ -1059,11 +1099,18 @@ function SubFolder() {
                     onClick={() => handleDeleteFiles(projectId)}
                     id="deleteUploadedfilesbtn"
                     className="btn btn-danger"
-                    disabled={selectedFiles.length === 0} // Disable button when no files are selected
+                    disabled={selectedFiles.size === 0} // Disable button when no files are selected
                   >
                     Delete Files
                   </button>
                 )}
+                <button
+                  className="btn btn-secondary ml-2"
+                  onClick={handleBulkDownload}
+                  disabled={selectedFiles.size === 0}
+                >
+                  Download Selected
+                </button>
 
                 <div className={`project-display ${viewType}`}>
                   {viewType === 'grid' ? (
