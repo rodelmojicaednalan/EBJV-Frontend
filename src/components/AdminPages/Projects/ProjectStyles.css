@@ -908,11 +908,12 @@
   max-height: 1920px;
   min-height: 510px;
   /* Allow dynamic height adjustment */
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: scroll;
   border: 1px solid rgba(0, 0, 0, .09);
 }
 
-.tableWrapper .table-list {
+.tableWrapper  .table-list {
   overflow-x: hidden;
   overflow-y: auto;
   width: 100%;
