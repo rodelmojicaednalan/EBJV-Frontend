@@ -62,10 +62,70 @@ function Projects() {
 
   // console.log(newProject.file)
 
-  const [roleCheck, setRoleCheck] = useState([]);
+  const [roleCheck, setRoleCheck] = useState(null); // null means not loaded yet
   const [fragFile, setFragFile] = useState(null);
   const [propertiesJSON, setPropertiesJSON] = useState('');
   const [components] = useState(() => new OBC.Components());
+  const [rolesLoading, setRolesLoading] = useState(true);
+  const [projectsLoading, setProjectsLoading] = useState(true);
+
+  // Fetch user role and projects in sequence to avoid timing issues
+  useEffect(() => {
+    const fetchUserRoleAndProjects = async () => {
+      setRolesLoading(true);
+      setProjectsLoading(true);
+      try {
+        const userResponse = await axiosInstance.get('/user');
+        const userRole = userResponse.data?.roles?.map((role) => role.role_name) || [];
+        setRoleCheck(userRole);
+        setRolesLoading(false);
+
+        // Now fetch projects based on role
+        setLoading(true);
+        let response;
+        const hasAdminRole = userRole.some((role) => ['Superadmin'].includes(role));
+        if (hasAdminRole) {
+          response = await axiosInstance.get('/projects');
+        } else {
+          response = await axiosInstance.get('/my-projects');
+        }
+        const formattedData = response.data.data.map((project) => {
+          const parsedFiles = JSON.parse(project.project_file);
+          return {
+            id: project.id,
+            project_name: project.project_name,
+            project_owner: `${project.owner.first_name} ${project.owner.last_name}`,
+            project_location: project.location,
+            project_file: parsedFiles,
+          };
+        });
+        setData(formattedData);
+        setFilteredData(formattedData);
+      } catch (error) {
+        setRoleCheck([]);
+        setData([]);
+        setFilteredData([]);
+        setRolesLoading(false);
+        console.error('Error fetching user role or projects:', error);
+      } finally {
+        setLoading(false);
+        setProjectsLoading(false);
+      }
+    };
+    fetchUserRoleAndProjects();
+    // Only on mount and refreshKey
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshKey]);
+
+  // If user changes, update project owner
+  useEffect(() => {
+    if (user && user.id) {
+      setProjectOwner(user.id);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!newProject.file) return;
@@ -175,64 +235,7 @@ function Projects() {
     }
   }, [user]);
 
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const userResponse = await axiosInstance.get('/user');
-        const userRole = userResponse.data?.roles?.map(
-          (role) => role.role_name
-        );
-        setRoleCheck(userRole); // State update happens asynchronously
-      } catch (error) {
-        console.error('Error fetching user role:', error);
-      }
-    };
-
-    fetchUserRole();
-  }, []); // Runs once on component mount
-
-  useEffect(() => {
-    if (!roleCheck) return; // Ensure roleCheck is available before proceeding
-
-    const fetchProjects = async () => {
-      setLoading(true);
-      try {
-        let response;
-        const hasAdminRole = roleCheck.some((role) =>
-          ['Superadmin'].includes(role)
-        );
-
-        if (hasAdminRole) {
-          response = await axiosInstance.get('/projects');
-        } else {
-          response = await axiosInstance.get('/my-projects');
-        }
-
-        const formattedData = response.data.data.map((project) => {
-          const parsedFiles = JSON.parse(project.project_file);
-          return {
-            id: project.id,
-            project_name: project.project_name,
-            project_owner: `${project.owner.first_name} ${project.owner.last_name}`,
-            project_location: project.location,
-            project_file: parsedFiles,
-          };
-        });
-
-        setData(formattedData);
-        setFilteredData(formattedData);
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    setTimeout(() => {
-      fetchProjects();
-    }, 500);
-  }, [roleCheck, refreshKey]); // Run
-
+  
   //filter Projects
   useEffect(() => {
     const results = data.filter(
@@ -427,19 +430,10 @@ function Projects() {
               style={{ cursor: 'pointer' }}
             />
           )} */}
-          {roleCheck.some((role) =>
+          {/* Only show delete if roles are loaded and user has permission */}
+          {roleCheck && Array.isArray(roleCheck) && roleCheck.some((role) =>
             ['Admin', 'Superadmin'].includes(role)
-          ) && (
-            // <img
-            //   className="delete-project-icon ml-3"
-            //   src={delete_icon}
-            //   title="Delete project"
-            //   style={{ cursor: 'pointer' }}
-            //   onClick={() => handleDeleteprojectClick(row.id)}
-            //   alt="delete"
-            //   width="25"
-            //   height="25"
-            // />
+          ) && !rolesLoading && !projectsLoading && (
             <BsFolderMinus
               color="rgba(225,12,0, .7)"
               className="ml-3"
@@ -480,9 +474,10 @@ function Projects() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            {roleCheck.some((role) =>
+            {/* Only show add button if roles are loaded and user has permission */}
+            {roleCheck && Array.isArray(roleCheck) && roleCheck.some((role) =>
               ['Admin', 'Superadmin'].includes(role)
-            ) && (
+            ) && !rolesLoading && !projectsLoading && (
               <button
                 onClick={() => setShowAddModal(true)}
                 className={`btn btn-primary float-end ${
@@ -490,21 +485,26 @@ function Projects() {
                 }`}
                 id="add-new-project-btn"
               >
-                {/* <i className="fa fa-plus"></i>  */}
                 {isMobile ? <TbCubePlus /> : <span>Add Project</span>}
-                {/* Add Project */}
               </button>
             )}
           </div>
           <div className="container-content">
-            <DataTable
-              className="dataTables_wrapper"
-              columns={columns}
-              data={filteredData}
-              pagination={filteredData.length >= 20}
-              paginationPerPage={20}
-              paginationRowsPerPageOptions={[20, 30]}
-            />
+            {/* Only show table if roles and projects are loaded */}
+            {(!rolesLoading && !projectsLoading) ? (
+              <DataTable
+                className="dataTables_wrapper"
+                columns={columns}
+                data={filteredData}
+                pagination={filteredData.length >= 20}
+                paginationPerPage={20}
+                paginationRowsPerPageOptions={[20, 30]}
+              />
+            ) : (
+              <div style={{ textAlign: 'center', padding: '2rem' }}>
+                Loading projects...
+              </div>
+            )}
           </div>
         </div>
       </div>

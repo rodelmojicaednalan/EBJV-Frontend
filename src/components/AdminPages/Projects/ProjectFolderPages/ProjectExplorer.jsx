@@ -1307,9 +1307,11 @@ function ProjectExplorer() {
                     onClick={handleBulkDownload}
                     disabled={selectedFiles.length === 0}
                   >
-                    Download Selected
+                    Download Selected Files
                   </button>
-
+                   {roleCheck.some((role) =>
+                    ['Admin', 'Superadmin'].includes(role)
+                  ) && (
                   <button
                     className="btn mr-2 deleteModeBtn"
                     onClick={() =>
@@ -1318,6 +1320,7 @@ function ProjectExplorer() {
                   >
                     {deleteFolderMode ? 'Cancel' : 'Delete Folders'}
                   </button>
+                   )}
 
                   {deleteFolderMode &&
                     selectedSubfolders.length > 0 && (
@@ -1462,7 +1465,7 @@ function ProjectExplorer() {
                     <DataTable
                       className="dataTables_wrapperz mt-3"
                       id="explorer-table"
-                      columns={noDeleteColumn}
+                      columns={explorerColumn}
                       data={explorerTable}
                       pagination={explorerTable.length >= 20}
                       paginationPerPage={20}

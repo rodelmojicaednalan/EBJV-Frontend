@@ -1489,15 +1489,14 @@
   transform: none !important;
   background-color: transparent;
   font-size: 14px;
+   font-weight: 500;
   color: #212A31;
 }
 
-.bulkDownloadBtn{
-  font-size: 14px;
-}
  
-.deleteModeBtn, .deleteFoldersBtn{
+.deleteModeBtn, .deleteFoldersBtn, .bulkDownloadBtn{
   font-size: 14px;
+  font-weight: 500;
   color: #212A31;
 }
 .deleteModeBtn:hover, .deleteFoldersBtn:hover{
@@ -1506,7 +1505,14 @@
   transform: none !important;
   box-shadow: none !important;
 }
-.deleteModeBtn:focus, .deleteFoldersBtn:focus{
+.deleteModeBtn:focus, .deleteFoldersBtn:focus, .bulkDownloadBtn:focus{
+  box-shadow: none !important;
+}
+
+.bulkDownloadBtn:hover{
+  color: #eb6314;
+  text-decoration: underline;
+  transform: none !important;
   box-shadow: none !important;
 }
 

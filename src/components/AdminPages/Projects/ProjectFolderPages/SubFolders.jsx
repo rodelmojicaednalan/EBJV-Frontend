@@ -1192,7 +1192,7 @@ function SubFolder() {
                     <DataTable
                       className="dataTables_wrapperz mt-3"
                       id="explorer-table"
-                      columns={noDeleteColumn}
+                      columns={explorerColumn}
                       data={filteredData}
                       pagination={filteredData.length >= 10}
                       paginationPerPage={rowsPerPage}
