@@ -83,7 +83,7 @@ function Layout() {
     // const isIfcViewer = /^\/ifc-viewer\/[a-zA-Z0-9]+\/[a-zA-Z0-9._-]+$/.test(location.pathname);
     // const isIfcViewer = /^\/ifc-viewer\/\d+\/[\w%.-]+$/.test(location.pathname);
     // const isResetPassword = /^\/reset-password\/[a-zA-Z0-9]+$/.test(location.pathname);
-    const isIfcViewer = /^\/ifc-viewer\/\d+\/[\w%.-]+$/.test(
+    const isIfcViewer = /^\/ifc-viewer\/\d+\/[^/]+$/.test(
       location.pathname
     );
 
