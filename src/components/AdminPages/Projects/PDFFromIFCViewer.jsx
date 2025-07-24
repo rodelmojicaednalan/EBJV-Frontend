@@ -98,8 +98,13 @@ function PDFFromIFCViewer() {
         try {
           const response = await axiosInstance.get(`/project/${projectId}/files?folder=${projectName}/${folderName}`);
           const pdfFiles = response.data.files.currentLevelFiles.map(file => decodeURIComponent(file).split('/').pop());
-    
-          return pdfFiles.find(file => file.toLowerCase().includes(assemblyMark));
+
+          // Use regex to match assemblyMark more accurately
+          const assemblyMarkPattern = new RegExp(`(^|[^a-zA-Z0-9])${assemblyMark}([^a-zA-Z0-9]|$)`, 'i');
+          return pdfFiles.find(file => {
+            const nameWithoutExt = file.replace(/\.[^/.]+$/, "");
+            return assemblyMarkPattern.test(nameWithoutExt);
+          });
         } catch (error) {
           console.error(`Error fetching PDFs from ${folderName}:`, error);
           return null;

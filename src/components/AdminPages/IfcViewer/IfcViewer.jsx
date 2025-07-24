@@ -38,11 +38,8 @@ function IfcViewer() {
   const [isLoading, setIsLoading] = useState(true);
   const [dimensions, setDimensions] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
-  const [isHideContainerOpen, setIsHideContainerOpen] =
-    useState(false);
-  const [selectedFragmentIdMap, setSelectedFragmentIdMap] = useState([
-    null,
-  ]);
+  const [isHideContainerOpen, setIsHideContainerOpen] = useState(false);
+  const [selectedFragmentIdMap, setSelectedFragmentIdMap] = useState([null]);
   const [hiderInstance, setHiderInstance] = useState(null);
   const [hiddenFragmentIds, setHiddenFragmentIds] = useState([]);
   const [selectedPartMark, setSelectedPartMark] = useState(null);
@@ -54,6 +51,12 @@ function IfcViewer() {
   const [showIfcGrid, setShowIfcGrid] = useState(false);
   const [modelProperties, setModelProperties] = useState([]);
   const modelPropertiesRef = useRef(null);
+
+  // Persistent panel state
+  const [isPanelOpen, setIsPanelOpen] = useState(() => {
+    const saved = localStorage.getItem('ifcPanelOpen');
+    return saved === null ? true : saved === 'true';
+  });
 
   const [lastOpacity, setLastOpacity] = useState(1);
   const [originalMaterials, setOriginalMaterials] = useState(
@@ -475,14 +478,15 @@ function IfcViewer() {
 
   const fileUrl = fileName;
 
+  // Toggle panel and persist state
   const togglePanel = () => {
     const panelDiv = document.querySelector('.asd');
     const app = document.querySelector('bim-grid');
     const isMobile = window.matchMedia('(max-width: 768px)').matches;
-
+    let willOpen;
     if (panelDiv.classList.contains('hidden')) {
       panelDiv.classList.remove('hidden');
-
+      willOpen = true;
       if (!isMobile) {
         app.style.gridTemplate = `"panel viewport" /400px 1fr`;
       } else {
@@ -495,7 +499,7 @@ function IfcViewer() {
       }
     } else {
       panelDiv.classList.add('hidden');
-
+      willOpen = false;
       if (!isMobile) {
         app.style.gridTemplate = `"viewport"`;
       } else {
@@ -505,6 +509,8 @@ function IfcViewer() {
         panelDiv.style.zIndex = '';
       }
     }
+    setIsPanelOpen(willOpen);
+    localStorage.setItem('ifcPanelOpen', willOpen);
   };
 
   const handleBack = () => {
@@ -516,6 +522,45 @@ function IfcViewer() {
       dimensions.create();
     }
   });
+
+  // On mount and whenever isPanelOpen changes, update panel visibility
+  useEffect(() => {
+    // Wait for DOM to be ready
+    const updatePanelVisibility = () => {
+      const panelDiv = document.querySelector('.asd');
+      const app = document.querySelector('bim-grid');
+      const isMobile = window.matchMedia('(max-width: 768px)').matches;
+      if (panelDiv && app) {
+        if (isPanelOpen) {
+          panelDiv.classList.remove('hidden');
+          if (!isMobile) {
+            app.style.gridTemplate = `"panel viewport" /400px 1fr`;
+          } else {
+            panelDiv.style.position = 'absolute';
+            panelDiv.style.top = '50px';
+            panelDiv.style.left = '0';
+            panelDiv.style.width = '85%';
+            panelDiv.style.height = '100%';
+            panelDiv.style.zIndex = '1000';
+          }
+        } else {
+          panelDiv.classList.add('hidden');
+          if (!isMobile) {
+            app.style.gridTemplate = `"viewport"`;
+          } else {
+            panelDiv.style.position = '';
+            panelDiv.style.width = '';
+            panelDiv.style.height = '';
+            panelDiv.style.zIndex = '';
+          }
+        }
+      }
+    };
+    // Use a timeout to ensure the panel is in the DOM
+    const timeout = setTimeout(updatePanelVisibility, 0);
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPanelOpen]);
 
   useEffect(() => {
     const hasReloaded = sessionStorage.getItem('hasReloaded');
@@ -821,8 +866,9 @@ function IfcViewer() {
             relationsTree.hidden = !query;
           };
 
+          // Always create with class 'asd' (no hidden)
           return BUI.html`
-          <bim-panel class="asd hidden" label="Classifications Tree" class="options-menu">
+          <bim-panel class="asd " label="Classifications Tree">
               <bim-panel-section label="Classifications">
               ${classificationsTree}
               </bim-panel-section>
@@ -1031,6 +1077,7 @@ function IfcViewer() {
       <TopBar
         handleBack={handleBack}
         handleTogglePanel={togglePanel}
+        isPanelOpen={isPanelOpen}
       />
       <div className="container" {...bind} ref={containerRef}>
         {/* <StickyHeader /> */}
@@ -1093,7 +1140,7 @@ function IfcViewer() {
 
 export default IfcViewer;
 
-function TopBar({ handleBack, handleTogglePanel }) {
+function TopBar({ handleBack, handleTogglePanel, isPanelOpen }) {
   return (
     <div className="top-bar">
       <div className="top-bar-content">
@@ -1105,7 +1152,7 @@ function TopBar({ handleBack, handleTogglePanel }) {
           <p style={{ marginBottom: '0rem', fontWeight: 'bold' }}>
             Classification Tree
           </p>
-          <Switch handleTogglePanel={handleTogglePanel} />
+          <Switch handleTogglePanel={handleTogglePanel} isPanelOpen={isPanelOpen} />
         </div>
       </div>
     </div>
