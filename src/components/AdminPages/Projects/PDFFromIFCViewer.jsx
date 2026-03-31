@@ -94,13 +94,33 @@ function PDFFromIFCViewer() {
     
       setProgress(0);
     
-      const searchForPdf = async (folderName) => {
-        try {
-          const response = await axiosInstance.get(`/project/${projectId}/files?folder=${projectName}/${folderName}`);
-          const pdfFiles = response.data.files.currentLevelFiles.map(file => decodeURIComponent(file).split('/').pop());
+      // const searchForPdf = async (folderName) => {
+      //   try {
+      //     const response = await axiosInstance.get(`/project/${projectId}/files?folder=${projectName}/${folderName}`);
+      //     const pdfFiles = response.data.files.currentLevelFiles.map(file => decodeURIComponent(file).split('/').pop());
 
-          // Use regex to match assemblyMark more accurately
+      //     // Use regex to match assemblyMark more accurately
+      //     const assemblyMarkPattern = new RegExp(`(^|[^a-zA-Z0-9])${assemblyMark}([^a-zA-Z0-9]|$)`, 'i');
+      //     return pdfFiles.find(file => {
+      //       const nameWithoutExt = file.replace(/\.[^/.]+$/, "");
+      //       return assemblyMarkPattern.test(nameWithoutExt);
+      //     });
+      //   } catch (error) {
+      //     console.error(`Error fetching PDFs from ${folderName}:`, error);
+      //     return null;
+      //   }
+      // };
+
+      const searchForPdf = async (folderName) => {
+        try { 
+          const formattedFolder = `${projectName}/${folderName}`.replace(/&/g, '%26');
+ 
+          const response = await axiosInstance.get(`/project/${projectId}/files?folder=${formattedFolder}`);
+          
+          const pdfFiles = response.data.files.currentLevelFiles.map(file => decodeURIComponent(file).split('/').pop());
+ 
           const assemblyMarkPattern = new RegExp(`(^|[^a-zA-Z0-9])${assemblyMark}([^a-zA-Z0-9]|$)`, 'i');
+          
           return pdfFiles.find(file => {
             const nameWithoutExt = file.replace(/\.[^/.]+$/, "");
             return assemblyMarkPattern.test(nameWithoutExt);
