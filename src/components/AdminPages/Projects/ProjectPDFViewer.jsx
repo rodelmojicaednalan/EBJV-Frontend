@@ -188,7 +188,7 @@ const modifyPDF = async () => {
     // ✅ Draw the "Click Here!" text
     const fontSize = 196;
 
-    firstPage.drawText(qrUrl, {
+    firstPage.drawText(encodeURI(qrUrl), {
       x: qrX ,
       y: qrY + 80,
       size: fontSize,
@@ -198,7 +198,7 @@ const modifyPDF = async () => {
     });
 
     
-    firstPage.drawText(qrUrl, {
+    firstPage.drawText(encodeURI(qrUrl), {
       x: qrX ,
       y: textY + 40,
       size: 14,
