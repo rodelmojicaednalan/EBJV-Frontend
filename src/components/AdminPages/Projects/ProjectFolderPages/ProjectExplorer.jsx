@@ -494,36 +494,43 @@ function ProjectExplorer() {
       const ifcFiles = newFiles.filter(
         (file) => file.type !== 'application/pdf'
       );
-
-      // Handle PDF Upload Immediately
+ 
+      // Handle PDF Upload One-by-One
       if (pdfFiles.length > 0) {
-        console.log('📄 Found PDF files, uploading directly...');
+        console.log(`📄 Found ${pdfFiles.length} PDF files, uploading one-by-one...`);
 
-        pdfFiles.forEach((file) => {
-          // Extract original filename and remove extra ".pdf" if exists
-          let fileName = file.name.replace(/\.pdf$/i, ''); // Remove trailing .pdf
-          let extension = '.pdf';
+        for (const file of pdfFiles) {
+          try {
+            const formData = new FormData();
+            
+            // Clean up the filename
+            let fileName = file.name.replace(/\.pdf$/i, ''); 
+            const updatedFile = new File(
+              [file],
+              `${fileName}.pdf`,
+              { type: file.type }
+            );
 
-          // Create a new File object with the cleaned-up name
-          const updatedFile = new File(
-            [file],
-            `${fileName}${extension}`,
-            { type: file.type }
-          );
+            formData.append('project_file', updatedFile);
 
-          // Append to FormData
-          formData.append('project_file', updatedFile);
-        });
-
-        await axiosInstance.post(
-          `/upload-pdf-files/${projectId}`,
-          formData,
-          {
-            headers: { 'Content-Type': 'multipart/form-data' },
+            console.log(`Uploading: ${file.name}...`);
+            
+            // Wait for each file to finish before moving to the next
+            await axiosInstance.post(
+              `/upload-pdf-files/${projectId}`,
+              formData,
+              {
+                headers: { 'Content-Type': 'multipart/form-data' },
+              }
+            );
+            
+            console.log(`✅ Successfully uploaded: ${file.name}`);
+          } catch (err) {
+            console.error(`❌ Error uploading ${file.name}:`, err);
+            // Even if one file fails, the loop continues to the next file!
           }
-        );
-
-        console.log('✅ PDF files uploaded successfully.');
+        }
+        console.log('✅ All PDF processing finished.');
       }
 
       // Skip IFC processing if no IFC files exist
