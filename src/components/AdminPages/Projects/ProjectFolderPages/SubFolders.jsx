@@ -23,6 +23,9 @@ import {
   FaChevronCircleLeft,
   FaChevronCircleRight,
   FaFileCsv,
+  FaCheckCircle,     
+  FaSpinner,         
+  FaExclamationCircle
 } from 'react-icons/fa';
 import { MdFolderOff } from 'react-icons/md';
 import { RiAddLargeFill, RiEdit2Fill } from 'react-icons/ri';
@@ -472,228 +475,141 @@ function SubFolder() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [newFiles, setNewFiles] = useState([]);
+  const [uploadQueue, setUploadQueue] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
   const [components] = useState(() => new OBC.Components());
 
   const handleAddNewFile = async () => {
-    try {
-      console.log('Starting file processing...');
-      if (!newFiles.length) {
-        console.warn('No new files to process.');
-        return;
-      }
+    if (!newFiles.length) {
+      console.warn('No new files to process.');
+      return;
+    }
 
-      Swal.fire({
-        title: 'Processing Files...',
-        text: 'Please wait.',
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading(),
-      });
+    setIsUploading(true);
 
-      const formData = new FormData();
-      const fragments = components.get(OBC.FragmentsManager);
-      const fragmentIfcLoader = components.get(OBC.IfcLoader);
+    const fragments = components.get(OBC.FragmentsManager);
+    const fragmentIfcLoader = components.get(OBC.IfcLoader);
 
-      console.log('Filtering files...');
-      const pdfFiles = newFiles.filter(
-        (file) => file.type === 'application/pdf'
+    const pdfFiles = newFiles.filter((file) => file.type === 'application/pdf');
+    const ifcFiles = newFiles.filter((file) => file.type !== 'application/pdf');
+
+    // Helper to update the UI progress of a specific file
+    const updateQueueItem = (fileName, updateObj) => {
+      setUploadQueue((prev) =>
+        prev.map((item) =>
+          item.name === fileName ? { ...item, ...updateObj } : item
+        )
       );
-      const ifcFiles = newFiles.filter(
-        (file) => file.type !== 'application/pdf'
-      );
+    };
 
-      // Handle PDF Upload Immediately
-      if (pdfFiles.length > 0) {
-        console.log('📄 Found PDF files, uploading directly...');
-        pdfFiles.forEach((file) => {
-          formData.append('project_file', file);
-        });
+    // 1. Process PDFs Sequentially
+    if (pdfFiles.length > 0) {
+      console.log(`📄 Processing ${pdfFiles.length} PDF files...`);
+      for (const file of pdfFiles) {
+        updateQueueItem(file.name, { status: 'uploading', progress: 0 });
+        
+        try {
+          const fileFormData = new FormData();
+          let fileName = file.name.replace(/\.pdf$/i, ''); 
+          const updatedFile = new File([file], `${fileName}.pdf`, { type: file.type });
+          fileFormData.append('project_file', updatedFile);
 
-        await axiosInstance.post(
-          `/upload-pdf-files/${projectId}/${encodeURIComponent(
-            formattedFolderName
-          )}`,
-          formData,
-          {
-            headers: { 'Content-Type': 'multipart/form-data' },
-          }
-        );
-        console.log('✅ PDF files uploaded successfully.');
+          await axiosInstance.post(
+            `/upload-pdf-files/${projectId}/${encodeURIComponent(formattedFolderName)}`,
+            fileFormData,
+            {
+              headers: { 'Content-Type': 'multipart/form-data' },
+              onUploadProgress: (progressEvent) => {
+                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                updateQueueItem(file.name, { progress: percentCompleted });
+              },
+            }
+          );
+          
+          updateQueueItem(file.name, { status: 'success', progress: 100 });
+        } catch (err) {
+          console.error(`❌ Error uploading ${file.name}:`, err);
+          updateQueueItem(file.name, { status: 'error' });
+        }
       }
+    }
 
-      // Skip IFC processing if no IFC files exist
-      if (ifcFiles.length === 0) {
-        Swal.fire({
-          title: 'Success!',
-          text: 'PDF files uploaded successfully.',
-          icon: 'success',
-          confirmButtonText: 'OK',
-        });
-
-        setShowAddModal(false);
-        setNewFiles([]);
-        setRefreshKey((prevKey) => prevKey + 1);
-        return;
-      }
-
-      console.log('Setting up IFC loader...');
+    // 2. Process IFCs Sequentially
+    if (ifcFiles.length > 0) {
+      console.log(`🏗️ Processing ${ifcFiles.length} IFC files...`);
       await fragmentIfcLoader.setup();
 
       for (const file of ifcFiles) {
+        updateQueueItem(file.name, { status: 'uploading', progress: 0 });
+
         try {
-          console.log(`Processing IFC file: ${file.name}`);
+          const fileFormData = new FormData();
           const data = await file.arrayBuffer();
           const buffer = new Uint8Array(data);
-          console.log('File converted to Uint8Array.');
 
-          console.log('Adding onFragmentsLoaded listener...');
-          const onLoadHandler = async (model) => {
+          const onLoadHandler = async () => {
             try {
-              console.log('🚀 Fragments loaded event triggered!');
+              const groupsArray = Array.from(fragments.groups.values());
+              if (groupsArray.length > 0) {
+                const group = groupsArray[0];
+                const fragData = fragments.export(group);
+                const fileName = file.name.split('.')[0];
+                const dateID = Date.now();
+                const fragBlob = new Blob([fragData]);
+                const fragFile = new File([fragBlob], `${dateID}-${fileName}.frag`);
 
-              const groupsArray = Array.from(
-                fragments.groups.values()
-              );
-              console.log(
-                'Fragments Groups Found:',
-                groupsArray.length
-              );
+                const properties = group.getLocalProperties();
+                let propertiesFile = null;
+                if (properties) {
+                  const propertiesBlob = new Blob([JSON.stringify(properties)]);
+                  propertiesFile = new File([propertiesBlob], `${dateID}-${fileName}.json`);
+                }
 
-              if (groupsArray.length === 0) {
-                console.warn('⚠️ No fragment groups found!');
-                return;
+                fileFormData.append('project_file', file);
+                fileFormData.append('project_file', fragFile);
+                if (propertiesFile) {
+                  fileFormData.append('properties', propertiesFile);
+                }
               }
-
-              const group = groupsArray[0];
-              console.log('Extracting fragment data...');
-              const fragData = fragments.export(group);
-              console.log(
-                'Fragment data extracted, size:',
-                fragData?.length
-              );
-
-              const fileName = file.name.split('.')[0];
-              const dateID = Date.now();
-
-              const fragBlob = new Blob([fragData]);
-              console.log(
-                'Fragment Blob created, size:',
-                fragBlob.size
-              );
-
-              const fragFile = new File(
-                [fragBlob],
-                `${dateID}-${fileName}.frag`
-              );
-              console.log(
-                'Fragment file created:',
-                fragFile.name,
-                'Size:',
-                fragFile.size
-              );
-
-              const properties = group.getLocalProperties();
-              console.log('Extracted properties:', properties);
-
-              let propertiesFile = null;
-              if (properties) {
-                const propertiesBlob = new Blob([
-                  JSON.stringify(properties),
-                ]);
-                console.log(
-                  'Properties Blob created, size:',
-                  propertiesBlob.size
-                );
-
-                propertiesFile = new File(
-                  [propertiesBlob],
-                  `${dateID}-${fileName}.json`
-                );
-                console.log(
-                  'Properties file created:',
-                  propertiesFile.name,
-                  'Size:',
-                  propertiesFile.size
-                );
-              }
-
-              console.log('Appending to FormData...');
-              formData.append('project_file', file);
-              console.log('Original IFC File appended to FormData');
-              formData.append('project_file', fragFile);
-              console.log('Frag File appended to FormData');
-              console.log('✅ FormData after adding fragFile:', [
-                ...formData.entries(),
-              ]);
-
-              if (propertiesFile) {
-                formData.append('properties', propertiesFile);
-                console.log(
-                  '✅ FormData after adding propertiesFile:',
-                  [...formData.entries()]
-                );
-              }
-
-              console.log(
-                '✅ Completed processing for file:',
-                file.name
-              );
               fragments.onFragmentsLoaded.remove(onLoadHandler);
             } catch (error) {
-              console.error(
-                '❌ Error processing IFC fragments:',
-                error
-              );
+              console.error('❌ Error processing IFC fragments:', error);
               fragments.onFragmentsLoaded.remove(onLoadHandler);
             }
           };
 
-          fragments.onFragmentsLoaded.add(onLoadHandler, {
-            once: true,
-          });
-
-          console.log('🚀 Loading IFC file...');
+          fragments.onFragmentsLoaded.add(onLoadHandler, { once: true });
           await fragmentIfcLoader.load(buffer);
-          console.log('✅ IFC file loaded successfully.');
+
+          await axiosInstance.post(
+            `/upload-ifc-files/${projectId}/${encodeURIComponent(formattedFolderName)}`,
+            fileFormData,
+            {
+              headers: { 'Content-Type': 'multipart/form-data' },
+              onUploadProgress: (progressEvent) => {
+                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                updateQueueItem(file.name, { progress: percentCompleted });
+              },
+            }
+          );
+
+          updateQueueItem(file.name, { status: 'success', progress: 100 });
         } catch (error) {
-          console.error('❌ Error loading IFC file:', error);
+          console.error(`❌ Error loading IFC file ${file.name}:`, error);
+          updateQueueItem(file.name, { status: 'error' });
         }
       }
-
-      console.log('🔄 Final FormData entries before sending:', [
-        ...formData.entries(),
-      ]);
-
-      console.log('📤 Sending IFC FormData to server...');
-      await axiosInstance.post(
-        `/upload-ifc-files/${projectId}/${encodeURIComponent(
-          formattedFolderName
-        )}`,
-        formData,
-        {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        }
-      );
-      console.log('✅ IFC files uploaded successfully.');
-
-      Swal.fire({
-        title: 'Success!',
-        text: 'Files have been added successfully.',
-        icon: 'success',
-        confirmButtonText: 'OK',
-      });
-
-      setShowAddModal(false);
-      setNewFiles([]);
-      setRefreshKey((prevKey) => prevKey + 1);
-    } catch (error) {
-      console.error('❌ Error during file upload:', error);
-      Swal.fire({
-        title: 'Error!',
-        text: 'Failed to upload files. Try again.',
-        icon: 'error',
-        confirmButtonText: 'OK',
-      });
     }
+
+    setIsUploading(false);
+    setRefreshKey((prevKey) => prevKey + 1);
+
+    Swal.fire({
+      title: 'Success!',
+      text: 'Files have been uploaded successfully.',
+      icon: 'success',
+      confirmButtonText: 'OK',
+    });
   };
 
   const [newFolderName, setNewFolderName] = useState(null);
@@ -1226,9 +1142,9 @@ function SubFolder() {
       </div>
       <Modal
         show={showAddModal}
-        onHide={() => setShowAddModal(false)}
+        onHide={() => !isUploading && setShowAddModal(false)}
       >
-        <Modal.Header closeButton>
+        <Modal.Header closeButton={!isUploading}>
           <Modal.Title>Upload Files</Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -1244,21 +1160,59 @@ function SubFolder() {
                 multiple
                 className="form-control"
                 id="projectFile"
+                disabled={isUploading}
                 onChange={(e) => {
                   const filesArray = Array.from(e.target.files);
-                  setNewFiles(filesArray);
+                  if (filesArray.length) {
+                    setNewFiles(filesArray);
+                    setUploadQueue(
+                      filesArray.map((file) => ({
+                        name: file.name,
+                        status: 'pending',
+                        progress: 0,
+                      }))
+                    );
+                  }
                 }}
               />
-              {newFiles && newFiles.length > 0 && (
-                <div className="mt-2">
-                  <h6>Selected Files:</h6>
-                  <ul>
-                    {newFiles.map((file, index) => (
-                      <li style={{ listStyle: 'none' }} key={index}>
-                        {file.name}
-                      </li>
-                    ))}
-                  </ul>
+
+              {/* LIVE UPLOAD QUEUE UI */}
+              {uploadQueue.length > 0 && (
+                <div className="mt-3 p-2 border rounded shadow-sm" style={{ maxHeight: "300px", overflowY: "auto", backgroundColor: "#f8f9fa" }}>
+                  <h6 className="mb-2 text-secondary" style={{ fontSize: "0.9rem" }}>
+                    Upload Progress ({uploadQueue.filter(q => q.status === 'success').length} / {uploadQueue.length})
+                  </h6>
+                  {uploadQueue.map((item, index) => (
+                    <div key={index} className="d-flex align-items-center mb-2 bg-white p-2 border rounded shadow-sm">
+                      <div className="flex-grow-1 text-truncate mr-3" style={{ fontSize: '0.85rem' }} title={item.name}>
+                        <strong>{item.name}</strong>
+                      </div>
+
+                      <div className="d-flex align-items-center justify-content-end" style={{ width: "130px", fontSize: "0.8rem" }}>
+                        {item.status === "pending" && <span className="text-muted">Pending...</span>}
+
+                        {item.status === "uploading" && (
+                          <div className="w-100 d-flex align-items-center">
+                            <FaSpinner className="fa-spin text-primary mr-2" />
+                            <div className="progress flex-grow-1" style={{ height: "8px" }}>
+                              <div
+                                className="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                                style={{ width: `${item.progress}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        )}
+
+                        {item.status === "success" && (
+                          <span className="text-success fw-bold"><FaCheckCircle className="mr-1"/> Done</span>
+                        )}
+
+                        {item.status === "error" && (
+                          <span className="text-danger fw-bold"><FaExclamationCircle className="mr-1"/> Failed</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -1268,7 +1222,12 @@ function SubFolder() {
           <Button
             id="closeAdd"
             variant="secondary"
-            onClick={() => setShowAddModal(false)}
+            onClick={() => {
+              setShowAddModal(false);
+              setUploadQueue([]);
+              setNewFiles([]);
+            }}
+            disabled={isUploading}
           >
             Close
           </Button>
@@ -1276,8 +1235,9 @@ function SubFolder() {
             id="saveAdd"
             variant="primary"
             onClick={handleAddNewFile}
+            disabled={isUploading || newFiles.length === 0}
           >
-            Upload
+            {isUploading ? 'Uploading...' : 'Upload'}
           </Button>
         </Modal.Footer>
       </Modal>
